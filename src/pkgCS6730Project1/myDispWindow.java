@@ -40,9 +40,11 @@ public abstract class myDispWindow {
 				useRndBtnClrs		= 16,	
 				useCustCam			= 17,			//whether or not to use a custom camera for this window
 				drawMseEdge			= 18,			//whether or not to draw the mouse location/edge from eye/projection onto box
-				clearPrivBtns		= 19;			//momentary priv buttons have been set, need to be cleared next frame
-				
-	public static final int numDispFlags = 20;
+				drawRightSideMenu	= 19,			//whether this window has a right-side info menu overlay
+				showRightSideMenu	= 20,			//whether this window is currently showing right side info menu, or if it is minimized
+				clearPrivBtns		= 21;			//momentary priv buttons have been set, need to be cleared next frame
+						
+			public static final int numDispFlags = 22;
 	
 	//private window-specific flags and UI components (buttons)
 	public int[] privFlags;
@@ -81,6 +83,9 @@ public abstract class myDispWindow {
 	
 	//offset to bottom of custom window menu 
 	protected float custMenuOffset;
+	
+	//box holding x,y,w,h values of black rectangle to form around menu for display variables on right side of screen, if present
+	private float[] UIRtSideRectBox;
 
 	//drawn trajectory
 	public myDrawnSmplTraj tmpDrawnTraj;						//currently drawn curve and all handling code - send to instanced owning screen
@@ -137,6 +142,36 @@ public abstract class myDispWindow {
 //		lastAnimTime=0;
 	}	
 	
+	public void initThisWin(boolean _canDrawTraj, boolean _trajIsFlat, boolean _isMenu){
+		initTmpTrajStuff(_trajIsFlat);	
+		initFlags();	
+		setFlags(canDrawTraj, _canDrawTraj);
+		setFlags(trajPointsAreFlat, _trajIsFlat);
+		//setFlags(closeable, true);
+		setFlags(drawMseEdge,true);
+		if(!_isMenu){
+			initUIBox();				//set up ui click region to be in sidebar menu below menu's entries - do not do here for sidebar
+		}
+		curTrajAraIDX = 0;		
+		setupGUIObjsAras();				//setup all ui objects and record final y value in sidebar menu for UI Objects in this window
+		
+		privBtnsToClear = new ArrayList<Integer>();
+		initAllPrivBtns();
+		initMe();
+		
+		initRtSideMenuBox();
+		setClosedBox();
+		mseClickCrnr = new float[2];		//this is offset for click to check buttons in x and y - since buttons for all menus will be in menubar, this should be the upper left corner of menubar - upper left corner of rect 
+		mseClickCrnr[0] = 0;
+		mseClickCrnr[1] = 0;		
+		if(getFlags(hasScrollBars)){scbrs = new myScrollBars[numSubScrInWin];	for(int i =0; i<numSubScrInWin;++i){scbrs[i] = new myScrollBars(pa, this);}}
+	}//initThisWin
+	
+	private void initRtSideMenuBox() {
+		//initialize right side info display window
+		float boxWidth = 1.2f*rectDim[0];
+		UIRtSideRectBox = new float[] {rectDim[2]-boxWidth,0,boxWidth, rectDim[3]};		
+	}
 	
 	//final initialization stuff, after window made, but necessary to make sure window displays correctly
 	public void finalInit(boolean thisIs3D, boolean viewCanChange, myPoint _ctr, myVector _baseFcs) {
@@ -272,6 +307,11 @@ public abstract class myDispWindow {
 			case clearPrivBtns		: { break;}
 		}				
 	}//setFlags
+
+	//set the right side menu state for this window - if it is actually present, show it
+	public void setRtSideInfoWinSt(boolean visible) {if(getFlags(drawRightSideMenu)) {setFlags(showRightSideMenu,visible);}}	
+
+	
 	//get baseclass flag
 	public boolean getFlags(int idx){int bitLoc = 1<<(idx%32);return (dispFlags[idx/32] & bitLoc) == bitLoc;}	
 	//check list of flags
@@ -285,28 +325,6 @@ public abstract class myDispWindow {
 	public boolean getAnyPrivFlags(int [] idxs){int bitLoc; for(int idx =0;idx<idxs.length;++idx){bitLoc = 1<<(idx%32);if ((privFlags[idx/32] & bitLoc) == bitLoc){return true;}} return false;}
 	//set a list of indexes in private flags array to be a specific value
 	public void setAllPrivFlags(int[] idxs, boolean val) { for(int idx =0;idx<idxs.length;++idx) {setPrivFlags(idxs[idx],val);}}
-	public void initThisWin(boolean _canDrawTraj, boolean _trajIsFlat, boolean _isMenu){
-		initTmpTrajStuff(_trajIsFlat);	
-		initFlags();	
-		setFlags(canDrawTraj, _canDrawTraj);
-		setFlags(trajPointsAreFlat, _trajIsFlat);
-		//setFlags(closeable, true);
-		setFlags(drawMseEdge,true);
-		if(!_isMenu){
-			initUIBox();				//set up ui click region to be in sidebar menu below menu's entries - do not do here for sidebar
-		}
-		curTrajAraIDX = 0;		
-		setupGUIObjsAras();				//setup all ui objects and record final y value in sidebar menu for UI Objects in this window
-		
-		privBtnsToClear = new ArrayList<Integer>();
-		initAllPrivBtns();
-		initMe();
-		setClosedBox();
-		mseClickCrnr = new float[2];		//this is offset for click to check buttons in x and y - since buttons for all menus will be in menubar, this should be the upper left corner of menubar - upper left corner of rect 
-		mseClickCrnr[0] = 0;
-		mseClickCrnr[1] = 0;		
-		if(getFlags(hasScrollBars)){scbrs = new myScrollBars[numSubScrInWin];	for(int i =0; i<numSubScrInWin;++i){scbrs[i] = new myScrollBars(pa, this);}}
-	}//initThisWin
 
 	//for adding/deleting a screen programatically (loading a song) TODO
 	//rebuild arrays of start locs whenever trajectory maps/arrays have changed - passed key is value modded in drwnTrajMap, 
@@ -671,16 +689,38 @@ public abstract class myDispWindow {
 		if(getFlags(canDrawTraj)){	drawNotifications();	}				//if this window accepts a drawn trajectory, then allow it to be displayed
 		if(getFlags(closeable)){drawMouseBox();}
 		if(getFlags(hasScrollBars)){scbrs[curDrnTrajScrIDX].drawMe();}
-		//draw onscreen stuff - this is in inheriting class
-		drawOnScreenStuff(modAmtMillis);
+		//draw rightSideMenu stuff, if this window supports it
+		if(getFlags(drawRightSideMenu)) {drawRtSideInfoBar(modAmtMillis);	}
 		pa.lights();	
 		pa.hint(PConstants.ENABLE_DEPTH_TEST);
 		pa.popStyle();pa.popMatrix();	
 		//last thing per draw - clear btns that have been set to clear after 1 frame of display
 		if (getFlags(clearPrivBtns)) {clearAllPrivBtns();setFlags(clearPrivBtns,false);}
 		if (privBtnsToClear.size() > 0){setFlags(clearPrivBtns, true);	}		
-	}
+	}//drawHeader
+	
+	//draw right side "menu" used to display simualtion/calculation variables and results
+	private void drawRtSideInfoBar(float modAmtMillis) {
+		pa.pushMatrix();pa.pushStyle();
+		//move to upper right corner of sidebar menu - cannot draw over leftside menu, use drawCustMenuObjs() instead to put UI objects there
+		//this side window is for information display
+		pa.translate(rectDim[0],0,0);			
+		if(getFlags(showRightSideMenu)) {				
+			pa.setFill(new int[] {0,0,0,200});//transparent black
+			pa.rect(UIRtSideRectBox);
+			pa.translate(UIRtSideRectBox[0]+5,UIRtSideRectBox[1]+yOff-4,0);
+			pa.setFill(new int[] {255,255,255,255});
 
+			 //instancing class implements this function
+			drawRightSideInfoBar(modAmtMillis); 
+		} else {
+			//shows narrow rectangular reminder that window is there
+			pa.translate(rectDim[2]-20,0,0);
+			pa.setFill(new int[] {0,0,0,200});
+			pa.rect(new float[] {0,0,20,rectDim[3]});
+		}
+		pa.popStyle();pa.popMatrix();			
+	}//drawRtSideInfoBar
 	
 	public void draw3D(float modAmtMillis){
 		if(!getFlags(showIDX)){return;}
@@ -1130,7 +1170,7 @@ public abstract class myDispWindow {
 	protected abstract void stopMe();
 	protected abstract void setCameraIndiv(float[] camVals);
 	protected abstract void drawMe(float animTimeMod);	
-	protected abstract void drawOnScreenStuff(float modAmtMillis);
+	protected abstract void drawRightSideInfoBar(float modAmtMillis);
 	
 	public String toString(){
 		String res = "Window : "+name+" ID: "+ID+" Fill :("+fillClr[0]+","+fillClr[1]+","+fillClr[2]+","+fillClr[3]+
@@ -1156,6 +1196,7 @@ class mySideBarMenu extends myDispWindow{
 			"Changing View",	
 			"Stop Simulation",
 			"Single Step",
+			"Displaying Side Menu",
 			"Displaying UI Menu",
 			"Reverse Drawn Trajectory"
 			};
@@ -1172,6 +1213,7 @@ class mySideBarMenu extends myDispWindow{
 			"Changing View",	 	
 			"Run Simulation",
 			"Single Step",
+			"Displaying Side Menu",
 			"Displaying UI Menu",
 			"Reverse Drawn Trajectory"
 			};
@@ -1487,7 +1529,7 @@ class mySideBarMenu extends myDispWindow{
 		}
 	}//drawSideBarButtons	
 	@Override//for windows to draw on screen
-	protected void drawOnScreenStuff(float modAmtMillis) {}
+	protected void drawRightSideInfoBar(float modAmtMillis) {}
 	@Override
 	protected void drawMe(float animTimeMod) {
 		pa.pushMatrix();pa.pushStyle();

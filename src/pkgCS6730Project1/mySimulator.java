@@ -327,14 +327,9 @@ public abstract class mySimulator {// extends mySimulator {
 	}
 	//draw result information on right sidebar
 	//UIRectBox is dims of enclosing box 
-	public void drawResultBar(UAV_DESSim pa, float[] UIrectBox, float yOff) {
+	public void drawResultBar(UAV_DESSim pa, float yOff) {
 		yOff-=4;
 		float sbrMult = 1.2f, lbrMult = 1.5f;//offsets multiplier for barriers between contextual ui elements
-		pa.pushMatrix();pa.pushStyle();
-		pa.setFill(new int[] {0,0,0,200});//transparent black
-		pa.rect(UIrectBox);
-		pa.translate(UIrectBox[0]+5,UIrectBox[1]+yOff,0);
-		pa.setFill(new int[] {255,255,255,255});
 		pa.pushMatrix();pa.pushStyle();
 			int curTime = (Math.round(exec.getNowTime()/1000.0f));
 			float yVal = 0;
@@ -406,7 +401,6 @@ public abstract class mySimulator {// extends mySimulator {
 				pa.text("Q Time : " + String.format("%07d", transitLanes[i].getTTLQueueTime()/1000) + " s",152, yVal);
 				yVal += sbrMult *yOff;
 			}//for every tl		
-		pa.popStyle();pa.popMatrix();	
 		pa.popStyle();pa.popMatrix();	
 	}//drawResultBar	
 	

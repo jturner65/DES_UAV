@@ -399,6 +399,9 @@ public class UAV_DESSim extends PApplet{
 			dispWinFrames[i].finalInit(dispWinIs3D[i], canMoveView[i], sceneCtrValsBase[scIdx], sceneFcsValsBase[scIdx]);
 			dispWinFrames[i].setTrajColors(winTrajFillClrs[i], winTrajStrkClrs[i]);
 		}	
+		//set initial state to be true - show info window
+		setFlags(showRtSideMenu, true);
+
 	}//initDispWins
 	
 	//get the ui rect values of the "master" ui region (another window) -> this is so ui objects of one window can be made, clicked, and shown displaced from those of the parent windwo
@@ -486,20 +489,22 @@ public class UAV_DESSim extends PApplet{
 	//simulation
 	public final int runSim				= 9;			//run simulation
 	public final int singleStep			= 10;			//run single sim step
-	public final int flipDrawnTraj  	= 11;			//whether or not to flip the direction of the drawn trajectory
+	public final int showRtSideMenu		= 11;			//display the right side info menu for the current window, if it supports that display
+	public final int flipDrawnTraj  	= 12;			//whether or not to flip the direction of the drawn trajectory
 	//window control
-	public final int showUIMenu 		= 12;			//whether or not to show sidebar menu
-	public final int showDESwin			= 13;			//whether to show 1st window
+	public final int showUIMenu 		= 13;			//whether or not to show sidebar menu
+	public final int showDESwin			= 14;			//whether to show 1st window
 	//public final int show2ndWinIDX		= 14;			//whether to show 2nd window
 	
-	public final int numFlags = 14;
+	public final int numFlags = 15;
 	
 	//flags to actually display in menu as clickable text labels - order does matter
 	public List<Integer> flagsToShow = Arrays.asList( 
 		debugMode, 			
 		saveAnim,
 		runSim,
-		singleStep
+		singleStep,
+		showRtSideMenu
 		);
 	
 	public final int numFlagsToShow = flagsToShow.size();
@@ -689,6 +694,7 @@ public class UAV_DESSim extends PApplet{
 				if(val==false) {for(int i=1; i<dispWinFrames.length;++i){if(isShowingWindow(i)) {dispWinFrames[i].stopMe();}}}
 				break;}
 			case singleStep			: {break;}////anything special for single step	
+			case showRtSideMenu		: {	for(int i =1; i<dispWinFrames.length;++i){dispWinFrames[i].setRtSideInfoWinSt(val);}break;}	//set value for every window - to show or not to show info window
 			//case flipDrawnTraj		: { dispWinFrames[dispPianoRollIDX].rebuildDrawnTraj();break;}						//whether or not to flip the drawn trajectory, width-wise
 			case flipDrawnTraj		: { for(int i =1; i<dispWinFrames.length;++i){dispWinFrames[i].rebuildAllDrawnTrajs();}break;}						//whether or not to flip the drawn melody trajectory, width-wise
 			case showUIMenu 	    : { dispWinFrames[dispMenuIDX].setFlags(myDispWindow.showIDX,val);    break;}											//whether or not to show the main ui window (sidebar)			

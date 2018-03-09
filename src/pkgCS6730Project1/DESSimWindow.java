@@ -31,7 +31,7 @@ public class DESSimWindow extends myDispWindow {
 	public final int numGUIObjs = uiVals.length;											//# of gui objects for ui	
 	
 	//display variables
-	private float[] UIrectBox;	//box holding x,y,w,h values of black rectangle to hold UI sim display values
+	//private float[] UIrectBox;	//box holding x,y,w,h values of black rectangle to hold UI sim display values
 	
 	/////////
 	//custom debug/function ui button names -empty will do nothing
@@ -50,11 +50,10 @@ public class DESSimWindow extends myDispWindow {
 			dispTaskLblsIDX		= 7,						//show labels over tasks...
 			dispTLnsLblsIDX		= 8,						//over transit lanes...
 			dispUAVLblsIDX		= 9,						//and/or over teams			
-			showSimValsIDX		= 10,						//yes/no show right sidebar menu of simulation outputs
-			conductExpIDX		= 11,						//conduct experiment with current settings
-			condUAVSweepExpIDX  = 12;						//sweep through UAV Team Sizes
+			conductExpIDX		= 10,						//conduct experiment with current settings
+			condUAVSweepExpIDX  = 11;						//sweep through UAV Team Sizes
 
-	public static final int numPrivFlags = 13;
+	public static final int numPrivFlags = 12;
 		
 	public DESSimWindow(UAV_DESSim _p, String _n, int _flagIdx, int[] fc, int[] sc, float[] rd, float[] rdClosed, String _winTxt, boolean _canDrawTraj) {
 		super(_p, _n, _flagIdx, fc, sc, rd, rdClosed, _winTxt, _canDrawTraj);
@@ -71,19 +70,19 @@ public class DESSimWindow extends myDispWindow {
 				"Visualization Debug","Resetting Simulation", "Drawing Vis", 
 				"Drawing UAV Teams", "Drawing Task Locs", "Drawing Lanes", 
 				"Showing Task Lbls", "Showing TLane Lbls", "Showing Team Lbls",
-				"Drawing UAV Boats", "Showing Sim Outputs", "Experimenting",
+				"Drawing UAV Boats", "Experimenting",
 				"Team SweepSize Experiment"
 		};
 		falsePrivFlagNames = new String[]{			//needs to be in order of flags
 				"Enable Debug","Reset Simulation", "Render Visualization",
 				"Draw UAV Teams", "Draw Task Locs", "Draw Transit Lanes",
 				"Show Task Lbls", "Show TLane Lbls", "Show Team Lbls",
-				"Drawing UAV Spheres", "Show Sim Outputs", "Conduct Experiment",
+				"Drawing UAV Spheres","Conduct Experiment",
 				"Conduct Team Sweep Experiment"
 		};
 		privModFlgIdxs = new int[]{
 				debugAnimIDX, resetSimIDX, drawVisIDX, drawUAVTeamsIDX,	drawTaskLocsIDX,drawTLanesIDX,
-				dispTaskLblsIDX, dispTLnsLblsIDX, dispUAVLblsIDX, drawBoatsIDX, showSimValsIDX,conductExpIDX,
+				dispTaskLblsIDX, dispTLnsLblsIDX, dispUAVLblsIDX, drawBoatsIDX, conductExpIDX,
 				condUAVSweepExpIDX
 		};
 		numClickBools = privModFlgIdxs.length;	
@@ -112,8 +111,7 @@ public class DESSimWindow extends myDispWindow {
 		setPrivFlags(drawUAVTeamsIDX, showVis);	
 		setPrivFlags(drawBoatsIDX, showVis);	
 		setPrivFlags(drawTaskLocsIDX, showVis);	
-		setPrivFlags(drawTLanesIDX, false);	
-		setPrivFlags(showSimValsIDX, false);			
+		setPrivFlags(drawTLanesIDX, false);				
 		setPrivFlags(dispTaskLblsIDX, false);	
 		setPrivFlags(dispTLnsLblsIDX, false);	
 		setPrivFlags(dispUAVLblsIDX, false);	
@@ -130,8 +128,7 @@ public class DESSimWindow extends myDispWindow {
 		setPrivFlags(drawUAVTeamsIDX, showVis);	
 		setPrivFlags(drawBoatsIDX, showVis);	
 		setPrivFlags(drawTaskLocsIDX, showVis);	
-		setPrivFlags(drawTLanesIDX, showVis);	
-		setPrivFlags(showSimValsIDX, showVis);			
+		setPrivFlags(drawTLanesIDX, showVis);			
 		setPrivFlags(dispTaskLblsIDX, showVis);	
 		setPrivFlags(dispTLnsLblsIDX, showVis);	
 		setPrivFlags(dispUAVLblsIDX, showVis);	
@@ -147,6 +144,8 @@ public class DESSimWindow extends myDispWindow {
 		setFlags(isRunnable, true);
 		//this window uses a customizable camera
 		setFlags(useCustCam, true);
+		//this window uses right side info window
+		setFlags(drawRightSideMenu, true);
 		//called once
 		initPrivFlags(numPrivFlags);
 		//initialize sim exec to simple world sim
@@ -155,9 +154,6 @@ public class DESSimWindow extends myDispWindow {
 		setSimpleSim();
 
 		custMenuOffset = uiClkCoords[3];	//495	
-		//UIrectBox = new float[] {0,0,1.25f*rectDim[0], rectDim[3]};
-		float boxWidth = 1.2f*rectDim[0];
-		UIrectBox = new float[] {rectDim[2]-boxWidth,0,boxWidth, rectDim[3]};
 	}//initMe	
 		
 	@Override
@@ -190,8 +186,6 @@ public class DESSimWindow extends myDispWindow {
 				simExec.des.setSimFlags(mySimulator.dispTLnsLblsIDX, val);		break;}
 			case dispUAVLblsIDX			: {				
 				simExec.des.setSimFlags(mySimulator.dispUAVLblsIDX, val);		break;}				
-			case showSimValsIDX			:{//show simulation values in window on right side				
-				break;}
 			case conductExpIDX			: {
 				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
 				if(val) {
@@ -335,32 +329,14 @@ public class DESSimWindow extends myDispWindow {
 		return done;	
 	}//simMe
 	
-	//draw output values over screen in right sidebar
-	private void drawSimOutputs(float modAmtMillis) {
-		pa.pushMatrix();pa.pushStyle();
-		//display current simulation variables
-		simExec.des.drawResultBar(pa, UIrectBox,  yOff);
-		pa.popStyle();pa.popMatrix();				
-	}//drawSimOutputs
-	
-	private void drawClosedSimOutputs(float modAmtMillis) {
-		pa.pushMatrix();pa.pushStyle();
-		//put black Box for variable output display on right side of screen
-		pa.translate(rectDim[2]-50,0,0);
-		pa.setFill(new int[] {0,0,0,200});
-		pa.rect(new float[] {0,0,50,rectDim[3]});
-		pa.popStyle();pa.popMatrix();	
-	}//drawClosedSimOutputs
 	
 	@Override
 	//draw 2d constructs over 3d area on screen - draws behind menu section
 	//modAmtMillis is in milliseconds
-	protected void drawOnScreenStuff(float modAmtMillis) {
+	protected void drawRightSideInfoBar(float modAmtMillis) {
 		pa.pushMatrix();pa.pushStyle();
-		//move to upper right corner of sidebar menu - cannot draw over menu, use drawCustMenuObjs() instead 
-		pa.translate(rectDim[0],0,0);
-		if(getPrivFlags(showSimValsIDX)) {	drawSimOutputs(modAmtMillis);}
-		else {								drawClosedSimOutputs(modAmtMillis);}
+		//display current simulation variables
+		simExec.des.drawResultBar(pa,  yOff);
 		pa.popStyle();pa.popMatrix();				
 	}//drawOnScreenStuff
 	
