@@ -219,31 +219,31 @@ public class mySimExecutive {
 	}//drawMe	
 	
 	//display message and time now
-	public void showTimeMsgNow(String _str, long stTime) {
+	protected void showTimeMsgNow(String _str, long stTime) {
 		dispOutput(_str+" Time Now : "+(getCurTime() - stTime));
 	}
 	
 	//get time from "start time"
 	//1518700615691 is epoch instant @ 8:17 am 2/15/18
 	//public long getCurTime() {return getCurTime(1518700615691L);}
-	public long getCurTime() {			
+	protected long getCurTime() {			
 		Instant instant = Instant.now();
 		long millis = instant.toEpochMilli() - execBuiltTime;//milliseconds since 1/1/1970, subtracting when this sim exec was built to keep millis low			
 		return millis;
 	}//getCurTime() 
 	
-	//returns a positive int value in millis of current time since sim start
-	public long getCurSimTime() {	return getCurTime() - simStartTime;}
+	//returns a positive int value in millis of current wall time since sim start
+	protected long getCurSimTime() {	return getCurTime() - simStartTime;}
 	//returns current simNow time - now is appropriately scaled time of sim, and incremented at each simMe call based on render time
-	public float getNowTime() {	return nowTime;}
+	protected float getNowTime() {	return nowTime;}
 	//return a positive value in minutes from beginning of simulation
-	public float getCurSimTimeMinutes() { return getCurSimTime()/60000.0f;}	
+	protected float getCurSimTimeMinutes() { return getCurSimTime()/60000.0f;}	
 	
-	public void setTimeScale(float _ts) {		frameTimeScale = _ts;	}
-	public float getTimeScale() {		return frameTimeScale;}	
+	protected void setTimeScale(float _ts) {		frameTimeScale = _ts;	}
+	protected float getTimeScale() {		return frameTimeScale;}	
 	
 	//split up newline-parsed strings into an array of strings, for display on screen
-	public String[] getInfoStrAra(String str){return str.split("\n",-1);}
+	protected String[] getInfoStrAra(String str){return str.split("\n",-1);}
 	
 	//will display output to console and screen if using graphical simulation
 	public void dispOutput(String str) {
