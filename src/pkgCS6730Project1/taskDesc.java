@@ -3,6 +3,8 @@ package pkgCS6730Project1;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+import base_Utils_Objects.vectorObjs.myPointf;
+
 /**
  * class to describe a task - use as struct to interact with ui
  * @author john

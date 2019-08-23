@@ -1,6 +1,14 @@
 package pkgCS6730Project1;
 
+import java.io.File;
 import java.util.*;
+
+import base_UI_Objects.my_procApplet;
+import base_UI_Objects.drawnObjs.myDrawnSmplTraj;
+import base_UI_Objects.windowUI.myDispWindow;
+import base_Utils_Objects.io.MsgCodes;
+import base_Utils_Objects.vectorObjs.myPoint;
+import base_Utils_Objects.vectorObjs.myVector;
 
 public class DESSimWindow extends myDispWindow {
 	//simulation executive
@@ -10,7 +18,7 @@ public class DESSimWindow extends myDispWindow {
 	///////////
 	//ui vals
 	//list of values for dropdown list of team size
-	private String[] uavTeamSizeVals = new String[] {"2","3","4","5","6","7","8","9"};
+	//private String[] uavTeamSizeVals = new String[] {"2","3","4","5","6","7","8","9"};
 	//idxs - need one per object
 	//add ui objects for controlling the task stdevmult and other criteria?
 	//for tasks : opt size, optsize mean TTC, stdDev Mult
@@ -21,14 +29,8 @@ public class DESSimWindow extends myDispWindow {
 		gIDX_ExpLength				= 2,			//length of time for experiment, in minutes
 		gIDX_NumExpTrials			= 3; 
 	//initial values - need one per object
-	public float[] uiVals = new float[]{
-			mySimExecutive.frameTimeScale,
-			mySimulator.uavTeamSize - Integer.parseInt(uavTeamSizeVals[0]),					//since using a list here, need to do this - setting default in only one location
-			720,																				//720 minutes == 12 hours default value
-			1
-			//
-	};			//values of 8 ui-controlled quantities
-	public final int numGUIObjs = uiVals.length;											//# of gui objects for ui	
+
+	public final int numGUIObjs = 4;											//# of gui objects for ui	
 	
 	//display variables
 	//private float[] UIrectBox;	//box holding x,y,w,h values of black rectangle to hold UI sim display values
@@ -54,40 +56,42 @@ public class DESSimWindow extends myDispWindow {
 			condUAVSweepExpIDX  = 11;						//sweep through UAV Team Sizes
 
 	public static final int numPrivFlags = 12;
+	
+	public String[][] menuBtnNames = new String[][] { // each must have literals for every button defined in side bar
+		// menu, or ignored
+		{ "Simple SIM", "Complex SIM", "---"}, // row 1
+		{ "---", "---", "---", "---" }, // row 3
+		{ "---", "---", "---", "---" }, // row 2
+		{ "---", "---", "---", "---" }, 
+		{ "---", "---", "---", "---", "---" } 
+	};
 		
-	public DESSimWindow(UAV_DESSim _p, String _n, int _flagIdx, int[] fc, int[] sc, float[] rd, float[] rdClosed, String _winTxt, boolean _canDrawTraj) {
-		super(_p, _n, _flagIdx, fc, sc, rd, rdClosed, _winTxt, _canDrawTraj);
-		float stY = rectDim[1]+rectDim[3]-4*yOff,stYFlags = stY + 2*yOff;
-		trajFillClrCnst = UAV_DESSim.gui_DarkCyan;		
-		trajStrkClrCnst = UAV_DESSim.gui_Cyan;
-		super.initThisWin(_canDrawTraj, true, false);
+	public DESSimWindow(my_procApplet _p, String _n, int _flagIdx, int[] fc, int[] sc, float[] rd, float[] rdClosed, String _winTxt) {
+		super(_p, _n, _flagIdx, fc, sc, rd, rdClosed, _winTxt);
+		super.initThisWin(false);
 	}//DancingBallWin
 	
+
 	@Override
-	//initialize all private-flag based UI buttons here - called by base class
-	public void initAllPrivBtns(){
-		truePrivFlagNames = new String[]{								//needs to be in order of privModFlgIdxs
-				"Visualization Debug","Resetting Simulation", "Drawing Vis", 
-				"Drawing UAV Teams", "Drawing Task Locs", "Drawing Lanes", 
-				"Showing Task Lbls", "Showing TLane Lbls", "Showing Team Lbls",
-				"Drawing UAV Boats", "Experimenting",
-				"Team SweepSize Experiment"
-		};
-		falsePrivFlagNames = new String[]{			//needs to be in order of flags
-				"Enable Debug","Reset Simulation", "Render Visualization",
-				"Draw UAV Teams", "Draw Task Locs", "Draw Transit Lanes",
-				"Show Task Lbls", "Show TLane Lbls", "Show Team Lbls",
-				"Drawing UAV Spheres","Conduct Experiment",
-				"Conduct Team Sweep Experiment"
-		};
-		privModFlgIdxs = new int[]{
-				debugAnimIDX, resetSimIDX, drawVisIDX, drawUAVTeamsIDX,	drawTaskLocsIDX,drawTLanesIDX,
-				dispTaskLblsIDX, dispTLnsLblsIDX, dispUAVLblsIDX, drawBoatsIDX, conductExpIDX,
-				condUAVSweepExpIDX
-		};
-		numClickBools = privModFlgIdxs.length;	
-		initPrivBtnRects(0,numClickBools);
-	}//initAllPrivBtns
+	public final void initAllPrivBtns(ArrayList<Object[]> tmpBtnNamesArray) {
+
+		// add an entry for each button, in the order they are wished to be displayed
+		// true tag, false tag, btn IDX
+		tmpBtnNamesArray.add(new Object[] {"Visualization Debug", "Enable Debug", debugAnimIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Resetting Simulation", "Reset Simulation",   resetSimIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Drawing Vis", "Render Visualization",  drawVisIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Drawing UAV Teams", "Draw UAV Teams",  drawUAVTeamsIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Drawing Task Locs", "Draw Task Locs",  drawTaskLocsIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Drawing Lanes", "Draw Transit Lanes", drawTLanesIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Showing Task Lbls", "Show Task Lbls",  dispTaskLblsIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Showing TLane Lbls", "Show TLane Lbls", dispTLnsLblsIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Showing Team Lbls", "Show Team Lbls",  dispUAVLblsIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Drawing UAV Boats", "Drawing UAV Spheres",   drawBoatsIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Experimenting", "Conduct Experiment", conductExpIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Team SweepSize Experiment", "Conduct Team Sweep Experiment", condUAVSweepExpIDX});  
+
+	}//initAllPrivBtns	
+	
 	//set labels of boolean buttons 
 //	private void setLabel(int idx, String tLbl, String fLbl) {truePrivFlagNames[idx] = tLbl;falsePrivFlagNames[idx] = fLbl;}//	
 	
@@ -116,7 +120,7 @@ public class DESSimWindow extends myDispWindow {
 		setPrivFlags(dispTLnsLblsIDX, false);	
 		setPrivFlags(dispUAVLblsIDX, false);	
 		resetDesFlags();
-		pa.setFlags(pa.runSim, false);
+		//pa.setSimIsRunning(false);
 		
 	}//initComplexSim
 	
@@ -134,7 +138,8 @@ public class DESSimWindow extends myDispWindow {
 		setPrivFlags(dispUAVLblsIDX, showVis);	
 		resetDesFlags();
 		//turn off simulation if running
-		pa.setFlags(pa.runSim, false);
+		//pa.setSimIsRunning(false);
+		
 		
 	}//initSimpleSim	
 	
@@ -152,7 +157,7 @@ public class DESSimWindow extends myDispWindow {
 		simExec = new mySimExecutive(pa);
 		
 		setSimpleSim();
-
+		pa.setAllMenuBtnNames(menuBtnNames);
 		custMenuOffset = uiClkCoords[3];	//495	
 	}//initMe	
 		
@@ -190,7 +195,7 @@ public class DESSimWindow extends myDispWindow {
 				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
 				if(val) {
 					simExec.initializeTrials((int) uiVals[gIDX_ExpLength], (int) uiVals[gIDX_NumExpTrials], true);
-					pa.setFlags(pa.runSim, true);
+					pa.setSimIsRunning(true);
 					addPrivBtnToClear(conductExpIDX);
 				} 
 				break;}
@@ -198,7 +203,7 @@ public class DESSimWindow extends myDispWindow {
 				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
 				if(val) {
 					simExec.initializeTrials((int) uiVals[gIDX_ExpLength], (int) uiVals[gIDX_NumExpTrials], false);
-					pa.setFlags(pa.runSim, true);
+					pa.setSimIsRunning(true);
 					addPrivBtnToClear(condUAVSweepExpIDX);
 				} 
 				break;}
@@ -207,60 +212,19 @@ public class DESSimWindow extends myDispWindow {
 		}		
 	}//setPrivFlags	
 		
-	//initialize structure to hold modifiable menu regions
-	@Override
-	protected void setupGUIObjsAras(){	
-		//pa.outStr2Scr("setupGUIObjsAras start");
-		guiMinMaxModVals = new double [][]{
-			{1.0f,10000.0f,1.0f},						//time scaling - 1 is real time, 1000 is 1000x speedup           		gIDX_FrameTimeScale 
-			{0,uavTeamSizeVals.length-1, 1.0f},							//min/max team size
-			{1.0f, 1440, 1.0f},								//experiment length
-			{1.0f, 100, 1.0f}								//# of experimental trials
-		};		//min max mod values for each modifiable UI comp	
 
-		guiStVals = new double[]{
-			uiVals[gIDX_FrameTimeScale],
-			uiVals[gIDX_UAVTeamSize],
-			uiVals[gIDX_ExpLength],
-			uiVals[gIDX_NumExpTrials],
-			
-		};								//starting value
-		
-		guiObjNames = new String[]{
-				"Sim Speed Multiplier",
-				"UAV Team Size",
-				"Experiment Duration",
-				"# Experimental Trials"
-		};								//name/label of component	
-		
-		//idx 0 is treat as int, idx 1 is obj has list vals, idx 2 is object gets sent to windows
-		guiBoolVals = new boolean [][]{
-			{false, false, true},	
-			{true, true, true},
-			{true, false, true},
-			{true, false, true}			
-		};						//per-object  list of boolean flags
-		
-		//since horizontal row of UI comps, uiClkCoords[2] will be set in buildGUIObjs		
-		guiObjs = new myGUIObj[numGUIObjs];			//list of modifiable gui objects
-		if(numGUIObjs > 0){
-			buildGUIObjs(guiObjNames,guiStVals,guiMinMaxModVals,guiBoolVals,new double[]{xOff,yOff});			//builds a horizontal list of UI comps
-		}
-		
-//		setupGUI_XtraObjs();
-	}//setupGUIObjsAras
+	@Override
+	protected final void setupGUIObjsAras(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals) {
+		tmpListObjVals.put(gIDX_UAVTeamSize, new String[] {"2","3","4","5","6","7","8","9"});			  
+		                                                                                                                              			
+		tmpUIObjArray.put(gIDX_FrameTimeScale, new Object[] { new double[]{1.0f,10000.0f,1.0f}, 1.0*mySimExecutive.frameTimeScale, "Sim Speed Multiplier",new boolean []{false, false, true}});  
+		tmpUIObjArray.put(gIDX_UAVTeamSize, new Object[] { new double[]{0,tmpListObjVals.get(gIDX_UAVTeamSize).length-1, 1.0f}, 1.0*mySimulator.uavTeamSize - Integer.parseInt(tmpListObjVals.get(gIDX_UAVTeamSize)[0]), "UAV Team Size",new boolean []{true, true, true}});          
+		tmpUIObjArray.put(gIDX_ExpLength, new Object[] { new double[]{1.0f, 1440, 1.0f}, 720.0, "Experiment Duration",new boolean []{true, false, true}});    
+		tmpUIObjArray.put(gIDX_NumExpTrials, new Object[] { new double[]{1.0f, 100, 1.0f}, 1.0, "# Experimental Trials",new boolean []{true, false, true}});  
+					
+		//tmpUIObjArray.put(gIDX_MapType,new Object[] { new double[]{0.0, tmpListObjVals.get(gIDX_MapType).length-1, 1},0.0, "Map Type to Show", new boolean[]{true, true, true}}); 
 	
-//	//setup UI object for song slider
-//	private void setupGUI_XtraObjs() {
-//		double stClkY = uiClkCoords[3], sizeClkY = 3*yOff;
-//		guiObjs[songTransIDX] = new myGUIBar(pa, this, songTransIDX, "MP3 Transport for ", 
-//				new myVector(0, stClkY,0), new myVector(uiClkCoords[2], stClkY+sizeClkY,0),
-//				new double[] {0.0, 1.0,0.1}, 0.0, new boolean[]{false, false, true}, new double[]{xOff,yOff});	
-//		
-//		//setup space for ui interaction with song bar
-//		stClkY += sizeClkY;				
-//		uiClkCoords[3] = stClkY;
-//	}
+	}//setupGUIObjsAras
 
 	
 	@Override
@@ -273,7 +237,7 @@ public class DESSimWindow extends myDispWindow {
 				simExec.setTimeScale(val);
 				break;}
 			case gIDX_UAVTeamSize : {
-				mySimulator.uavTeamSize = (int)val + Integer.parseInt(uavTeamSizeVals[0]);//add idx 0 as min size
+				mySimulator.uavTeamSize = (int)val + 2;//add idx 0 as min size
 				pa.outStr2Scr("uav team size desired is : " + mySimulator.uavTeamSize);
 				//rebuild sim exec and sim environment whenever team size changes
 				simExec.initSimExec(true);				
@@ -288,25 +252,8 @@ public class DESSimWindow extends myDispWindow {
 			}
 		}
 	}
-	//if any ui values have a string behind them for display
-	@Override
-	protected String getUIListValStr(int UIidx, int validx) {			
-		switch(UIidx){
-			case gIDX_UAVTeamSize : {return uavTeamSizeVals[(validx % uavTeamSizeVals.length)];}
-			default : {break;}
-		}
-		return "";
-	}
-	
-	@Override
-	public void initDrwnTrajIndiv(){}
-	
-//	public void setLights(){
-//		pa.ambientLight(102, 102, 102);
-//		pa.lightSpecular(204, 204, 204);
-//		pa.directionalLight(180, 180, 180, 0, 1, -1);	
-//	}	
-	//overrides function in base class mseClkDisp
+
+
 	@Override
 	public void drawTraj3D(float animTimeMod,myPoint trans){}//drawTraj3D	
 	//set camera to either be global or from pov of one of the boids
@@ -329,23 +276,26 @@ public class DESSimWindow extends myDispWindow {
 		return done;	
 	}//simMe
 	
-	
 	@Override
-	//draw 2d constructs over 3d area on screen - draws behind menu section
-	//modAmtMillis is in milliseconds
-	protected void drawRightSideInfoBar(float modAmtMillis) {
+	protected final void drawRightSideInfoBarPriv(float modAmtMillis) {
 		pa.pushMatrix();pa.pushStyle();
 		//display current simulation variables
 		simExec.des.drawResultBar(pa,  yOff);
-		pa.popStyle();pa.popMatrix();				
-	}//drawOnScreenStuff
-	
+		pa.popStyle();pa.popMatrix();		
+	}
+
+	@Override
+	protected final void drawOnScreenStuffPriv(float modAmtMillis) {
+		
+
+	}
+
 	@Override
 	//animTimeMod is in seconds.
 	protected void drawMe(float animTimeMod) {
 //		curMseLookVec = pa.c.getMse2DtoMse3DinWorld(pa.sceneCtrVals[pa.sceneIDX]);			//need to be here
 //		curMseLoc3D = pa.c.getMseLoc(pa.sceneCtrVals[pa.sceneIDX]);
-		simExec.drawMe(animTimeMod);
+		simExec.drawMe(animTimeMod, this);
 	}//drawMe	
 	
 	
@@ -359,104 +309,175 @@ public class DESSimWindow extends myDispWindow {
 		pa.popStyle();					pa.popMatrix();		
 	}//drawCustMenuObjs
 
-	
+	/////////////////////////////
+	// window control
 	@Override
-	protected void closeMe() {
-		//things to do when swapping this window out for another window - release objects that take up a lot of memory, for example.
-	}	
-	
+	protected final void resizeMe(float scale) {}
 	@Override
-	protected void showMe() {
-		//things to do when swapping into this window - reinstance released objects, for example.
-		pa.setMenuDbgBtnNames(menuDbgBtnNames);
-		pa.setMenuFuncBtnNames(menuFuncBtnNames);
-	}
-	
+	protected final void showMe() {}
 	@Override
-	//stopping simulation
-	protected void stopMe() {
-		System.out.println("Simulation Finished");	
-	}
-	
-	//custom functions launched by UI input
-	//if launching threads for custom functions, need to remove clearFuncBtnState call in function below and call clearFuncBtnState when thread ends
-	private void custFunc0(){
-		clearFuncBtnState(1,false);
-		setSimpleSim();
-		//clearFuncBtnState(0,false);
-	}			
-	private void custFunc1(){
-		clearFuncBtnState(0,false);
-		setComplexSim();
-		//clearFuncBtnState(1,false);
-	}	
-	
-	private void custFunc2(){	
-		//custom function code here
-		clearFuncBtnState(2,false);
-	}			
-	private void custFunc3(){	
-		//custom function code here
-		clearFuncBtnState(3,false);
-	}			
-	private void custFunc4(){	
-		//custom function code here
-		clearFuncBtnState(4,false);
-	}		
+	protected final void closeMe() {}
 	@Override
-	public void clickFunction(int btnNum) {
-		//pa.outStr2Scr("click cust function in "+name+" : btn : " + btnNum);
-		switch(btnNum){
-			case 0 : {	custFunc0();	break;}
-			case 1 : {	custFunc1();	break;}
-			case 2 : {	custFunc2();	break;}
-			case 3 : {	custFunc3();	break;}
-			case 4 : {	custFunc4();	break;}
-			default : {break;}
-		}	
-	}		//only for display windows
-	
-	//debug function
-	//if launching threads for debugging, need to remove clearDBGState call in function below and call clearDBGState when thread ends
-	private void dbgFunc0(){		
-		simExec.TEST_verifyPriorityQueueFunctionality();
-		clearDBGBtnState(0,false);
-	}	
-	private void dbgFunc1(){		
-		simExec.TEST_verifyFEL();
-		clearDBGBtnState(1,false);
-	}	
-	private void dbgFunc2(){
-		simExec.TEST_simulator();
-		//dbg code here
-		clearDBGBtnState(2,false);
-	}	
-	private void dbgFunc3(){	
-		simExec.TEST_taskDists();
-		//dbg code here
-		clearDBGBtnState(3,false);
-	}	
+	protected final void stopMe() {}
 
 	@Override
-	public void clickDebug(int btnNum){
-		pa.outStr2Scr("click debug in "+name+" : btn : " + btnNum);
-		switch(btnNum){
-			case 0 : {	dbgFunc0();	break;}//verify priority queue functionality
-			case 1 : {	dbgFunc1();	break;}//verify FEL pq integrity
-			case 2 : {	dbgFunc2();	break;}
-			case 3 : {	dbgFunc3();	break;}
-			default : {break;}
-		}		
-	}//clickDebug
+	public void handleSideMenuMseOvrDispSel(int btn, boolean val) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected final myPoint getMsePtAs3DPt(myPoint mseLoc) {		return new myPoint(mseLoc);	}
+
+
+
+	@Override
+	protected void setVisScreenDimsPriv() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	protected final void setCustMenuBtnNames() {	}
+
+	@Override
+	protected final void launchMenuBtnHndlr(int funcRow, int btn) {
+		msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Begin requested action : Click Functions "+(funcRow+1)+" in " + name + " : btn : " + btn, MsgCodes.info4);
+		switch (funcRow) {
+			case 0: {// row 1 of menu side bar buttons
+				// {"Gen Training Data", "Save Training data","Load Training Data"}, //row 1
+				switch (btn) {
+					case 0: {
+						resetButtonState();
+						setSimpleSim();
+						pa.setSimIsRunning(false);
+						break;
+					}
+					case 1: {
+						resetButtonState();
+						setComplexSim();
+						pa.setSimIsRunning(false);
+						break;
+					}
+					case 2: {
+						resetButtonState();
+						break;
+					}
+					default: {
+						msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Unknown Functions 1 btn : " + btn, MsgCodes.warning2);
+						break;
+					}
+				}
+				break;
+			} // row 1 of menu side bar buttons
 	
+			case 1: {// row 2 of menu side bar buttons
+				switch (btn) {
+					case 0: {
+						resetButtonState();
+						break;
+					}
+					case 1: {
+						resetButtonState();
+						break;
+					}
+					case 2: {
+						resetButtonState();
+						break;
+					}
+					case 3: {// show/hide som Map UI
+						resetButtonState();
+						break;
+					}
+					default: {
+						msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Unknown Functions 2 btn : " + btn, MsgCodes.warning2);
+						resetButtonState();
+						break;
+					}
+				}
+				break;
+			} // row 2 of menu side bar buttons
+			case 2: {// row 3 of menu side bar buttons
+				switch (btn) {
+					case 0: {
+						resetButtonState();
+						break;
+					}
+					case 1: {
+						resetButtonState();
+						break;
+					}
+					case 2: {
+						resetButtonState();
+						break;
+					}
+					case 3: {
+						resetButtonState();
+						break;
+					}
+					default: {
+						msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Unknown Functions 3 btn : " + btn,
+								MsgCodes.warning2);
+						resetButtonState();
+						break;
+					}
+				}
+				break;
+			} // row 3 of menu side bar buttons
+			case 3: {// row 3 of menu side bar buttons
+				switch (btn) {
+					case 0:
+					case 1:
+					case 2:
+					case 3: {// load all training data, default map config, and build map
+						resetButtonState();
+						break;
+					}
+					default: {
+						msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Unknown Functions 4 btn : " + btn, MsgCodes.warning2);
+						resetButtonState();
+						break;
+					}
+				}
+				break;
+			} // row 3 of menu side bar buttons
+		}
+		msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "End requested action (multithreaded actions may still be working) : Click Functions "+(funcRow+1)+" in " + name + " : btn : " + btn, MsgCodes.info4);
+	}
 	@Override
-	public void hndlFileLoadIndiv(String[] vals, int[] stIdx) {}
-	@Override
-	public List<String> hndlFileSaveIndiv() {List<String> res = new ArrayList<String>();return res;}
-	@Override
-	protected void processTrajIndiv(myDrawnSmplTraj drawnNoteTraj){	}
-	@Override
-	protected myPoint getMsePtAs3DPt(int mouseX, int mouseY){return pa.P(mouseX,mouseY,0);}
+	public final void handleSideMenuDebugSel(int btn, int val) {
+		msgObj.dispMessage("DESSimWindow", "handleSideMenuDebugSel","Click Debug functionality in " + name + " : btn : " + btn, MsgCodes.info4);
+		switch (btn) {
+			case 0: {
+				resetButtonState();
+				break;
+			}
+			case 1: {
+				resetButtonState();
+				break;
+			}
+			case 2: {
+				resetButtonState();
+				break;
+			}
+			case 3: {// show current mapdat status
+				resetButtonState();
+				break;
+			}
+			case 4: {
+				resetButtonState();
+				break;
+			}
+			default: {
+				msgObj.dispMessage("DESSimWindow", "handleSideMenuDebugSel", "Unknown Debug btn : " + btn,MsgCodes.warning2);
+				resetButtonState();
+				break;
+			}
+		}
+		msgObj.dispMessage("DESSimWindow", "handleSideMenuDebugSel", "End Debug functionality selection.",MsgCodes.info4);
+	}
+	
 	@Override
 	protected boolean hndlMouseMoveIndiv(int mouseX, int mouseY, myPoint mseClckInWorld){
 		return false;
@@ -467,8 +488,8 @@ public class DESSimWindow extends myDispWindow {
 	//cntl key pressed handles unfocus of spherey
 	@Override
 	protected boolean hndlMouseClickIndiv(int mouseX, int mouseY, myPoint mseClckInWorld, int mseBtn) {	
-		boolean res = checkUIButtons(mouseX, mouseY);	
-		return res;}//hndlMouseClickIndiv
+			
+		return false;}//hndlMouseClickIndiv
 	@Override
 	protected boolean hndlMouseDragIndiv(int mouseX, int mouseY, int pmouseX, int pmouseY, myPoint mouseClickIn3D, myVector mseDragInWorld, int mseBtn) {
 		boolean res = false;
@@ -476,23 +497,39 @@ public class DESSimWindow extends myDispWindow {
 	@Override
 	protected void hndlMouseRelIndiv() {	}
 	@Override
-	protected void endShiftKeyI() {}
+	protected final void endShiftKeyI() {}
 	@Override
-	protected void endAltKeyI() {}
+	protected final void endAltKeyI() {}
 	@Override
-	protected void endCntlKeyI() {}
+	protected final void endCntlKeyI() {}
+	
+	///////////////////////
+	// deprecated file io stuff
+	@Override
+	public final void hndlFileLoad(File file, String[] vals, int[] stIdx) {}
+	@Override
+	public final ArrayList<String> hndlFileSave(File file) {		return null;}
+	@Override
+	protected final String[] getSaveFileDirNamesPriv() {return null;	}
 	@Override
 	protected void snapMouseLocs(int oldMouseX, int oldMouseY, int[] newMouseLoc) {}	
+	
+	
+	
+	////////////////////
+	// drawn trajectory stuff
 	@Override
-	protected void addSScrToWinIndiv(int newWinKey){}
+	protected final void initDrwnTrajIndiv() {}
 	@Override
-	protected void addTrajToScrIndiv(int subScrKey, String newTrajKey){}
+	protected final void addSScrToWinIndiv(int newWinKey) {}
 	@Override
-	protected void delSScrToWinIndiv(int idx) {}	
+	protected final void addTrajToScrIndiv(int subScrKey, String newTrajKey) {}
 	@Override
-	protected void delTrajToScrIndiv(int subScrKey, String newTrajKey) {}
-	//resize drawn all trajectories
+	protected final void delSScrToWinIndiv(int idx) {}
 	@Override
-	protected void resizeMe(float scale) { }
+	protected final void delTrajToScrIndiv(int subScrKey, String newTrajKey) {}
+	@Override
+	protected final void processTrajIndiv(myDrawnSmplTraj drawnTraj) {}
+
 }//DESSimWindow
 

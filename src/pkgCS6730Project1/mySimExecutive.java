@@ -4,10 +4,16 @@ import java.nio.file.*;
 import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
+import base_UI_Objects.my_procApplet;
+import base_Utils_Objects.priorityQueue.myMinQueue;
+import base_Utils_Objects.priorityQueue.base.myPriorityQueue;
+import pkgCS6730Project1.events.EventType;
+import pkgCS6730Project1.events.myEvent;
+
 //class to manage the functionality of the simulation executive
 public class mySimExecutive {
 	//ref to owning application (if papplet) or null if console
-	public UAV_DESSim pa;	
+	public my_procApplet pa;	
 	//simulator 
 	public mySimulator des;	
 	//Priority queue holding future event list
@@ -20,7 +26,7 @@ public class mySimExecutive {
 	//set at start of every simMe call
 	private float nowTime;
 	//scaling time to speed up simulation == amount to multiply modAmtMillis by
-	public static float frameTimeScale = 1.0f;		
+	public static float frameTimeScale = 1000.0f;		
 	//flags relevant to simulator executive execution
 	private int[] execFlags;	
 	public static final int
@@ -41,10 +47,10 @@ public class mySimExecutive {
 	private final int minTrlUAVSz = 2, maxTrlUAVSz = 9;
 	
 
-	//pass null for command line version - define empty class called UAV_DESSim
-	public mySimExecutive(UAV_DESSim _pa) {
+	//pass null for command line version - define empty class called my_procApplet
+	public mySimExecutive(my_procApplet _pa) {
 		if(_pa != null) {pa= _pa;}
-		else {dispOutput("Null UAV_DESSim PApplet, assuming console only");}
+		else {dispOutput("Null my_procApplet PApplet, assuming console only");}
 		Instant now = Instant.now();
 		execBuiltTime = now.toEpochMilli();//milliseconds since 1/1/1970 when this exec was built.
 		initExecFlags();
@@ -133,12 +139,12 @@ public class mySimExecutive {
 		execFlags[flIDX] = (val ?  execFlags[flIDX] | mask : execFlags[flIDX] & ~mask);
 		switch(idx){
 			case debugExecIDX 			: {
-				des.setSimFlags(des.debugSimIDX, val);
+				des.setSimFlags(mySimulator.debugSimIDX, val);
 				break;}
 			case conductExpIDX			: {//if true then conducting an experiment.  reset simulation to beginning with current settings and then run until # of minutes have passed	
 				break;}			
 			case drawVisIDX				: {//draw visualization - if false should ignore all processing/papplet stuff
-				des.setSimFlags(des.drawVisIDX, val);				
+				des.setSimFlags(mySimulator.drawVisIDX, val);				
 				break;}
 		}			
 	}//setExecFlags
@@ -212,10 +218,10 @@ public class mySimExecutive {
 	
 	//draw simulation results for visualization
 	//animTimeMod is in seconds
-	public void drawMe(float animTimeMod) {
+	public void drawMe(float animTimeMod, DESSimWindow win) {
 		if(!getExecFlags(drawVisIDX)) {return;}//not drawing, return
 		//call simulator to render sim world
-		des.drawMe(pa,animTimeMod* frameTimeScale);
+		des.drawMe(pa,animTimeMod* frameTimeScale, win);
 	}//drawMe	
 	
 	//display message and time now
@@ -402,7 +408,7 @@ public class mySimExecutive {
 	}//TEST_buildPQWithAra
 	
 	private void TEST_PQShowElemsReAdd(myPriorityQueue<myEvent> tmpPQ, String lPfx) {
-		myEvent[] tmpAra = new myEvent[tmpPQ._numElems];	
+		myEvent[] tmpAra = new myEvent[tmpPQ.get_numElems()];	
 		int idx=0;
 		while (!tmpPQ.isEmpty()){
 			tmpAra[idx] = tmpPQ.removeFirst();
@@ -415,7 +421,7 @@ public class mySimExecutive {
 	}//TEST_dequeAndShowElems
 	
 	private void TEST_dequeAndShowElems(myPriorityQueue<myEvent> tmpPQ, String lPfx) {
-		int num = tmpPQ._numElems;
+		int num = tmpPQ.get_numElems();
 		for (int i=0;i<num;++i) {
 			dispOutput(lPfx + "Elem # "+i+" in tmpPQ of Size " +tmpPQ.size() + " : " + tmpPQ.removeFirst() );
 		}
