@@ -123,8 +123,15 @@ public class UAV_DESSim extends my_procApplet {
 
 	@Override
 	protected void handleKeyPress(char key, int keyCode) {
-		// TODO Auto-generated method stub
-		
+		switch (key){
+		case ' ' : {toggleSimIsRunning(); break;}							//run sim
+		case 'f' : {dispWinFrames[curFocusWin].setInitCamView();break;}					//reset camera
+		case 'a' :
+		case 'A' : {toggleSaveAnim();break;}						//start/stop saving every frame for making into animation
+		case 's' :
+		case 'S' : {save(getScreenShotSaveName(prjNmShrt));break;}//save picture of current image			
+		default : {	}
+	}//switch	
 	}
 	
 	

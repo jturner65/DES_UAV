@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+import base_UI_Objects.IRenderInterface;
 import base_UI_Objects.my_procApplet;
 import base_Utils_Objects.vectorObjs.myPointf;
 import pkgCS6730Project1.mySimulator;
@@ -213,10 +214,10 @@ public class myUAVTask extends myUAVResource{
 		pa.translate(loc);
 		//don't draw at all if drawMe is false, unless occupied
 		if(drawMe) {//always draw
-			pa.setColorValStroke(getEntityFlags(taskInUseIDX) ? (td.isGroupTask ? pa.gui_TransMagenta : pa.gui_TransCyan) : pa.gui_TransGray, 255);
+			pa.setColorValStroke(getEntityFlags(taskInUseIDX) ? (td.isGroupTask ? IRenderInterface.gui_TransMagenta : IRenderInterface.gui_TransCyan) : IRenderInterface.gui_TransGray, 255);
 			pa.sphere(rad); 
 		} else if(getEntityFlags(taskInUseIDX)) {//only draw if occupied
-			pa.setColorValStroke( (td.isGroupTask ? pa.gui_TransMagenta : pa.gui_TransCyan), 255 );
+			pa.setColorValStroke( (td.isGroupTask ? IRenderInterface.gui_TransMagenta : IRenderInterface.gui_TransCyan), 255 );
 			pa.sphere(rad); 
 		}
 	}//drawEntityPriv

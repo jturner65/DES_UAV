@@ -1,9 +1,8 @@
 package pkgCS6730Project1.entities;
 
-import java.util.concurrent.*;
 
+import base_UI_Objects.IRenderInterface;
 import base_UI_Objects.my_procApplet;
-import base_Utils_Objects.vectorObjs.myPoint;
 import base_Utils_Objects.vectorObjs.myPointf;
 import base_Utils_Objects.vectorObjs.myVectorf;
 import pkgCS6730Project1.DESSimWindow;
@@ -114,7 +113,7 @@ public class myUAVTeam extends myEntity {
 		pa.translate(loc);
 			boolean debugAnim = sim.getDebug();
 			pa.pushMatrix();pa.pushStyle();
-			pa.setColorValStroke(pa.gui_Black, 255);
+			pa.setColorValStroke(IRenderInterface.gui_Black, 255);
 			pa.strokeWeight(2.0f);
 			if(debugAnim) {pa.line(new myPointf(), motionTraj);}//motion trajectory vector
 			pa.popStyle();pa.popMatrix();

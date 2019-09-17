@@ -2,6 +2,7 @@ package pkgCS6730Project1.entities;
 
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import base_UI_Objects.IRenderInterface;
 import base_UI_Objects.my_procApplet;
 import base_Utils_Objects.vectorObjs.myPointf;
 import base_Utils_Objects.vectorObjs.myVectorf;
@@ -85,14 +86,14 @@ public class myUAVTransitLane extends myUAVResource{
 	private long setTeamTTandDur(myUAVTeam _team, myPointf _stLoc, float _distToGo) {
 		//find end location as start location + travel vector
 		myPointf lclEndLoc = getLocOnLane (_stLoc, _distToGo);
-		long dur = (long) (_distToGo * 1000.0f / (_team.teamSpeed*laneVel));		//meters / meters per second / 1000 == milliseconds
+		long dur = (long) (_distToGo * 1000.0f / (myUAVTeam.teamSpeed*laneVel));		//meters / meters per second / 1000 == milliseconds
 		_team.setTrajAndDur(_stLoc, lclEndLoc, dur);
 		return dur;		
 	}//setTeamTTandDur
 	//return distance passed team should go to arrive at specified place in line
 	private float getDistToGo(myUAVTeam team, int place) {
 		//minimum distance to go is the distance that would require 1 millisecond to travel 
-		float minDistToGo =  (team.teamSpeed*laneVel)/1000.0f;
+		float minDistToGo =  (myUAVTeam.teamSpeed*laneVel)/1000.0f;
 		float distToGo = Math.max(travelLane.magn - (place * team.getNoflyDist()), minDistToGo);
 		return distToGo;
 	}
@@ -213,11 +214,11 @@ public class myUAVTransitLane extends myUAVResource{
 		if((drawMe)||(it)){
 			pa.pushMatrix();pa.pushStyle();	
 			if((drawMe) && (!it)) {
-				int clr = (this.laneVel > 1) ? pa.gui_TransBlack : pa.gui_TransGray;
+				int clr = (this.laneVel > 1) ? IRenderInterface.gui_TransBlack : IRenderInterface.gui_TransGray;
 				pa.cylinder_NoFill(stLoc,endLoc, rad, clr, clr);
 			} else if (it) {
-				int clr =  (this.laneVel > 1) ? pa.gui_Green : pa.gui_Yellow;
-				pa.cylinder_NoFill(stLoc,endLoc, rad, pa.gui_Red , clr);
+				int clr =  (this.laneVel > 1) ? IRenderInterface.gui_Green : IRenderInterface.gui_Yellow;
+				pa.cylinder_NoFill(stLoc,endLoc, rad, IRenderInterface.gui_Red , clr);
 			}			
 			pa.popStyle();pa.popMatrix();	
 		}

@@ -3,6 +3,7 @@ package pkgCS6730Project1.entities;
 import java.util.concurrent.ThreadLocalRandom;
 
 import base_UI_Objects.my_procApplet;
+import base_Utils_Objects.MyMathUtils;
 import base_Utils_Objects.vectorObjs.myPoint;
 import base_Utils_Objects.vectorObjs.myPointf;
 import base_Utils_Objects.vectorObjs.myVectorf;
@@ -151,8 +152,8 @@ public class myUAVObj {
 		p.pushMatrix();p.pushStyle();
 			p.translate(coords.x,coords.y,coords.z);		//move to location
 			alignUAV(p, delT);
-			p.rotate(p.PI/2.0f,1,0,0);
-			p.rotate(p.PI/2.0f,0,1,0);
+			p.rotate(MyMathUtils.Pi_f/2.0f,1,0,0);
+			p.rotate(MyMathUtils.Pi_f/2.0f,0,1,0);
 			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
 			p.pushStyle();
 			f.tmpl.drawMe(animAraIDX, ID);
@@ -166,8 +167,8 @@ public class myUAVObj {
 			p.translate(coords.x,coords.y,coords.z);		//move to location
 			drawMyVec(p, rotVec, my_procApplet.gui_Black,4.0f);p.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
 			alignUAV(p, delT);
-			p.rotate(p.PI/2.0f,1,0,0);
-			p.rotate(p.PI/2.0f,0,1,0);
+			p.rotate(MyMathUtils.Pi_f/2.0f,1,0,0);
+			p.rotate(MyMathUtils.Pi_f/2.0f,0,1,0);
 			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
 			p.pushStyle();
 			f.tmpl.drawMe(animAraIDX, ID);	

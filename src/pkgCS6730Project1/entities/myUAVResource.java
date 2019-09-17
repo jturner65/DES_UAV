@@ -5,7 +5,6 @@ import java.util.concurrent.*;
 import base_UI_Objects.my_procApplet;
 import base_Utils_Objects.vectorObjs.myPointf;
 import pkgCS6730Project1.DESSimWindow;
-import pkgCS6730Project1.UAV_DESSim;
 import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.entities.base.EntityType;
 import pkgCS6730Project1.entities.base.myEntity;
