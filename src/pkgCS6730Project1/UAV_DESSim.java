@@ -1,8 +1,8 @@
 package pkgCS6730Project1;
 
 import base_UI_Objects.my_procApplet;
-import base_UI_Objects.windowUI.myDispWindow;
-import processing.core.*;
+import base_UI_Objects.windowUI.base.myDispWindow;
+import base_UI_Objects.windowUI.sidebar.mySideBarMenu;
 
 /**
  * CS6730 Project 1 : UAV Discrete Event Simulator
@@ -15,7 +15,6 @@ public class UAV_DESSim extends my_procApplet {
 	public String authorString = "John Turner";
 	public final int[] bground = new int[]{244,244,255,255};		//bground color
 	
-	private int[] visFlags;
 	private final int
 		showUIMenu 		= 0,			//whether or not to show sidebar menu
 		showDESwin		= 1;			//whether to show 1st window
@@ -33,12 +32,20 @@ public class UAV_DESSim extends my_procApplet {
 	//////////////////////////////////////////////// code
 	public static void main(String[] passedArgs) {
 	    String[] appletArgs = new String[] { "pkgCS6730Project1.UAV_DESSim" };
-	    if (passedArgs != null) {	    	PApplet.main(PApplet.concat(appletArgs, passedArgs));  } else {	    	PApplet.main(appletArgs);	    }
+	    my_procApplet._invokedMain(appletArgs, passedArgs);
 	}
 
+	/**
+	 * whether or not we want to restrict window size on widescreen monitors
+	 * 
+	 * @return 0 - use monitor size regardless
+	 * 			1 - use smaller dim to be determine window 
+	 * 			2+ - TBD
+	 */
 	@Override
-	protected int[] getDesiredAppDims() {return new int[] {(int)(getDisplayWidth()*.95f), (int)(getDisplayHeight()*.92f)};}
-
+	protected int setAppWindowDimRestrictions() {	return 1;}	
+	
+	
 	@Override
 	protected void setup_indiv() {		setBkgrnd(); setDesired3DGridDims(1500);}
 	@Override
@@ -66,7 +73,7 @@ public class UAV_DESSim extends my_procApplet {
 		buildInitMenuWin(showUIMenu);
 		//menu bar init
 		int wIdx = dispMenuIDX,fIdx=showUIMenu;
-		dispWinFrames[wIdx] = new DES_SimSideBarMenu(this, winTitles[wIdx], fIdx, winFillClrs[wIdx], winStrkClrs[wIdx], winRectDimOpen[wIdx], winRectDimClose[wIdx], winDescr[wIdx]);	
+		dispWinFrames[wIdx] = buildSideBarMenu(wIdx, fIdx, new String[]{"Sim Map","Functions 2","Functions 3","Functions 4"}, new int[] {3,4,4,4}, 5, false, false);// new DES_SimSideBarMenu(this, winTitles[wIdx], fIdx, winFillClrs[wIdx], winStrkClrs[wIdx], winRectDimOpen[wIdx], winRectDimClose[wIdx], winDescr[wIdx]);	
 		//instanced window dimensions when open and closed - only showing 1 open at a time
 		float[] _dimOpen  =  new float[]{menuWidth, 0, width-menuWidth, height}, _dimClosed  =  new float[]{menuWidth, 0, hideWinWidth, height};	
 		//setInitDispWinVals : use this to define the values of a display window
@@ -104,16 +111,19 @@ public class UAV_DESSim extends my_procApplet {
 	@Override
 	protected String getPrjNmShrt() {		return prjNmShrt;	}
 
+	//////////////////////////////////////////
+	/// graphics and base functionality utilities and variables
+	//////////////////////////////////////////
+	
+	/**
+	 * return the number of visible window flags for this application
+	 * @return
+	 */
 	@Override
-	public void initVisFlags() {
-		visFlags = new int[1 + numVisFlags/32];for(int i =0; i<numVisFlags;++i){forceVisFlag(i,false);}	
-		((DES_SimSideBarMenu)dispWinFrames[dispMenuIDX]).initPFlagColors();			//init sidebar window flags
-	}
-
+	public int getNumVisFlags() {return numVisFlags;}
 	@Override
-	public void setVisFlag(int idx, boolean val) {
-		int flIDX = idx/32, mask = 1<<(idx%32);
-		visFlags[flIDX] = (val ?  visFlags[flIDX] | mask : visFlags[flIDX] & ~mask);
+	//address all flag-setting here, so that if any special cases need to be addressed they can be
+	protected void setVisFlag_Indiv(int idx, boolean val ){
 		switch (idx){
 			case showUIMenu 	    : { dispWinFrames[dispMenuIDX].setFlags(myDispWindow.showIDX,val);    break;}											//whether or not to show the main ui window (sidebar)			
 			case showDESwin			: { setWinFlagsXOR(dispDES_SimWin, val); break;}//setDispAndModMapMgr(showCOTS_2DMorph, dispCOTS_2DMorph, val);break;}
@@ -169,7 +179,7 @@ public class UAV_DESSim extends my_procApplet {
 	//these tie using the UI buttons to modify the window in with using the boolean tags - PITA but currently necessary
 	public void handleShowWin(int btn, int val, boolean callFlags){//display specific windows - multi-select/ always on if sel
 		if(!callFlags){//called from setflags - only sets button state in UI to avoid infinite loop
-			setMenuBtnState(DES_SimSideBarMenu.btnShowWinIdx,btn, val);
+			setMenuBtnState(mySideBarMenu.btnShowWinIdx,btn, val);
 		} else {//called from clicking on buttons in UI
 		
 			//val is btn state before transition 
@@ -180,15 +190,6 @@ public class UAV_DESSim extends my_procApplet {
 	}//handleShowWin
 	
 	
-	@Override
-	//get vis flag
-	public boolean getVisFlag(int idx){int bitLoc = 1<<(idx%32);return (visFlags[idx/32] & bitLoc) == bitLoc;}	
-	@Override
-	public void forceVisFlag(int idx, boolean val) {
-		int flIDX = idx/32, mask = 1<<(idx%32);
-		visFlags[flIDX] = (val ?  visFlags[flIDX] | mask : visFlags[flIDX] & ~mask);
-		//doesn't perform any other ops - to prevent looping
-	}
 	@Override
 	protected int[] getClr_Custom(int colorVal, int alpha) {	return new int[] {255,255,255,alpha};}
 
