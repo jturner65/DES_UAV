@@ -1,8 +1,8 @@
 package pkgCS6730Project1.renderedObjs;
 
 import base_UI_Objects.my_procApplet;
-import base_Utils_Objects.vectorObjs.myPointf;
-import base_Utils_Objects.vectorObjs.myVectorf;
+import base_Math_Objects.vectorObjs.floats.myPointf;
+import base_Math_Objects.vectorObjs.floats.myVectorf;
 import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.entities.myUAVObj;
 import pkgCS6730Project1.renderedObjs.base.myRenderObj;

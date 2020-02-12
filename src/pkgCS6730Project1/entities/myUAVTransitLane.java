@@ -2,10 +2,10 @@ package pkgCS6730Project1.entities;
 
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import base_UI_Objects.IRenderInterface;
+import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_UI_Objects.my_procApplet;
-import base_Utils_Objects.vectorObjs.myPointf;
-import base_Utils_Objects.vectorObjs.myVectorf;
+import base_Math_Objects.vectorObjs.floats.myPointf;
+import base_Math_Objects.vectorObjs.floats.myVectorf;
 import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.entities.base.EntityType;
 import pkgCS6730Project1.events.EventType;

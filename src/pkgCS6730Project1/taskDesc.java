@@ -3,7 +3,7 @@ package pkgCS6730Project1;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-import base_Utils_Objects.vectorObjs.myPointf;
+import base_Math_Objects.vectorObjs.floats.myPointf;
 
 /**
  * class to describe a task - use as struct to interact with ui

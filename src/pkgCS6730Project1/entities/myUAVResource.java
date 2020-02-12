@@ -3,7 +3,7 @@ package pkgCS6730Project1.entities;
 import java.util.concurrent.*;
 
 import base_UI_Objects.my_procApplet;
-import base_Utils_Objects.vectorObjs.myPointf;
+import base_Math_Objects.vectorObjs.floats.myPointf;
 import pkgCS6730Project1.DESSimWindow;
 import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.entities.base.EntityType;

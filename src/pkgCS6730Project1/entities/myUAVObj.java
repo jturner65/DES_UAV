@@ -3,10 +3,10 @@ package pkgCS6730Project1.entities;
 import java.util.concurrent.ThreadLocalRandom;
 
 import base_UI_Objects.my_procApplet;
-import base_Utils_Objects.MyMathUtils;
-import base_Utils_Objects.vectorObjs.myPoint;
-import base_Utils_Objects.vectorObjs.myPointf;
-import base_Utils_Objects.vectorObjs.myVectorf;
+import base_Math_Objects.MyMathUtils;
+import base_Math_Objects.vectorObjs.doubles.myPoint;
+import base_Math_Objects.vectorObjs.floats.myPointf;
+import base_Math_Objects.vectorObjs.floats.myVectorf;
 import pkgCS6730Project1.mySimulator;
 
 //class referencing a single uav object
