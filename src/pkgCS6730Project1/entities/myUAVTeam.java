@@ -2,9 +2,9 @@ package pkgCS6730Project1.entities;
 
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
-import base_UI_Objects.my_procApplet;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
+import base_UI_Objects.windowUI.base.myDispWindow;
 import pkgCS6730Project1.DESSimWindow;
 import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.entities.base.EntityType;
@@ -108,24 +108,24 @@ public class myUAVTeam extends myEntity {
 //	public void setValidWrapCoordsForDraw(myPointf _coords){_coords.set(((_coords.x+pa.gridDimX) % pa.gridDimX),((_coords.y+pa.gridDimY) % pa.gridDimY),((_coords.z+pa.gridDimZ) % pa.gridDimZ));	}//findValidWrapCoords	
 	
 	//move creatures to random start positions
-	public void drawEntity(my_procApplet pa, DESSimWindow win, float delT, boolean drawMe, boolean drawLbls){
-		pa.pushMatrix();pa.pushStyle();
+	public void drawEntity(IRenderInterface pa, DESSimWindow win, float delT, boolean drawMe, boolean drawLbls){
+		pa.pushMatState();
 		pa.translate(loc);
 			boolean debugAnim = sim.getDebug();
-			pa.pushMatrix();pa.pushStyle();
+			pa.pushMatState();
 			pa.setColorValStroke(IRenderInterface.gui_Black, 255);
-			pa.strokeWeight(2.0f);
-			if(debugAnim) {pa.line(new myPointf(), motionTraj);}//motion trajectory vector
-			pa.popStyle();pa.popMatrix();
+			pa.setStrokeWt(2.0f);
+			if(debugAnim) {pa.drawLine(new myPointf(), motionTraj);}//motion trajectory vector
+			pa.popMatState();
 			//individual UAVs are relative to loc
 			if(sim.getDrawBoats()){//broken apart to minimize if checks - only potentially 2 per team per frame instead of thousands
-				if(debugAnim){		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeDbgFrame(pa,delT);}}
+				if(debugAnim){		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeDbgFrame(myDispWindow.AppMgr, pa,delT);}}
 				else {				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMe(pa,delT);}}	  					
 			} else {
-				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeBall(pa,debugAnim);  }
+				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeBall(myDispWindow.AppMgr, pa,debugAnim);  }
 			}
 		if(drawLbls) {	dispEntityLabel(pa, win);		}
-		pa.popStyle();pa.popMatrix();
+		pa.popMatState();
 	}//drawTeam
 	
 	//public void leaveTransitLane() {setEntityFlags(inTransitLane, false);}

@@ -1,5 +1,7 @@
 package pkgCS6730Project1;
 
+import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
+
 /**
  * console version of Discrete Event Simulator with UAV teams performing tasks
  * @author john
@@ -96,7 +98,7 @@ public class UAV_DESSimConsole {
 		//make actual # of loop iterations scaled by frame rate multiplier
 		//set default values
 		
-		UAV_DESSim dummy = null;
+		IRenderInterface dummy = null;
 		mySimulator.uavTeamSize = numUAVPerTeam;
 		mySimExecutive.frameTimeScale = frtMult;
 	

@@ -4,7 +4,7 @@ import java.nio.file.*;
 import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
-import base_UI_Objects.my_procApplet;
+import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Utils_Objects.priorityQueue.myMinQueue;
 import base_Utils_Objects.priorityQueue.base.myPriorityQueue;
 import pkgCS6730Project1.events.EventType;
@@ -13,7 +13,7 @@ import pkgCS6730Project1.events.myEvent;
 //class to manage the functionality of the simulation executive
 public class mySimExecutive {
 	//ref to owning application (if papplet) or null if console
-	public my_procApplet pa;	
+	public IRenderInterface pa;	
 	//simulator 
 	public mySimulator des;	
 	//Priority queue holding future event list
@@ -47,10 +47,10 @@ public class mySimExecutive {
 	private final int minTrlUAVSz = 2, maxTrlUAVSz = 9;
 	
 
-	//pass null for command line version - define empty class called my_procApplet
-	public mySimExecutive(my_procApplet _pa) {
+	//pass null for command line version - define empty class called IRenderInterface
+	public mySimExecutive(IRenderInterface _pa) {
 		if(_pa != null) {pa= _pa;}
-		else {dispOutput("Null my_procApplet PApplet, assuming console only");}
+		else {dispOutput("Null IRenderInterface PApplet, assuming console only");}
 		Instant now = Instant.now();
 		execBuiltTime = now.toEpochMilli();//milliseconds since 1/1/1970 when this exec was built.
 		initExecFlags();

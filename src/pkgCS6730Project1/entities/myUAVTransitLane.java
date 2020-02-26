@@ -3,7 +3,6 @@ package pkgCS6730Project1.entities;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
-import base_UI_Objects.my_procApplet;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import pkgCS6730Project1.mySimulator;
@@ -209,18 +208,18 @@ public class myUAVTransitLane extends myUAVResource{
 	
 	//transitlane-specifics
 	@Override
-	protected void drawEntityPriv(my_procApplet pa, boolean drawMe) {
+	protected void drawEntityPriv(IRenderInterface pa, boolean drawMe) {
 		boolean it = getEntityFlags(taskInUseIDX);
 		if((drawMe)||(it)){
-			pa.pushMatrix();pa.pushStyle();	
+			pa.pushMatState();	
 			if((drawMe) && (!it)) {
 				int clr = (this.laneVel > 1) ? IRenderInterface.gui_TransBlack : IRenderInterface.gui_TransGray;
-				pa.cylinder_NoFill(stLoc,endLoc, rad, clr, clr);
+				pa.drawCylinder_NoFill(stLoc,endLoc, rad, clr, clr);
 			} else if (it) {
 				int clr =  (this.laneVel > 1) ? IRenderInterface.gui_Green : IRenderInterface.gui_Yellow;
-				pa.cylinder_NoFill(stLoc,endLoc, rad, IRenderInterface.gui_Red , clr);
+				pa.drawCylinder_NoFill(stLoc,endLoc, rad, IRenderInterface.gui_Red , clr);
 			}			
-			pa.popStyle();pa.popMatrix();	
+			pa.popMatState();	
 		}
 		pa.translate(loc);
 	}//drawEntityPriv

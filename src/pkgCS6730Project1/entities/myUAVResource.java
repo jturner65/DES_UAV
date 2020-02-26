@@ -2,7 +2,7 @@ package pkgCS6730Project1.entities;
 
 import java.util.concurrent.*;
 
-import base_UI_Objects.my_procApplet;
+import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import pkgCS6730Project1.DESSimWindow;
 import pkgCS6730Project1.mySimulator;
@@ -97,15 +97,15 @@ public abstract class myUAVResource extends myEntity {
 	public abstract myEvent leaveRes(myEvent ev);
 	
 	@Override
-	public void drawEntity(my_procApplet pa, DESSimWindow win, float delT, boolean drawMe, boolean drawLbls) {
-		pa.pushMatrix();pa.pushStyle();
+	public void drawEntity(IRenderInterface pa, DESSimWindow win, float delT, boolean drawMe, boolean drawLbls) {
+		pa.pushMatState();
 		//draw resource-based instance-specific stuff
 		drawEntityPriv(pa, drawMe);
 		
 		if(drawLbls) {dispEntityLabel(pa, win);		}
-		pa.popStyle();pa.popMatrix();		
+		pa.popMatState();		
 	}
-	protected abstract void drawEntityPriv(my_procApplet pa, boolean drawMe);
+	protected abstract void drawEntityPriv(IRenderInterface pa, boolean drawMe);
 	
 	public String toString(){
 		String res = "Resource : "  + super.toString();

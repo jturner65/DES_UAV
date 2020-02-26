@@ -5,9 +5,10 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 
-import base_UI_Objects.my_procApplet;
+import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
+import base_UI_Objects.my_procApplet;
 import pkgCS6730Project1.entities.myUAVTask;
 import pkgCS6730Project1.entities.myUAVTeam;
 import pkgCS6730Project1.entities.myUAVTransitLane;
@@ -122,16 +123,17 @@ public abstract class mySimulator {// extends mySimulator {
 		//setup flag array
 		initSimFlags();
 		//set up render object templates for different UAV Teams
-		if(exec.pa != null) {		
+		if(exec.pa != null) {	
+			my_procApplet pa = (my_procApplet) exec.pa;
 			sphrRndrTmpl = new mySphereRndrObj[NumUniqueTeams];
-			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new mySphereRndrObj(exec.pa, this, i);	}	
+			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new mySphereRndrObj(pa, this, i);	}	
 			cmplxRndrTmpls = new ConcurrentSkipListMap<String, myRenderObj[]> (); 
 			UAVBoatSails = new PImage[NumUniqueTeams];
 			boatRndrTmpl = new myBoatRndrObj[NumUniqueTeams];
 			for(int i=0; i<NumUniqueTeams; ++i){	
-				UAVBoatSails[i] = exec.pa.loadImage(UAVTeamNames[i]+".jpg");
+				UAVBoatSails[i] = pa.loadImage(UAVTeamNames[i]+".jpg");
 				//build boat render object for each individual flock type
-				boatRndrTmpl[i] = new myBoatRndrObj(exec.pa, this, i);		
+				boatRndrTmpl[i] = new myBoatRndrObj(pa, this, i);		
 			}		
 			cmplxRndrTmpls.put(UAVTypeNames[0], boatRndrTmpl);
 			rndrTmpl = cmplxRndrTmpls.get(UAVTypeNames[0]);//start by rendering boats
@@ -289,7 +291,7 @@ public abstract class mySimulator {// extends mySimulator {
 		if((nextTeamNum * uavTeamSize) > this.maxNumUAVs){//too many UAVs in play
 			return null;
 		}		
-		//myUAVTeam(my_procApplet _p, mySimulator _sim, String _name, int _uavTeamSize, myPointf _initLoc)
+		//myUAVTeam(IRenderInterface _p, mySimulator _sim, String _name, int _uavTeamSize, myPointf _initLoc)
 		String name = "UAVTeam_" + nextTeamNum + "_Sz_"+uavTeamSize;
 		dispOutput("Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
 		myUAVTeam team = new myUAVTeam(this, name, uavTeamSize, new myPointf(tasks[0].loc));//always start at initial task's location
@@ -313,7 +315,7 @@ public abstract class mySimulator {// extends mySimulator {
 	}//visSimMe
 		
 	//animTimeMod is in seconds, time that has passed since last draw call
-	public void drawMe(my_procApplet pa, float animTimeMod, DESSimWindow win) {
+	public void drawMe(IRenderInterface pa, float animTimeMod, DESSimWindow win) {
 		//draw all transit lanes
 		//if(getSimFlags(drawTLanesIDX)) {
 		for(myUAVTransitLane tl : transitLanes) {tl.drawEntity(pa, win, animTimeMod, getSimFlags(drawTLanesIDX), getSimFlags(dispTLnsLblsIDX));}
@@ -340,26 +342,26 @@ public abstract class mySimulator {// extends mySimulator {
 	}
 	//draw result information on right sidebar
 	//UIRectBox is dims of enclosing box 
-	public void drawResultBar(my_procApplet pa, float yOff) {
+	public void drawResultBar(IRenderInterface pa, float yOff) {
 		yOff-=4;
 		float sbrMult = 1.2f, lbrMult = 1.5f;//offsets multiplier for barriers between contextual ui elements
-		pa.pushMatrix();pa.pushStyle();
+		pa.pushMatState();
 			int curTime = (Math.round(exec.getNowTime()/1000.0f));
 			float yVal = 0;
-			pa.setFill(new int[] {255,255,0,255}, 255);
-			pa.text("SIMULATION OUTPUT", 0, yVal);yVal += sbrMult * yOff;
-			pa.setFill(new int[] {255,255,255,255}, 255);
-			pa.text("Sim Time : " + String.format("%08d", curTime) + " secs ", 0, yVal);//yVal += yOff;
-			pa.text("Sim Clock Time : " + String.format("%04d", curTime/3600) + " : " + String.format("%02d", (curTime/60)%60 )+ " : " + String.format("%02d", (curTime%60)), 150, yVal);
+			pa.setFill(255,255,0,255);	
+			pa.showText("SIMULATION OUTPUT", 0, yVal);yVal += sbrMult * yOff;
+			pa.setFill(255,255,255,255);
+			pa.showText("Sim Time : " + String.format("%08d", curTime) + " secs ", 0, yVal);//yVal += yOff;
+			pa.showText("Sim Clock Time : " + String.format("%04d", curTime/3600) + " : " + String.format("%02d", (curTime/60)%60 )+ " : " + String.format("%02d", (curTime%60)), 150, yVal);
 //			yVal += yOff;
-//			pa.text("Wall Clock Time : " + String.format("%04d", curTime/3600) + " : " + String.format("%02d", (curTime/60)%60 )+ " : " + String.format("%02d", (curTime%60)), 0, yVal);
+//			pa.showText("Wall Clock Time : " + String.format("%04d", curTime/3600) + " : " + String.format("%02d", (curTime/60)%60 )+ " : " + String.format("%02d", (curTime%60)), 0, yVal);
 			yVal += lbrMult *yOff;
 			//TEAM RES - summary
 			int tmSize = teams.size();
-			pa.setFill(new int[] {255,155,20,255}, 255);
-			pa.text("Teams Summary : (for "+ String.format("%2d", tmSize) + " teams = "+String.format("%3d", (tmSize * uavTeamSize)) + " UAVs out of " + maxNumUAVs + " ttl)" , 0, yVal);yVal += yOff;
-			pa.setFill(new int[] {255,255,255,255}, 255);
-			pa.text("Team size : "+uavTeamSize , 0, yVal);yVal += yOff;
+			pa.setFill(255,155,20,255);
+			pa.showText("Teams Summary : (for "+ String.format("%2d", tmSize) + " teams = "+String.format("%3d", (tmSize * uavTeamSize)) + " UAVs out of " + maxNumUAVs + " ttl)" , 0, yVal);yVal += yOff;
+			pa.setFill(255,255,255,255);
+			pa.showText("Team size : "+uavTeamSize , 0, yVal);yVal += yOff;
 			//
 			long ttlTask=0, ttlTravel=0, ttlQueue=0, ttlRun=0,ttlProcsDone=0;
 			for(int i=0;i<tmSize;++i) {
@@ -370,51 +372,51 @@ public abstract class mySimulator {// extends mySimulator {
 				ttlRun += tm.getTTLRunTime()+tm.getCurTimeInProc();
 				ttlProcsDone += tm.getTTLNumTeamsProc();
 			}//	
-			pa.text("Procs Done : ", 0, yVal);pa.text(""+String.format("%07d", ttlProcsDone), 90, yVal);yVal += yOff;
-			pa.text("TTL Work time : ", 0, yVal);pa.text(""+String.format("%07d", ttlTask/1000) + " sec", 90, yVal);yVal += yOff;
-			pa.text("TTL Travel time : ", 0, yVal);pa.text(""+String.format("%07d",ttlTravel/1000) + " sec",90, yVal);yVal += yOff;
-			pa.text("TTL Queue time : ", 0, yVal);pa.text(""+String.format("%07d", ttlQueue/1000) + " sec", 90, yVal);yVal += yOff;
-			pa.text("TTL Uptime : ", 0, yVal);pa.text(""+String.format("%07d", ttlRun/1000) + " sec", 90, yVal);yVal += lbrMult* yOff;
+			pa.showText("Procs Done : ", 0, yVal);pa.showText(""+String.format("%07d", ttlProcsDone), 90, yVal);yVal += yOff;
+			pa.showText("TTL Work time : ", 0, yVal);pa.showText(""+String.format("%07d", ttlTask/1000) + " sec", 90, yVal);yVal += yOff;
+			pa.showText("TTL Travel time : ", 0, yVal);pa.showText(""+String.format("%07d",ttlTravel/1000) + " sec",90, yVal);yVal += yOff;
+			pa.showText("TTL Queue time : ", 0, yVal);pa.showText(""+String.format("%07d", ttlQueue/1000) + " sec", 90, yVal);yVal += yOff;
+			pa.showText("TTL Uptime : ", 0, yVal);pa.showText(""+String.format("%07d", ttlRun/1000) + " sec", 90, yVal);yVal += lbrMult* yOff;
 			//task res
-			pa.setFill(new int[] {255,88,255,255}, 255);
-			pa.text("Task Totals : (" + tasks.length+ " tasks) (red is max time so far)", 0, yVal);yVal +=  sbrMult *yOff;
-			pa.setFill(new int[] {255,255,255,255}, 255);
+			pa.setFill(255,88,255,255);
+			pa.showText("Task Totals : (" + tasks.length+ " tasks) (red is max time so far)", 0, yVal);yVal +=  sbrMult *yOff;
+			pa.setFill(255,255,255,255);
 
 			int hLiteIDX = findMaxIDX(tasks,tasks.length-2);
 			for(int i=0;i<tasks.length;++i) {		
 				taskDesc td = tasks[i].td;
-				pa.setFill(new int[] {0,255,255,255}, 255);
-				pa.text(""+(i+1) +" : "+tasks[i].name,0, yVal);
-				pa.setFill(new int[] {255,255,255,255}, 255);
-				pa.text("Opt Size : " + td.optUAVTeamSize + " | Opt TTC : " 
+				pa.setFill(0,255,255,255);
+				pa.showText(""+(i+1) +" : "+tasks[i].name,0, yVal);
+				pa.setFill(255,255,255,255);
+				pa.showText("Opt Size : " + td.optUAVTeamSize + " | Opt TTC : " 
 							+ String.format("%4d",((int)(td.timeForOptToCmp/1000.0f)))+" s | StdDev : "+ String.format("%3.2f",td.stdDev),65, yVal);
 				yVal += yOff; 
-				pa.text("#Teams Proc: " + String.format("%3d", tasks[i].getTTLNumTeamsProc()), 0, yVal);
-				if(hLiteIDX==i) {pa.setFill(new int[] {255,44,80,255}, 255);}
-				pa.text("TTL Task Time: " + String.format("%07d", tasks[i].getTTLRunTime()/1000) + " s",102,yVal);
-				pa.setFill(new int[] {255,255,255,255}, 255);
+				pa.showText("#Teams Proc: " + String.format("%3d", tasks[i].getTTLNumTeamsProc()), 0, yVal);
+				if(hLiteIDX==i) {pa.setFill(255,44,80,255);}
+				pa.showText("TTL Task Time: " + String.format("%07d", tasks[i].getTTLRunTime()/1000) + " s",102,yVal);
+				pa.setFill(255,255,255,255);
 				yVal += sbrMult *yOff;
 			}//for every task
 			yVal += (lbrMult - sbrMult) *yOff;//offset by same amount as other groupings
 			//transit lane res	
 			
 			hLiteIDX = findMaxIDX(transitLanes, transitLanes.length);		
-			pa.setFill(new int[] {255,150,99,255}, 255);
-			pa.text("Lane Totals : (" + transitLanes.length+ " Lanes) (red is max Q time (bottleneck))", 0, yVal);yVal += sbrMult *yOff;
-			pa.setFill(new int[] {255,255,255,255}, 255);
+			pa.setFill(255,150,99,255);
+			pa.showText("Lane Totals : (" + transitLanes.length+ " Lanes) (red is max Q time (bottleneck))", 0, yVal);yVal += sbrMult *yOff;
+			pa.setFill(255,255,255,255);
 			for(int i=0;i<this.transitLanes.length;++i) {
-				pa.setFill(new int[] {0,255,255,255}, 255);
-				pa.text(""+(i+1) +" : "+transitLanes[i].name,0, yVal);yVal += yOff; 
-				pa.setFill(new int[] {255,255,255,255}, 255);
-				pa.text("#Teams Proc: " + String.format("%3d", transitLanes[i].getTTLNumTeamsProc()), 0, yVal);
-				if(hLiteIDX==i) {pa.setFill(new int[] {255,44,80,255}, 255);}
-				pa.text("TTL Lane Time: " + String.format("%07d", transitLanes[i].getTTLRunTime()/1000) + " s",152,yVal);yVal += yOff;
-				pa.setFill(new int[] {255,255,255,255}, 255);			
-				pa.text("Travel Time : "+String.format("%07d", transitLanes[i].getTTLTravelTime()/1000) + " s",0, yVal);//yVal += yOff; 
-				pa.text("Q Time : " + String.format("%07d", transitLanes[i].getTTLQueueTime()/1000) + " s",152, yVal);
+				pa.setFill(0,255,255,255);
+				pa.showText(""+(i+1) +" : "+transitLanes[i].name,0, yVal);yVal += yOff; 
+				pa.setFill(255,255,255,255);	
+				pa.showText("#Teams Proc: " + String.format("%3d", transitLanes[i].getTTLNumTeamsProc()), 0, yVal);
+				if(hLiteIDX==i) {pa.setFill(255,44,80,255);	}
+				pa.showText("TTL Lane Time: " + String.format("%07d", transitLanes[i].getTTLRunTime()/1000) + " s",152,yVal);yVal += yOff;
+				pa.setFill(255,255,255,255);			
+				pa.showText("Travel Time : "+String.format("%07d", transitLanes[i].getTTLTravelTime()/1000) + " s",0, yVal);//yVal += yOff; 
+				pa.showText("Q Time : " + String.format("%07d", transitLanes[i].getTTLQueueTime()/1000) + " s",152, yVal);
 				yVal += sbrMult *yOff;
 			}//for every tl		
-		pa.popStyle();pa.popMatrix();	
+		pa.popMatState();	
 	}//drawResultBar	
 	
 	//print output - allow for console-only execution (somehow...)

@@ -2,11 +2,12 @@ package pkgCS6730Project1.entities;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import base_UI_Objects.my_procApplet;
+import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
+import base_UI_Objects.GUI_AppManager;
 import pkgCS6730Project1.mySimulator;
 
 //class referencing a single uav object
@@ -63,7 +64,7 @@ public class myUAVObj {
 	}//constructor
 	
 	//align the UAV along the current orientation matrix
-	private void alignUAV(my_procApplet pa, float delT){
+	private void alignUAV(IRenderInterface pa, float delT){
 		rotVec.set(O_axisAngle[1],O_axisAngle[2],O_axisAngle[3]);
 		float rotAngle = (float) (oldRotAngle + ((O_axisAngle[0]-oldRotAngle) * delT));
 		pa.rotate(rotAngle,rotVec.x, rotVec.y, rotVec.z);
@@ -145,57 +146,63 @@ public class myUAVObj {
 		velocity.set(_vel);			//velocity vector only used to determine orientation
 		setOrientation(delT);
 	}//moveUAV
+	
+	private void drawTmpl(IRenderInterface p) {
+		p.pushMatState();
+		f.tmpl.drawMe(animAraIDX, ID);
+		p.popMatState();
+	}
 
 	
 	//draw this body on mesh
-	public void drawMe(my_procApplet p, float delT){
-		p.pushMatrix();p.pushStyle();
+	public void drawMe(IRenderInterface p, float delT){
+		p.pushMatState();
 			p.translate(coords.x,coords.y,coords.z);		//move to location
 			alignUAV(p, delT);
 			p.rotate(MyMathUtils.Pi_f/2.0f,1,0,0);
 			p.rotate(MyMathUtils.Pi_f/2.0f,0,1,0);
-			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
-			p.pushStyle();
-			f.tmpl.drawMe(animAraIDX, ID);
-			p.popStyle();			
-		p.popStyle();p.popMatrix();
+			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size
+			drawTmpl(p);
+//			p.pushStyle();
+//			f.tmpl.drawMe(animAraIDX, ID);
+//			p.popStyle();			
+		p.popMatState();
 		animIncr();
 	}//drawme	
 	
-	public void drawMeDbgFrame(my_procApplet p, float delT){
-		p.pushMatrix();p.pushStyle();
+	public void drawMeDbgFrame(GUI_AppManager AppMgr, IRenderInterface p, float delT){
+		p.pushMatState();
 			p.translate(coords.x,coords.y,coords.z);		//move to location
-			drawMyVec(p, rotVec, my_procApplet.gui_Black,4.0f);p.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
+			drawMyVec(p, rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
 			alignUAV(p, delT);
 			p.rotate(MyMathUtils.Pi_f/2.0f,1,0,0);
 			p.rotate(MyMathUtils.Pi_f/2.0f,0,1,0);
 			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
-			p.pushStyle();
-			f.tmpl.drawMe(animAraIDX, ID);	
-			p.popStyle();			
-		p.popStyle();p.popMatrix();
+			drawTmpl(p);
+//			p.pushStyle();
+//			f.tmpl.drawMe(animAraIDX, ID);
+//			p.popStyle();			
+		p.popMatState();
 		animIncr();		
 	}
 	
 	//draw this UAV as a ball - replace with sphere render obj 
-	public void drawMeBall(my_procApplet p, boolean debugAnim){
-		p.pushMatrix();p.pushStyle();
+	public void drawMeBall(GUI_AppManager AppMgr, IRenderInterface p, boolean debugAnim){
+		p.pushMatState();
 			p.translate(coords.x,coords.y,coords.z);		//move to location
-			if(debugAnim){drawMyVec(p,rotVec, my_procApplet.gui_Black,4.0f);p.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);}
+			if(debugAnim){drawMyVec(p,rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);}
 			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
 			f.sphTmpl.drawMe(animAraIDX, ID);
-		p.popStyle();p.popMatrix();
+		p.popMatState();
 		//animIncr();
 	}//drawme 
 	
-	public void drawMyVec(my_procApplet p, myVectorf v, int clr, float sw){
-		p.pushMatrix();
-			p.pushStyle();
+	public void drawMyVec(IRenderInterface p, myVectorf v, int clr, float sw){
+		p.pushMatState();
 			p.setColorValStroke(clr, 255);
-			p.strokeWeight(sw);
-			p.line(new myPointf(0,0,0),v);
-			p.popStyle();
-		p.popMatrix();		
+			p.setStrokeWt(sw);
+			p.drawLine(0,0,0,v.x, v.y, v.z);
+		p.popMatState();
 	}
 	
 	private void animIncr(){

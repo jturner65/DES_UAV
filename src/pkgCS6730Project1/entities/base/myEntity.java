@@ -1,8 +1,10 @@
 package pkgCS6730Project1.entities.base;
 
-
-import base_UI_Objects.my_procApplet;
+import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
+//
+//import base_UI_Objects.my_procApplet;
 import base_Math_Objects.vectorObjs.floats.myPointf;
+import base_UI_Objects.GUI_AppManager;
 import pkgCS6730Project1.DESSimWindow;
 import pkgCS6730Project1.mySimulator;
 
@@ -11,8 +13,12 @@ public abstract class myEntity {
 	public int ID;//provide unique count-based ID to all entities
 	public static int IDcount = 0;
 	
+
 	//public static UAV_DESSim pa;	
 	public mySimulator sim;
+	public static GUI_AppManager AppMgr;
+
+	
 	public String name;
 	public myPointf loc;			//initial location of this entity (may change if it moves)
 	
@@ -59,19 +65,19 @@ public abstract class myEntity {
 	protected abstract String[] showStatus();
 	
 	//display this entity's label information
-	protected void dispEntityLabel(my_procApplet pa, DESSimWindow win) {
+	protected void dispEntityLabel(IRenderInterface pa, DESSimWindow win) {
 		win.unSetCamOrient();
-		pa.pushMatrix();pa.pushStyle();
+		pa.pushMatState();
 			pa.translate(labelVals[0],labelVals[1],labelVals[2]);
 			pa.setFill(lblColors,255);
 			pa.scale(.5f,.5f,.5f);
 			String[] currStatus = this.showStatus();
 			for(int i=0;i<currStatus.length;++i){
-				pa.text(currStatus[i], 0,(i+1)*10.0f, 0); 
+				pa.showText(currStatus[i], 0,(i+1)*10.0f, 0); 
 
 				//pa.showOffsetText(new float[] {0,(i+1)*10.0f, 0},pa.gui_Black, currStatus[i]);
 			}
-		pa.popStyle();pa.popMatrix();
+		pa.popMatState();
 		win.setCamOrient();
 
 	}//dispEntityLabel
@@ -84,7 +90,7 @@ public abstract class myEntity {
 	public long getTTLNumTeamsProc() {return timeVals[ttlNumTeamsProc];}
 	
 	//draw this entity
-	public abstract void drawEntity(my_procApplet pa, DESSimWindow win, float delT, boolean drawMe, boolean drawLbls);
+	public abstract void drawEntity(IRenderInterface pa, DESSimWindow win, float delT, boolean drawMe, boolean drawLbls);
 	
 	public String toString() {
 		String res = "Entity ID : " + ID + " | Name : " + name + "\n";

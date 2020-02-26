@@ -1,5 +1,6 @@
 package pkgCS6730Project1;
 
+import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.my_procApplet;
 import base_UI_Objects.windowUI.base.myDispWindow;
 import base_UI_Objects.windowUI.sidebar.mySideBarMenu;
@@ -9,7 +10,7 @@ import base_UI_Objects.windowUI.sidebar.mySideBarMenu;
  * @author john turner
  */
 
-public class UAV_DESSim extends my_procApplet {
+public class UAV_DESSim extends GUI_AppManager {
 
 	public String prjNmLong = "CS6730 Project 1 : UAV Des Simulation", prjNmShrt = "Prj1_UAV_DESSim";
 	public String authorString = "John Turner";
@@ -31,8 +32,8 @@ public class UAV_DESSim extends my_procApplet {
 ///////////////	
 	//////////////////////////////////////////////// code
 	public static void main(String[] passedArgs) {
-	    String[] appletArgs = new String[] { "pkgCS6730Project1.UAV_DESSim" };
-	    my_procApplet._invokedMain(appletArgs, passedArgs);
+	    UAV_DESSim me = new UAV_DESSim();
+	    my_procApplet._invokedMain(me, passedArgs);	
 	}
 
 	/**
@@ -49,10 +50,10 @@ public class UAV_DESSim extends my_procApplet {
 	@Override
 	protected void setup_indiv() {		setBkgrnd(); setDesired3DGridDims(1500);}
 	@Override
-	public void setBkgrnd(){background(bground[0],bground[1],bground[2],bground[3]);}//setBkgrnd	
+	public void setBkgrnd(){((my_procApplet)pa).background(bground[0],bground[1],bground[2],bground[3]);}//setBkgrnd	
 
 	@Override
-	protected void initMainFlags_Priv() {
+	protected void initMainFlags_Indiv() {
 		setMainFlagToShow_debugMode(true);
 		setMainFlagToShow_runSim(true);
 		setMainFlagToShow_singleStep(true);
@@ -60,9 +61,8 @@ public class UAV_DESSim extends my_procApplet {
 	}
 
 	@Override
-	protected void initVisOnce_Priv() {
+	protected void initVisOnce_Indiv() {
 		showInfo = true;
-		drawnTrajEditWidth = 10;
 		//includes 1 for menu window (never < 1) - always have same # of visFlags as myDispWindows
 		int numWins = numVisFlags;		
 		//titles and descs, need to be set before sidebar menu is defined
@@ -75,7 +75,7 @@ public class UAV_DESSim extends my_procApplet {
 		int wIdx = dispMenuIDX,fIdx=showUIMenu;
 		dispWinFrames[wIdx] = buildSideBarMenu(wIdx, fIdx, new String[]{"Sim Map","Functions 2","Functions 3","Functions 4"}, new int[] {3,4,4,4}, 5, false, false);// new DES_SimSideBarMenu(this, winTitles[wIdx], fIdx, winFillClrs[wIdx], winStrkClrs[wIdx], winRectDimOpen[wIdx], winRectDimClose[wIdx], winDescr[wIdx]);	
 		//instanced window dimensions when open and closed - only showing 1 open at a time
-		float[] _dimOpen  =  new float[]{menuWidth, 0, width-menuWidth, height}, _dimClosed  =  new float[]{menuWidth, 0, hideWinWidth, height};	
+		float[] _dimOpen  =  new float[]{menuWidth, 0, pa.getWidth()-menuWidth, pa.getHeight()}, _dimClosed  =  new float[]{menuWidth, 0, hideWinWidth, pa.getHeight()};	
 		//setInitDispWinVals : use this to define the values of a display window
 		//int _winIDX, 
 		//float[] _dimOpen, float[] _dimClosed  : dimensions opened or closed
@@ -89,13 +89,13 @@ public class UAV_DESSim extends my_procApplet {
 
 		wIdx = dispDES_SimWin; fIdx= showDESwin;
 		setInitDispWinVals(wIdx, _dimOpen, _dimClosed,new boolean[]{false,true,true,true}, new int[]{210,220,250,255},new int[]{255,255,255,255},new int[]{180,180,180,255},new int[]{100,100,100,255}); 
-		dispWinFrames[wIdx] = new DESSimWindow(this, winTitles[wIdx], fIdx, winFillClrs[wIdx], winStrkClrs[wIdx], winRectDimOpen[wIdx], winRectDimClose[wIdx], winDescr[wIdx]);		
+		dispWinFrames[wIdx] = new DESSimWindow(pa, this, winTitles[wIdx], fIdx, winFillClrs[wIdx], winStrkClrs[wIdx], winRectDimOpen[wIdx], winRectDimClose[wIdx], winDescr[wIdx]);		
 
 		
 	}
 
 	@Override
-	protected void initOnce_Priv() {
+	protected void initOnce_Indiv() {
 		//which objects to initially show
 		setVisFlag(showUIMenu, true);					//show input UI menu	
 		//setVisFlag(showSpereAnimRes, true);
@@ -139,7 +139,7 @@ public class UAV_DESSim extends my_procApplet {
 		case 'a' :
 		case 'A' : {toggleSaveAnim();break;}						//start/stop saving every frame for making into animation
 		case 's' :
-		case 'S' : {save(getScreenShotSaveName(prjNmShrt));break;}//save picture of current image			
+		case 'S' : {break;}//save(getScreenShotSaveName(prjNmShrt));break;}//save picture of current image			
 		default : {	}
 	}//switch	
 	}
@@ -191,13 +191,10 @@ public class UAV_DESSim extends my_procApplet {
 	
 	
 	@Override
-	protected int[] getClr_Custom(int colorVal, int alpha) {	return new int[] {255,255,255,alpha};}
+	public int[] getClr_Custom(int colorVal, int alpha) {	return new int[] {255,255,255,alpha};}
 
 	@Override
-	protected void setSmoothing() {
-		noSmooth();
-		
-	}
+	protected void setSmoothing() {pa.setSmoothing(0);		}
 
 	
 }//papplet class

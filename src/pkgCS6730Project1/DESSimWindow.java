@@ -3,10 +3,11 @@ package pkgCS6730Project1;
 import java.io.File;
 import java.util.*;
 
-import base_UI_Objects.my_procApplet;
-import base_UI_Objects.drawnObjs.myDrawnSmplTraj;
+import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
+import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.base.base_UpdateFromUIData;
 import base_UI_Objects.windowUI.base.myDispWindow;
+import base_UI_Objects.windowUI.drawnObjs.myDrawnSmplTraj;
 import base_Utils_Objects.io.MsgCodes;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.doubles.myVector;
@@ -67,8 +68,8 @@ public class DESSimWindow extends myDispWindow {
 		{ "---", "---", "---", "---", "---" } 
 	};
 		
-	public DESSimWindow(my_procApplet _p, String _n, int _flagIdx, int[] fc, int[] sc, float[] rd, float[] rdClosed, String _winTxt) {
-		super(_p, _n, _flagIdx, fc, sc, rd, rdClosed, _winTxt);
+	public DESSimWindow(IRenderInterface _p, GUI_AppManager _AppMgr, String _n, int _flagIdx, int[] fc, int[] sc, float[] rd, float[] rdClosed, String _winTxt) {
+		super(_p, _AppMgr, _n, _flagIdx, fc, sc, rd, rdClosed, _winTxt);
 		super.initThisWin(false);
 	}//DancingBallWin
 	
@@ -158,7 +159,7 @@ public class DESSimWindow extends myDispWindow {
 		simExec = new mySimExecutive(pa);
 		
 		setSimpleSim();
-		pa.setAllMenuBtnNames(menuBtnNames);
+		AppMgr.setAllMenuBtnNames(menuBtnNames);
 		custMenuOffset = uiClkCoords[3];	//495	
 	}//initMe	
 		
@@ -205,7 +206,7 @@ public class DESSimWindow extends myDispWindow {
 				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
 				if(val) {
 					simExec.initializeTrials((int) uiVals[gIDX_ExpLength], (int) uiVals[gIDX_NumExpTrials], true);
-					pa.setSimIsRunning(true);
+					AppMgr.setSimIsRunning(true);
 					addPrivBtnToClear(conductExpIDX);
 				} 
 				break;}
@@ -213,7 +214,7 @@ public class DESSimWindow extends myDispWindow {
 				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
 				if(val) {
 					simExec.initializeTrials((int) uiVals[gIDX_ExpLength], (int) uiVals[gIDX_NumExpTrials], false);
-					pa.setSimIsRunning(true);
+					AppMgr.setSimIsRunning(true);
 					addPrivBtnToClear(condUAVSweepExpIDX);
 				} 
 				break;}
@@ -267,7 +268,7 @@ public class DESSimWindow extends myDispWindow {
 	@Override
 	protected void setCameraIndiv(float[] camVals){		
 		//, float rx, float ry, float dz are now member variables of every window
-		pa.camera(camVals[0],camVals[1],camVals[2],camVals[3],camVals[4],camVals[5],camVals[6],camVals[7],camVals[8]);      
+		pa.setCameraWinVals(camVals);//camera(camVals[0],camVals[1],camVals[2],camVals[3],camVals[4],camVals[5],camVals[6],camVals[7],camVals[8]);      
 		// puts origin of all drawn objects at screen center and moves forward/away by dz
 		pa.translate(camVals[0],camVals[1],(float)dz); 
 	    setCamOrient();	
@@ -284,10 +285,10 @@ public class DESSimWindow extends myDispWindow {
 	
 	@Override
 	protected final void drawRightSideInfoBarPriv(float modAmtMillis) {
-		pa.pushMatrix();pa.pushStyle();
+		pa.pushMatState();
 		//display current simulation variables
 		simExec.des.drawResultBar(pa,  yOff);
-		pa.popStyle();pa.popMatrix();		
+		pa.popMatState();		
 	}
 
 	@Override
@@ -304,11 +305,11 @@ public class DESSimWindow extends myDispWindow {
 	//draw custom 2d constructs below interactive component of menu
 	@Override
 	public void drawCustMenuObjs(){
-		pa.pushMatrix();				pa.pushStyle();		
+		pa.pushMatState();
 		//all sub menu drawing within push mat call
 		pa.translate(0,custMenuOffset+yOff);		
 		//draw any custom menu stuff here
-		pa.popStyle();					pa.popMatrix();		
+		pa.popMatState();	
 	}//drawCustMenuObjs
 
 	/////////////////////////////
@@ -340,12 +341,12 @@ public class DESSimWindow extends myDispWindow {
 				switch (btn) {
 					case 0: {						
 						setSimpleSim();
-						pa.setSimIsRunning(false);
+						AppMgr.setSimIsRunning(false);
 						break;
 					}
 					case 1: {
 						setComplexSim();
-						pa.setSimIsRunning(false);
+						AppMgr.setSimIsRunning(false);
 						break;
 					}
 					case 2: {
