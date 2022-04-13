@@ -3,7 +3,7 @@ A discrete event sim of drones moving through a system.  This was a project for 
 
 Basically the drone teams move from task to task, completing them in a certain amount of time before they move on.  The tasks themselves come in two types, single-service resources (where only a single team can perform the task at a time) and multi-service resources (where any number of teams can perform the task.)
 
-The linkages between each task is are called "resource-queues", and represent the the distance between each task along with a FIFO queue wating to enter occupied tasks.  
+The linkages between each task are called "resource-queues" and represent the the distance between each task along with a FIFO queue for the UAVs wait to enter occupied tasks.  
 
 All state changes in the system are driven by events, which are in turned managed by a Future Event List, which is a priority queue.  As part of the assignment' requirements, I implemented the a minheap-based and maxheap-based PQ.  Testing methods to guarantee the integrity and capabilities of the queue are built in and accessible via UI interations, as are tests of the simulation itself.  
 
