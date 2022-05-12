@@ -140,8 +140,7 @@ public class DESSimWindow extends myDispWindow {
 		setPrivFlags(dispUAVLblsIDX, showVis);	
 		resetDesFlags();
 		//turn off simulation if running
-		//pa.setSimIsRunning(false);
-		
+		//pa.setSimIsRunning(false);	
 		
 	}//initSimpleSim	
 	
@@ -333,7 +332,7 @@ public class DESSimWindow extends myDispWindow {
 	protected final void setCustMenuBtnNames() {	}
 	@Override
 	protected final void launchMenuBtnHndlr(int funcRow, int btn) {
-		msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Begin requested action : Click Functions "+(funcRow+1)+" in " + name + " : btn : " + btn, MsgCodes.info4);
+		msgObj.dispMessage(className, "launchMenuBtnHndlr", "Begin requested action : Click Functions "+(funcRow+1)+" in " + name + " : btn : " + btn, MsgCodes.info4);
 		switch (funcRow) {
 			case 0: {// row 1 of menu side bar buttons
 				// {"Gen Training Data", "Save Training data","Load Training Data"}, //row 1
@@ -353,7 +352,7 @@ public class DESSimWindow extends myDispWindow {
 						break;
 					}
 					default: {
-						msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Unknown Functions 1 btn : " + btn, MsgCodes.warning2);
+						msgObj.dispMessage(className, "launchMenuBtnHndlr", "Unknown Functions 1 btn : " + btn, MsgCodes.warning2);
 						break;
 					}
 				}
@@ -379,7 +378,7 @@ public class DESSimWindow extends myDispWindow {
 						break;
 					}
 					default: {
-						msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Unknown Functions 2 btn : " + btn, MsgCodes.warning2);
+						msgObj.dispMessage(className, "launchMenuBtnHndlr", "Unknown Functions 2 btn : " + btn, MsgCodes.warning2);
 						resetButtonState();
 						break;
 					}
@@ -405,7 +404,7 @@ public class DESSimWindow extends myDispWindow {
 						break;
 					}
 					default: {
-						msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Unknown Functions 3 btn : " + btn,
+						msgObj.dispMessage(className, "launchMenuBtnHndlr", "Unknown Functions 3 btn : " + btn,
 								MsgCodes.warning2);
 						resetButtonState();
 						break;
@@ -423,7 +422,7 @@ public class DESSimWindow extends myDispWindow {
 						break;
 					}
 					default: {
-						msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "Unknown Functions 4 btn : " + btn, MsgCodes.warning2);
+						msgObj.dispMessage(className, "launchMenuBtnHndlr", "Unknown Functions 4 btn : " + btn, MsgCodes.warning2);
 						resetButtonState();
 						break;
 					}
@@ -431,40 +430,44 @@ public class DESSimWindow extends myDispWindow {
 				break;
 			} // row 3 of menu side bar buttons
 		}
-		msgObj.dispMessage("DESSimWindow", "launchMenuBtnHndlr", "End requested action (multithreaded actions may still be working) : Click Functions "+(funcRow+1)+" in " + name + " : btn : " + btn, MsgCodes.info4);
+		msgObj.dispMessage(className, "launchMenuBtnHndlr", "End requested action (multithreaded actions may still be working) : Click Functions "+(funcRow+1)+" in " + name + " : btn : " + btn, MsgCodes.info4);
 	}
 	@Override
-	public final void handleSideMenuDebugSel(int btn, int val) {
-		msgObj.dispMessage("DESSimWindow", "handleSideMenuDebugSel","Click Debug functionality in " + name + " : btn : " + btn, MsgCodes.info4);
+	public final void handleSideMenuDebugSelEnable(int btn) {
+		msgObj.dispMessage(className, "handleSideMenuDebugSelEnable","Click Debug functionality on in " + name + " : btn : " + btn, MsgCodes.info4);
 		switch (btn) {
-			case 0: {
-				resetButtonState();
-				break;
-			}
-			case 1: {
-				resetButtonState();
-				break;
-			}
-			case 2: {
-				resetButtonState();
-				break;
-			}
-			case 3: {// show current mapdat status
-				resetButtonState();
-				break;
-			}
-			case 4: {
-				resetButtonState();
-				break;
-			}
+			case 0: {				break;			}
+			case 1: {				break;			}
+			case 2: {				break;			}
+			case 3: {				break;			}
+			case 4: {				break;			}
+			case 5: {				break;			}
 			default: {
-				msgObj.dispMessage("DESSimWindow", "handleSideMenuDebugSel", "Unknown Debug btn : " + btn,MsgCodes.warning2);
-				resetButtonState();
+				msgObj.dispMessage(className, "handleSideMenuDebugSelEnable", "Unknown Debug btn : " + btn,MsgCodes.warning2);
 				break;
 			}
 		}
-		msgObj.dispMessage("DESSimWindow", "handleSideMenuDebugSel", "End Debug functionality selection.",MsgCodes.info4);
+		msgObj.dispMessage(className, "handleSideMenuDebugSelEnable", "End Debug functionality on selection.",MsgCodes.info4);
 	}
+	
+	@Override
+	public final void handleSideMenuDebugSelDisable(int btn) {
+		msgObj.dispMessage(className, "handleSideMenuDebugSelDisable","Click Debug functionality off in " + name + " : btn : " + btn, MsgCodes.info4);
+		switch (btn) {
+			case 0: {				break;			}
+			case 1: {				break;			}
+			case 2: {				break;			}
+			case 3: {				break;			}
+			case 4: {				break;			}
+			case 5: {				break;			}
+		default: {
+			msgObj.dispMessage(className, "handleSideMenuDebugSelDisable", "Unknown Debug btn : " + btn,MsgCodes.warning2);
+			break;
+			}
+		}
+		msgObj.dispMessage(className, "handleSideMenuDebugSelDisable", "End Debug functionality off selection.",MsgCodes.info4);
+	}
+
 	
 	@Override
 	protected boolean hndlMouseMoveIndiv(int mouseX, int mouseY, myPoint mseClckInWorld){

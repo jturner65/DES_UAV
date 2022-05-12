@@ -66,8 +66,8 @@ public class UAV_DESSim extends GUI_AppManager {
 		//includes 1 for menu window (never < 1) - always have same # of visFlags as myDispWindows
 		int numWins = numVisFlags;		
 		//titles and descs, need to be set before sidebar menu is defined
-		String[] _winTitles = new String[]{"","2D COTS Morph","3D COTS Morph"},//,"SOM Map UI"},
-				_winDescr = new String[] {"","Display 2 COTS patches and the morph between them","Display 2 COTS patches in 3D and the morph between them"};
+		String[] _winTitles = new String[]{"","UAV DES Sim"},//,"SOM Map UI"},
+				_winDescr = new String[] {"","Display UAV Discrete Event Simulator"};
 		initWins(numWins,_winTitles, _winDescr);
 		//call for menu window
 		buildInitMenuWin(showUIMenu);
@@ -84,21 +84,19 @@ public class UAV_DESSim extends GUI_AppManager {
 		//   flags controlling display of window :  idxs : 0 : canDrawInWin; 1 : canShow3dbox; 2 : canMoveView; 3 : dispWinIs3d
 		//int[] _fill, int[] _strk, 			: window fill and stroke colors
 		//int _trajFill, int _trajStrk)			: trajectory fill and stroke colors, if these objects can be drawn in window (used as alt color otherwise)
-		//specify windows that cannot be shown simultaneously here
-		initXORWins(new int[]{showDESwin},new int[]{dispDES_SimWin});
 
 		wIdx = dispDES_SimWin; fIdx= showDESwin;
 		setInitDispWinVals(wIdx, _dimOpen, _dimClosed,new boolean[]{false,true,true,true}, new int[]{210,220,250,255},new int[]{255,255,255,255},new int[]{180,180,180,255},new int[]{100,100,100,255}); 
 		dispWinFrames[wIdx] = new DESSimWindow(pa, this, winTitles[wIdx], fIdx, winFillClrs[wIdx], winStrkClrs[wIdx], winRectDimOpen[wIdx], winRectDimClose[wIdx], winDescr[wIdx]);		
-
+		//specify windows that cannot be shown simultaneously here
+		initXORWins(new int[]{showDESwin},new int[]{dispDES_SimWin});
 		
 	}
 
 	@Override
 	protected void initOnce_Indiv() {
 		//which objects to initially show
-		setVisFlag(showUIMenu, true);					//show input UI menu	
-		//setVisFlag(showSpereAnimRes, true);
+		setVisFlag(showUIMenu, true);					//show input UI menu
 		setVisFlag(showDESwin, true);
 	}
 	@Override
@@ -179,13 +177,14 @@ public class UAV_DESSim extends GUI_AppManager {
 	//these tie using the UI buttons to modify the window in with using the boolean tags - PITA but currently necessary
 	public void handleShowWin(int btn, int val, boolean callFlags){//display specific windows - multi-select/ always on if sel
 		if(!callFlags){//called from setflags - only sets button state in UI to avoid infinite loop
-			setMenuBtnState(mySideBarMenu.btnShowWinIdx,btn, val);
+			//setMenuBtnState(mySideBarMenu.btnShowWinIdx,btn, val);
 		} else {//called from clicking on buttons in UI
 		
 			//val is btn state before transition 
 			boolean bVal = (val == 1?  false : true);
 			//each entry in this array should correspond to a clickable window, not counting menu
-			setVisFlag(btn+1, bVal);
+			setVisFlag(winFlagsXOR[btn], bVal);
+			//setVisFlag(btn+1, bVal);
 		}
 	}//handleShowWin
 	
