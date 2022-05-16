@@ -61,7 +61,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	}
 
 	@Override
-	protected void initVisOnce_Indiv() {
+	protected void initAllDispWindows() {
 		showInfo = true;
 		//includes 1 for menu window (never < 1) - always have same # of visFlags as myDispWindows
 		int numWins = numVisFlags;		
