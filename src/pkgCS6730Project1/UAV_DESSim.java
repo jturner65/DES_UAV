@@ -48,7 +48,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	
 	
 	@Override
-	protected void setup_indiv() {		setBkgrnd(); setDesired3DGridDims(1500);}
+	protected void setup_Indiv() {		setBkgrnd(); setDesired3DGridDims(1500);}
 	@Override
 	public void setBkgrnd(){((my_procApplet)pa).background(bground[0],bground[1],bground[2],bground[3]);}//setBkgrnd	
 
@@ -112,6 +112,14 @@ public class UAV_DESSim extends GUI_AppManager {
 	//////////////////////////////////////////
 	/// graphics and base functionality utilities and variables
 	//////////////////////////////////////////
+	
+	/**
+	 * Individual extending Application Manager post-drawMe functions
+	 * @param modAmtMillis
+	 * @param is3DDraw
+	 */
+	@Override
+	protected void drawMePost_Indiv(float modAmtMillis, boolean is3DDraw) {}
 	
 	/**
 	 * return the number of visible window flags for this application
