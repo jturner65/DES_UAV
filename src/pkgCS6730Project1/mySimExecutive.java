@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
+import base_Utils_Objects.io.MessageObject;
 import base_Utils_Objects.priorityQueue.myMinQueue;
 import base_Utils_Objects.priorityQueue.base.myPriorityQueue;
 import pkgCS6730Project1.events.EventType;
@@ -14,6 +15,10 @@ import pkgCS6730Project1.events.myEvent;
 public class mySimExecutive {
 	//ref to owning application (if papplet) or null if console
 	public IRenderInterface pa;	
+	/**
+	 * msg object for output to console or log
+	 */
+	protected MessageObject msgObj;
 	//simulator 
 	public mySimulator des;	
 	//Priority queue holding future event list
@@ -48,9 +53,10 @@ public class mySimExecutive {
 	
 
 	//pass null for command line version - define empty class called IRenderInterface
-	public mySimExecutive(IRenderInterface _pa) {
+	public mySimExecutive(IRenderInterface _pa, MessageObject _msgObj) {
+		msgObj = _msgObj;
 		if(_pa != null) {pa= _pa;}
-		else {dispOutput("Null IRenderInterface PApplet, assuming console only");}
+		else {dispOutput("mySimExecutive ctor","Null IRenderInterface PApplet, assuming console only");}
 		Instant now = Instant.now();
 		execBuiltTime = now.toEpochMilli();//milliseconds since 1/1/1970 when this exec was built.
 		initExecFlags();
@@ -177,7 +183,7 @@ public class mySimExecutive {
 		}		
 		//eventsProcced++;
 		while ((ev != null) && (ev.getTimestamp() <= nowTime)) {	//"now" has evolved to be later than most recent event, so pop off events from PQ in order
-			dispOutput("Frame Time : "+String.format("%08d", (int)nowTime)+" Frame Size : " +  ((int)frameTimeScale) + " | NowTime : Current Event TS : " + ev.getTimestamp() + "| Ev Name : " + ev.name);
+			dispOutput("simMe","Frame Time : "+String.format("%08d", (int)nowTime)+" Frame Size : " +  ((int)frameTimeScale) + " | NowTime : Current Event TS : " + ev.getTimestamp() + "| Ev Name : " + ev.name);
 			//ev == null means no events on FEL
 			ev = FEL.removeFirst();
 			//eventsProcced++;
@@ -192,23 +198,23 @@ public class mySimExecutive {
 			//either done with all trials or ready to move on to next trial
 			if(curTrial >= numTrials) {//performed enough trials to check if done				
 				if (!getExecFlags(condSweepExpIDX)) {//done with all trials, and not sweeping
-					dispOutput("NowTime : "+nowDispTime+ " | Finished with all " +numTrials +" trials of experiments of duration : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
+					dispOutput("simMe","NowTime : "+nowDispTime+ " | Finished with all " +numTrials +" trials of experiments of duration : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
 					endAllTrials();
 					return true;//if done with experimental trials then stop sim
 				} else {//finished with set of trials for current uav team size
 					if(uavTeamSizeTrial >= maxTrlUAVSz) {//team size == max team size, then end and exit
-						dispOutput("NowTime : "+nowDispTime+ " | Finished with all " +numTrials +" trials for all team sizes, of experiments of duration : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
+						dispOutput("simMe","NowTime : "+nowDispTime+ " | Finished with all " +numTrials +" trials for all team sizes, of experiments of duration : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
 						endAllTrials();
 						return true;//if done with experimental trials then stop sim						
 					} else {//save current trials, increment team size, restart set of trials with new team size
-						dispOutput("NowTime : "+nowDispTime+ " | Finished with all " +numTrials +" trials for team size " +uavTeamSizeTrial +", each of duration  : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
+						dispOutput("simMe","NowTime : "+nowDispTime+ " | Finished with all " +numTrials +" trials for team size " +uavTeamSizeTrial +", each of duration  : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
 						endTrialsForTmSz();
 						return false;
 					}
 				}
 			}
 			//otherwise move on to next trial - reset environment and go again 
-			dispOutput("NowTime : "+nowDispTime+ " | Finished with trial " + curTrial + " of " +numTrials +" total trials of experiments, each of duration  : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
+			dispOutput("simMe","NowTime : "+nowDispTime+ " | Finished with trial " + curTrial + " of " +numTrials +" total trials of experiments, each of duration  : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
 			endExperiment();			
 			++curTrial;		
 			startExperiment();
@@ -225,8 +231,8 @@ public class mySimExecutive {
 	}//drawMe	
 	
 	//display message and time now
-	protected void showTimeMsgNow(String _str, long stTime) {
-		dispOutput(_str+" Time Now : "+(getCurTime() - stTime));
+	protected void showTimeMsgNow(String callingClass, String callingMethod, String _str, long stTime) {
+		dispOutput(callingClass, callingMethod,_str+" Time Now : "+(getCurTime() - stTime));
 	}
 	
 	//get time from "start time"
@@ -251,14 +257,18 @@ public class mySimExecutive {
 	//split up newline-parsed strings into an array of strings, for display on screen
 	protected String[] getInfoStrAra(String str){return str.split("\n",-1);}
 	
+	// TODO : replace with msgObj
 	//will display output to console and screen if using graphical simulation
-	public void dispOutput(String str) {
-		if((null == pa) || (!getExecFlags(drawVisIDX))) {
-			System.out.println(str);
-		} else {
-			pa.outStr2Scr(str,false);
-		}		
+	public void dispOutput(String className, String callMethod, String dataStr) {
+		msgObj.dispInfoMessage(className, callMethod, dataStr);
+	}
+	
+	//will display output to console and screen if using graphical simulation
+	private void dispOutput(String callMethod, String str) {
+		dispOutput("mySimExecutive", callMethod, str);
 	}//dispOutput
+	
+	
 	//will return working directory 
 	public String getCWD() {
 		Path currentRelativePath = Paths.get("");
@@ -283,17 +293,17 @@ public class mySimExecutive {
 			  outputWriter.flush();  
 			  outputWriter.close(); 		
 		  } catch (Exception e) {
-			  dispOutput("Error saving report : "+ fileName+":\n"+e.getMessage());			  
+			  dispOutput("saveReport","Error saving report : "+ fileName+":\n"+e.getMessage());			  
 		  } 		
 	}//saveReport
 	
 	public boolean createRptDir(String dName) {
 		File dir = new File(dName);	
 		if (!dir.exists()) {
-			dispOutput("Create directory: " + dName);	
+			dispOutput("createRptDir","Create directory: " + dName);	
 		    try{dir.mkdir();	    	return true;	    } 
 		    catch(SecurityException se){
-		    	dispOutput("failed to create directory : " + dName+":\n"+se.getMessage());
+		    	dispOutput("createRptDir","failed to create directory : " + dName+":\n"+se.getMessage());
 		    	return false;	    }  
 		}
 		return true;
@@ -304,34 +314,34 @@ public class mySimExecutive {
 	/////DEBUG AND TESTING
 	//test the distributions of the diminishing returns functionality for the task time to complete
 	public void TEST_taskDists() {
-		dispOutput("\nTesting Task Diminishing returns functions.  Results will be saved to file.");
+		dispOutput("TEST_taskDists","\nTesting Task Diminishing returns functions.  Results will be saved to file.");
 		String saveRes = des.testTaskTimeVals();
-		dispOutput("Test of Task Diminishing returns functions Complete.  Results saved to "+ saveRes);
+		dispOutput("TEST_taskDists","Test of Task Diminishing returns functions Complete.  Results saved to "+ saveRes);
 	}	
 	
 	public void TEST_simulator() {
 		String res = "\nSimulator Current State : \n";
 		res += des.toString();
-		dispOutput(res);
+		dispOutput("TEST_simulator", res);
 	}
 	
 	//verify current priority queue's heapness
 	public void TEST_verifyFEL() {
 		String res = TEST_verifyFELHeap();
-		dispOutput("\nFEL Test 1 : Verifying FEL integrity and state.");
-		dispOutput("\t"+res);
+		dispOutput("TEST_verifyFEL","\nFEL Test 1 : Verifying FEL integrity and state.");
+		dispOutput("TEST_verifyFEL","\t"+res);
 		if(null==FEL) {return;}
-		dispOutput("\nFEL Test 2 : Showing Raw contents of FEL heap : ");
+		dispOutput("TEST_verifyFEL","\nFEL Test 2 : Showing Raw contents of FEL heap : ");
 		@SuppressWarnings("rawtypes")
 		Comparable[] heap = FEL.getHeap();
-		dispOutput("heap idx: 0 elem is always null/unused ");
+		dispOutput("TEST_verifyFEL","heap idx: 0 elem is always null/unused ");
 		for(int i=1;i<heap.length;++i) {
-			if(null == heap[i]) {dispOutput("heap idx: " + i +" elem is null/unused ");}
-			else {dispOutput("heap idx: " + i +" elem : " +((myEvent)heap[i]).toStrBrf());}
+			if(null == heap[i]) {dispOutput("TEST_verifyFEL","heap idx: " + i +" elem is null/unused ");}
+			else {dispOutput("TEST_verifyFEL","heap idx: " + i +" elem : " +((myEvent)heap[i]).toStrBrf());}
 		}
-		dispOutput("\nFEL Test 3 : Verifying FEL Contents and access.");
+		dispOutput("TEST_verifyFEL","\nFEL Test 3 : Verifying FEL Contents and access.");
 		TEST_PQShowElemsReAdd(FEL, "FEL");
-		dispOutput("\nFEL Test 4 : Heap Sort of FEL (elements in descending order)."); 	
+		dispOutput("TEST_verifyFEL","\nFEL Test 4 : Heap Sort of FEL (elements in descending order)."); 	
 		TEST_heapSortAndShowContents(FEL, "FEL");		
 	}
 	
@@ -358,35 +368,35 @@ public class mySimExecutive {
 		
 		//build array of test data
 		myEvent[] tmpAra = TEST_buildTestAra(numTestElems);
-		dispOutput("_________________________________________________________________________");
-		dispOutput("\nPQ Test 1 : adding random elements, removing first element in order\n");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","\nPQ Test 1 : adding random elements, removing first element in order\n");
 		//add elements in tmpAra to tmpPQ
 		TEST_buildPQWithAra(tmpPQ, tmpAra, "tmpPQ", true);
-		dispOutput("\nNow removing top elements :");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","\nNow removing top elements :");
 		TEST_dequeAndShowElems(tmpPQ,  "\t");
-		dispOutput("");
-		dispOutput("Test 2 done : After removing elements in order, tmpPQ has : " + tmpPQ.size() + " Elements.\n");
-		dispOutput("_________________________________________________________________________");
-		dispOutput("\nPQ Test 2 : adding random elements, removing element in order of addition (randomly accessed in PQ)\n");
-		dispOutput("Now testing remove elements in added order (not dequeing) -- i.e. removing random elements.");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","Test 2 done : After removing elements in order, tmpPQ has : " + tmpPQ.size() + " Elements.\n");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","\nPQ Test 2 : adding random elements, removing element in order of addition (randomly accessed in PQ)\n");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","Now testing remove elements in added order (not dequeing) -- i.e. removing random elements.");
 		TEST_buildPQWithAra(tmpPQ, tmpAra, "tmpPQ", true);
 		//remove requested element, then remove and display remaining elements in top-first order
 		for (int i=0;i<tmpAra.length;++i) {
-			dispOutput("\tRemove Elem "+tmpAra[i]+" in tmpPQ of Size " +tmpPQ.size() + " : returned : " + tmpPQ.removeElem(tmpAra[i])+" : remaining elements :" );
+			dispOutput("TEST_verifyPriorityQueueFunctionality","\tRemove Elem "+tmpAra[i]+" in tmpPQ of Size " +tmpPQ.size() + " : returned : " + tmpPQ.removeElem(tmpAra[i])+" : remaining elements :" );
 			TEST_dequeAndShowElems(tmpPQ,  "\t\t");
-			dispOutput("");
+			dispOutput("TEST_verifyPriorityQueueFunctionality","");
 			//re-add into tmpPQ
 			for(int j=(i+1);j<tmpAra.length;++j) {		tmpPQ.insert(tmpAra[j]);	}
 		}
 		
-		dispOutput("Test 2 done : Finished removing random elements.  Heap now has : " + tmpPQ.size() + " elements.\n");
-		dispOutput("_________________________________________________________________________");
-		dispOutput("\nPQ Test 3 : adding random elements, sorting via HeapSort without corrupting pq\n");
-		dispOutput("Rebuilding pq");		
+		dispOutput("TEST_verifyPriorityQueueFunctionality","Test 2 done : Finished removing random elements.  Heap now has : " + tmpPQ.size() + " elements.\n");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","\nPQ Test 3 : adding random elements, sorting via HeapSort without corrupting pq\n");
+		dispOutput("TEST_verifyPriorityQueueFunctionality","Rebuilding pq");		
 		TEST_buildPQWithAra(tmpPQ, tmpAra, "tmpPQ",  true);
 		//test retrieving sorted list directly from heap - be sure to maintain heapness
 		TEST_heapSortAndShowContents(tmpPQ, "tmpPQ");		
-		dispOutput("Test 3 done : Finished testing heap sort.  Heap now has : " + tmpPQ.size() + " elements.\n");		
+		dispOutput("TEST_verifyPriorityQueueFunctionality","Test 3 done : Finished testing heap sort.  Heap now has : " + tmpPQ.size() + " elements.\n");		
 		
 	}//verifyQueue
 	//build array of test data
@@ -399,12 +409,12 @@ public class mySimExecutive {
 	}
 	//add test data to passed PQ
 	private void TEST_buildPQWithAra(myPriorityQueue<myEvent> tmpPQ, myEvent[] tmpAra, String pqName, boolean showMsgs) {
-		if(showMsgs) {dispOutput("Before loading "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}
+		if(showMsgs) {dispOutput("TEST_buildPQWithAra","Before loading "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}
 		for (int i =0;i<tmpAra.length;++i) {
 			tmpPQ.insert(tmpAra[i]);
-			if(showMsgs) {dispOutput("\tAdding Elem # " + i + " : "+ tmpAra[i] + " to pq :"+pqName);}
+			if(showMsgs) {dispOutput("TEST_buildPQWithAra","\tAdding Elem # " + i + " : "+ tmpAra[i] + " to pq :"+pqName);}
 		}
-		if(showMsgs) {dispOutput("\nAfter adding "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}		
+		if(showMsgs) {dispOutput("TEST_buildPQWithAra","\nAfter adding "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}		
 	}//TEST_buildPQWithAra
 	
 	private void TEST_PQShowElemsReAdd(myPriorityQueue<myEvent> tmpPQ, String lPfx) {
@@ -412,7 +422,7 @@ public class mySimExecutive {
 		int idx=0;
 		while (!tmpPQ.isEmpty()){
 			tmpAra[idx] = tmpPQ.removeFirst();
-			dispOutput("Elem # "+idx+" in " +lPfx + " of Size " +tmpAra.length + " : " + tmpAra[idx].toStrBrf() );
+			dispOutput("TEST_PQShowElemsReAdd","Elem # "+idx+" in " +lPfx + " of Size " +tmpAra.length + " : " + tmpAra[idx].toStrBrf() );
 			idx++;
 		}
 		for (int i=0;i<idx;++i) {
@@ -423,19 +433,19 @@ public class mySimExecutive {
 	private void TEST_dequeAndShowElems(myPriorityQueue<myEvent> tmpPQ, String lPfx) {
 		int num = tmpPQ.get_numElems();
 		for (int i=0;i<num;++i) {
-			dispOutput(lPfx + "Elem # "+i+" in tmpPQ of Size " +tmpPQ.size() + " : " + tmpPQ.removeFirst() );
+			dispOutput("TEST_dequeAndShowElems",lPfx + "Elem # "+i+" in tmpPQ of Size " +tmpPQ.size() + " : " + tmpPQ.removeFirst() );
 		}
 	}//TEST_dequeAndShowElems
 	private void TEST_heapSortAndShowContents(myPriorityQueue<myEvent> tmpPQ, String pqName) {
 		@SuppressWarnings("rawtypes")
 		Comparable[] tmpSortedAra = tmpPQ.getSortedElems();
 		if(tmpSortedAra.length == 0) {
-			dispOutput("No Elements in "+pqName+" currently " );
+			dispOutput("TEST_heapSortAndShowContents","No Elements in "+pqName+" currently " );
 			return;
 		}
-		dispOutput("\nNow Displaying elements in "+pqName+" in heap sort order : ");
+		dispOutput("TEST_heapSortAndShowContents","\nNow Displaying elements in "+pqName+" in heap sort order : ");
 		for(int i=0;i<tmpSortedAra.length;++i) {
-			dispOutput("\tElem # " + i + " in sorted results : " + ((myEvent)tmpSortedAra[i]).toStrBrf() );
+			dispOutput("TEST_heapSortAndShowContents","\tElem # " + i + " in sorted results : " + ((myEvent)tmpSortedAra[i]).toStrBrf() );
 		}
 	}//TEST_heapSortAndShowContents
 

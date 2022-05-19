@@ -47,7 +47,7 @@ public class myUAVTransitLane extends myUAVResource{
 	public void finalInit() {
 		// Set transit lane vector between parent and child task - travel lanes always only have 1 of each
 		if((parentResources.size() != 1) || (childResources.size() != 1)){
-			sim.dispOutput("Error in myUAVTransitLane::finalInitPriv() for object : " + name + " :: Incorrect # parents/children specified for transit lane : # Parents : "+ parentResources.size() + " # children : " +childResources.size() );			
+			sim.exec.dispOutput("myUAVTransitLane","finalInit","Error in myUAVTransitLane::finalInitPriv() for object : " + name + " :: Incorrect # parents/children specified for transit lane : # Parents : "+ parentResources.size() + " # children : " +childResources.size() );			
 		}
 		stLoc = new myVectorf(parentResources.firstEntry().getValue().loc);
 		endLoc = new myVectorf(childResources.firstEntry().getValue().loc);	 
@@ -59,7 +59,7 @@ public class myUAVTransitLane extends myUAVResource{
 		travelLane._normalize()._mult(lenTravelLane);
 		endLoc.set(myPointf._add(stLoc, travelLane));
 		
-		sim.dispOutput("\t" + name + " : travel lane : "+ travelLane.toString());
+		sim.exec.dispOutput("myUAVTransitLane","finalInit","\t" + name + " : travel lane : "+ travelLane.toString());
 		//initialize map of teams in transit 
 		teamQ = new  ConcurrentSkipListMap<Long, myUAVTeam>();
 		
@@ -108,7 +108,7 @@ public class myUAVTransitLane extends myUAVResource{
 		//if we are entering the holding lane, finish off the time recording for the team
 		if(this.name.equals(sim.holdingLane.name)) {team.finishedProcess();		}
 		setEntityFlags(taskInUseIDX, true);
-		sim.dispOutput("\t" + name +" : arriveAtRes : " + timeProc + " q size : "+teamQ.size()); 
+		sim.exec.dispOutput("myUAVTransitLane","arriveAtRes","\t" + name +" : arriveAtRes : " + timeProc + " q size : "+teamQ.size()); 
 		//distance to travel is == to distance to next task - # of teams x team diameter
 		//minimum distance to go is the distance that would require 1 millisecond to travel 
 		float distToGo = getDistToGo(team, teamQ.size());
@@ -130,7 +130,7 @@ public class myUAVTransitLane extends myUAVResource{
 	public myEvent leaveRes(myEvent ev) {
 		if (queueIsEmpty()) { return null;}
 		long timeProc = ev.getTimestamp();
-		sim.dispOutput("\t" + name +" : leaveRes : " + timeProc + " q size : "+teamQ.size()); 
+		sim.exec.dispOutput("myUAVTransitLane","leaveRes","\t" + name +" : leaveRes : " + timeProc + " q size : "+teamQ.size()); 
 		long firstKey = teamQ.firstKey();		
 		myUAVTeam team = teamQ.remove(firstKey);
 		//increment # of teams this entity has processed
@@ -168,7 +168,7 @@ public class myUAVTransitLane extends myUAVResource{
 	public myEvent enterQueue(myEvent ev) {
 		//add team to queue with event time as key
 		long timeArrive = ev.getTimestamp();
-		sim.dispOutput("\t" + name + " : enterQueue : " + timeArrive + " q size : "+teamQ.size()); 
+		sim.exec.dispOutput("myUAVTransitLane","enterQueue","\t" + name + " : enterQueue : " + timeArrive + " q size : "+teamQ.size()); 
 		myUAVTeam team = ev.consumer;
 		//move team to position in queue, based on size - size == position in queue
 		float dist2Go = getDistToGo(team, teamQ.size());

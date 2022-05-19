@@ -119,10 +119,10 @@ public class myUAVTask extends myUAVResource{
 	public myEvent consumerReady(myEvent ev) {
 		long timeProc = ev.getTimestamp();
 		if(getEntityFlags(taskIsFullIDX)) {//this is full, return a null event - when this task is done it will generate a "ready for input" event
-			sim.dispOutput("\t" + name +" : consumerReady : " + timeProc + " | Not Ready for Consumer : Wait."); 
+			sim.exec.dispOutput("myUAVTask","consumerReady","\t" + name +" : consumerReady : " + timeProc + " | Not Ready for Consumer : Wait."); 
 			return null;
 		} else {//task is ready, generate immediate LeaveResource event for right now
-			sim.dispOutput("\t" + name +" : consumerReady : " + timeProc + " | Ready for Consumer : Generating Leave Queue event."); 
+			sim.exec.dispOutput("myUAVTask","consumerReady","\t" + name +" : consumerReady : " + timeProc + " | Ready for Consumer : Generating Leave Queue event."); 
 			//find parent with lowest arrival time team and generate a "LeaveResource" event targeting it to pull the next object from it
 			return getFirstParentUAV(timeProc);
 		}		
@@ -135,7 +135,7 @@ public class myUAVTask extends myUAVResource{
 		float _draw = ThreadLocalRandom.current().nextFloat();
 		//get biggest key less than or equal to _draw - with only 1 entry, will always return same entry
 		Entry<Float, myUAVResource> nextResource = childResources.floorEntry(_draw);
-		if(null == nextResource) {sim.dispOutput("ERROR : _leaveResEnd : null entry as next resource (transit lane) "+ name); return null;}	
+		if(null == nextResource) {sim.exec.dispOutput("myUAVTask","_leaveResEnd","ERROR : _leaveResEnd : null entry as next resource (transit lane) "+ name); return null;}	
 		
 		//generate event that this task is available for to deque any teams in parent queue
 		if(parentResources.firstEntry().getValue().name.equals(sim.holdingLane.name)) {
@@ -171,7 +171,7 @@ public class myUAVTask extends myUAVResource{
 		} else {
 			//as of now, consumer is leaving, task is unoccupied - verify teams are the same	
 			myUAVTeam _team = teamsBeingServed.remove(team.name);
-			if(null == _team) {	sim.dispOutput("ERROR : leaveRes : attempting to remove team not present in Group Resource Task "+ name); return null;}		
+			if(null == _team) {	sim.exec.dispOutput("myUAVTask","leaveRes","ERROR : leaveRes : attempting to remove team not present in Group Resource Task "+ name); return null;}		
 			if(teamsBeingServed.size() == 0) {setTaskIsEmpty();}
 		}		
 		//time to disengage this task		

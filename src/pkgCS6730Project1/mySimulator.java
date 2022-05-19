@@ -9,6 +9,7 @@ import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.my_procApplet;
+import base_Utils_Objects.io.MessageObject;
 import pkgCS6730Project1.entities.myUAVTask;
 import pkgCS6730Project1.entities.myUAVTeam;
 import pkgCS6730Project1.entities.myUAVTransitLane;
@@ -24,7 +25,7 @@ import processing.core.*;
  * concrete class to manage specific simulation environment and event handling for DES simulation - owned by and called from sim executive
  * @author john
  */
-public abstract class mySimulator {// extends mySimulator {
+public abstract class mySimulator {
 	//owning executor
 	public mySimExecutive exec;
 	//fixed structure holding task resources in this simulation
@@ -160,7 +161,7 @@ public abstract class mySimulator {// extends mySimulator {
 		//first build tasks 
 		for(int i=0;i<_ts.length;++i) {	_ts[i]=new myUAVTask(this, tDesc[i]);}
 		if(showMsg) {
-			dispOutput("All " + _ts.length + " Tasks initialized.");	
+			exec.dispOutput("mySimulator", "buildTasks", "All " + _ts.length + " Tasks initialized.");	
 		}
 		return _ts;
 	}//buildTasks
@@ -179,7 +180,7 @@ public abstract class mySimulator {// extends mySimulator {
 		//holding lane is lane from final task to initial task - in all simulations
 		holdingLane = buildTransitLane(_tasks, _tasks.length-1, 0, 10.0f, showMsg);
 		if(showMsg) {
-			dispOutput("All " + _tl.length + " transitLanes initialized and connected to parents and children, along with holding lane.");
+			exec.dispOutput("mySimulator", "buildTransitLanes","All " + _tl.length + " transitLanes initialized and connected to parents and children, along with holding lane.");
 		}
 		return _tl;
 	}//buildTransitLanes	
@@ -211,7 +212,7 @@ public abstract class mySimulator {// extends mySimulator {
 		_tasks[0].addParent(0.0f, holdingLane);
 		_tasks[_tasks.length-1].addChild(0.0f, holdingLane);
 		if(showMsg) {
-			dispOutput("All " + _tasks.length + " tasks connected to parent and children transitlanes.");
+			exec.dispOutput("mySimulator", "setTaskParentChild","All " + _tasks.length + " tasks connected to parent and children transitlanes.");
 		}
 	}//setTaskParentChild	
 	
@@ -247,7 +248,7 @@ public abstract class mySimulator {// extends mySimulator {
 		//set parent and child Transit lanes for each task - some tasks have multiple parents or children.  if multiple children, need to send probability structure for 
 		//cumulative prob dist
 		setTaskParentChild(tasks, transitLanes, taskParentIDXs, taskChildIDXs, showMsg);
-		exec.showTimeMsgNow("Millis to build map", stTime);		
+		exec.showTimeMsgNow("mySimulator","initSim","Millis to build map", stTime);		
 		
 		//teams is dynamic - depends on how large team size is specified to be and how many UAVs exist to draw from
 		teams = new ArrayList<myUAVTeam>();		
@@ -293,7 +294,7 @@ public abstract class mySimulator {// extends mySimulator {
 		}		
 		//myUAVTeam(IRenderInterface _p, mySimulator _sim, String _name, int _uavTeamSize, myPointf _initLoc)
 		String name = "UAVTeam_" + nextTeamNum + "_Sz_"+uavTeamSize;
-		dispOutput("Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
+		exec.dispOutput("mySimulator", "addNewTeam","Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
 		myUAVTeam team = new myUAVTeam(this, name, uavTeamSize, new myPointf(tasks[0].loc));//always start at initial task's location
 		if(exec.pa != null) {
 			team.setTemplate(rndrTmpl, sphrRndrTmpl);
@@ -418,9 +419,7 @@ public abstract class mySimulator {// extends mySimulator {
 			}//for every tl		
 		pa.popMatState();	
 	}//drawResultBar	
-	
-	//print output - allow for console-only execution (somehow...)
-	public void dispOutput(String str) {exec.dispOutput(str);}
+
 	//add an event to the FEL queue
 	public void addEvent(myEvent resEv) {exec.addEvent(resEv);}
 	
@@ -737,7 +736,7 @@ public abstract class mySimulator {// extends mySimulator {
 			case ConsumerWaiting : {return ((myUAVTask)_ev.resource).consumerReady(_ev);}
 			
 			default : {
-				dispOutput("\tmyDESSimulator::handleEvent : Unknown/unhandled event type :  " + _ev.type);
+				exec.dispOutput("mySimulator", "handleEvent","\tmyDESSimulator::handleEvent : Unknown/unhandled event type :  " + _ev.type);
 				return null;
 			}
 		}

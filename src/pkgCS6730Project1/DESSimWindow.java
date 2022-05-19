@@ -155,7 +155,7 @@ public class DESSimWindow extends myDispWindow {
 		//called once
 		//initPrivFlags(numPrivFlags);
 		//initialize sim exec to simple world sim
-		simExec = new mySimExecutive(pa);
+		simExec = new mySimExecutive(pa, msgObj);
 		
 		setSimpleSim();
 		AppMgr.setAllMenuBtnNames(menuBtnNames);
@@ -246,7 +246,7 @@ public class DESSimWindow extends myDispWindow {
 					break;}
 				case gIDX_UAVTeamSize : {
 					mySimulator.uavTeamSize = (int)val + 2;//add idx 0 as min size
-					pa.outStr2Scr("uav team size desired is : " + mySimulator.uavTeamSize);
+					msgObj.dispInfoMessage("DESSimWindow", "setUIWinVals", "UAV team size desired is : " + mySimulator.uavTeamSize);
 					//rebuild sim exec and sim environment whenever team size changes
 					simExec.initSimExec(true);				
 					break;}
@@ -276,7 +276,6 @@ public class DESSimWindow extends myDispWindow {
 	@Override
 	//modAmtMillis is time passed per frame in milliseconds
 	protected boolean simMe(float modAmtMillis) {//run simulation
-		//pa.outStr2Scr("took : " + (pa.millis() - stVal) + " millis to simulate");
 		boolean done = simExec.simMe(modAmtMillis);
 		if(done) {setPrivFlags(conductExpIDX, false);}
 		return done;	

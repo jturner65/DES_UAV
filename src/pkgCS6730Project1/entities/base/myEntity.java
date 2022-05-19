@@ -13,11 +13,7 @@ public abstract class myEntity {
 	public int ID;//provide unique count-based ID to all entities
 	public static int IDcount = 0;
 	
-
-	//public static UAV_DESSim pa;	
 	public mySimulator sim;
-	public static GUI_AppManager AppMgr;
-
 	
 	public String name;
 	public myPointf loc;			//initial location of this entity (may change if it moves)

@@ -1,6 +1,7 @@
 package pkgCS6730Project1;
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
+import base_Utils_Objects.io.MessageObject;
 
 /**
  * console version of Discrete Event Simulator with UAV teams performing tasks
@@ -101,9 +102,10 @@ public class UAV_DESSimConsole {
 		IRenderInterface dummy = null;
 		mySimulator.uavTeamSize = numUAVPerTeam;
 		mySimExecutive.frameTimeScale = frtMult;
-	
+		
+		MessageObject msgObj = MessageObject.buildMe(false);
 		//instance sim exec and run loop
-		mySimExecutive simExec = new mySimExecutive(dummy);
+		mySimExecutive simExec = new mySimExecutive(dummy, msgObj); 
 		mySimulator des = new simpleDesSim(simExec, 100);
 		simExec.initSimWorld(des, true);
 		
