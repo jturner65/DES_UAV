@@ -159,8 +159,8 @@ public class myUAVObj {
 		p.pushMatState();
 			p.translate(coords.x,coords.y,coords.z);		//move to location
 			alignUAV(p, delT);
-			p.rotate(MyMathUtils.Pi_f/2.0f,1,0,0);
-			p.rotate(MyMathUtils.Pi_f/2.0f,0,1,0);
+			p.rotate(MyMathUtils.HALF_PI_F,1,0,0);
+			p.rotate(MyMathUtils.HALF_PI_F,0,1,0);
 			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size
 			drawTmpl(p);
 //			p.pushStyle();
@@ -175,8 +175,8 @@ public class myUAVObj {
 			p.translate(coords.x,coords.y,coords.z);		//move to location
 			drawMyVec(p, rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
 			alignUAV(p, delT);
-			p.rotate(MyMathUtils.Pi_f/2.0f,1,0,0);
-			p.rotate(MyMathUtils.Pi_f/2.0f,0,1,0);
+			p.rotate(MyMathUtils.HALF_PI_F,1,0,0);
+			p.rotate(MyMathUtils.HALF_PI_F,0,1,0);
 			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
 			drawTmpl(p);
 //			p.pushStyle();
