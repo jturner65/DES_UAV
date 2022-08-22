@@ -1,10 +1,7 @@
 package pkgCS6730Project1.entities.base;
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
-//
-//import base_UI_Objects.my_procApplet;
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import base_UI_Objects.GUI_AppManager;
 import pkgCS6730Project1.DESSimWindow;
 import pkgCS6730Project1.mySimulator;
 
@@ -70,8 +67,6 @@ public abstract class myEntity {
 			String[] currStatus = this.showStatus();
 			for(int i=0;i<currStatus.length;++i){
 				pa.showText(currStatus[i], 0,(i+1)*10.0f, 0); 
-
-				//pa.showOffsetText(new float[] {0,(i+1)*10.0f, 0},pa.gui_Black, currStatus[i]);
 			}
 		pa.popMatState();
 		win.setCamOrient();

@@ -9,7 +9,6 @@ import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.my_procApplet;
-import base_Utils_Objects.io.MessageObject;
 import pkgCS6730Project1.entities.myUAVTask;
 import pkgCS6730Project1.entities.myUAVTeam;
 import pkgCS6730Project1.entities.myUAVTransitLane;
@@ -127,7 +126,7 @@ public abstract class mySimulator {
 		if(exec.pa != null) {	
 			my_procApplet pa = (my_procApplet) exec.pa;
 			sphrRndrTmpl = new mySphereRndrObj[NumUniqueTeams];
-			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new mySphereRndrObj(pa, this, i);	}	
+			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new mySphereRndrObj(exec.pa, this, i);	}	
 			cmplxRndrTmpls = new ConcurrentSkipListMap<String, myRenderObj[]> (); 
 			UAVBoatSails = new PImage[NumUniqueTeams];
 			boatRndrTmpl = new myBoatRndrObj[NumUniqueTeams];
