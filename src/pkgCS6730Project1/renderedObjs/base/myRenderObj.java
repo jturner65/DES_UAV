@@ -108,6 +108,29 @@ public abstract class myRenderObj {
 	 * @return a Processing PShape with specified criteria
 	 */	
 	protected PShape createBaseShape(int meshType, float... args) {
+		return createBaseShape(false, meshType, args);
+	}
+	/**
+	 * Create and return a processing shape (PShape) with no args. 
+	 * TODO : replace with agnostic mesh someday.
+	 * @return a Processing PShape with specified criteria
+	 */	
+	protected PShape createBaseShape() {
+		return createBaseShape(true, -1);
+	}
+	
+	/**
+	 * Create and return a processing shape (PShape) with passed arg list. 
+	 * TODO : replace with agnostic mesh someday.
+	 * @param isEmtpy If no meshType is provided
+	 * @param meshType PConstants-defined constant specifying the type of shape to create
+	 * @param args a (possibly empty) list of arguments
+	 * @return a Processing PShape with specified criteria
+	 */	
+	private PShape createBaseShape(boolean isEmpty, int meshType, float... args) {
+		if (isEmpty) {
+			return ((my_procApplet) p).createShape();
+		}
 		if (args.length == 0) {
 			return ((my_procApplet) p).createShape(meshType);
 		}
@@ -121,7 +144,7 @@ public abstract class myRenderObj {
 	 * @return
 	 */
 	protected PShape makeShape(myVectorf initTransVec){
-		PShape sh = ((my_procApplet) p).createShape();
+		PShape sh = createBaseShape();
 		sh.translate(initTransVec.x,initTransVec.y,initTransVec.z);		
 		return sh;
 	}//makeShape
