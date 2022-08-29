@@ -39,8 +39,8 @@ public class DESSimWindow extends myDispWindow {
 	
 	/////////
 	//custom debug/function ui button names -empty will do nothing
-	public String[] menuDbgBtnNames = new String[] {"Verify PQ", "Verify FEL", "Show Sim", "Test Tasks"};//must have literals for every button or this is ignored
-	public String[] menuFuncBtnNames = new String[] {"Use Main Sim", "Use Huge Sim"};//must have literals for every button or ignored
+//	public String[] menuDbgBtnNames = new String[] {"Verify PQ", "Verify FEL", "Show Sim", "Test Tasks"};//must have literals for every button or this is ignored
+//	public String[] menuFuncBtnNames = new String[] {"Use Main Sim", "Use Huge Sim"};//must have literals for every button or ignored
 	
 	//private child-class flags - window specific
 	public static final int 
@@ -59,14 +59,14 @@ public class DESSimWindow extends myDispWindow {
 
 	public static final int numPrivFlags = 12;
 	
-	public String[][] menuBtnNames = new String[][] { // each must have literals for every button defined in side bar
-		// menu, or ignored
-		{ "Simple SIM", "Complex SIM", "---"}, // row 1
-		{ "---", "---", "---", "---" }, // row 3
-		{ "---", "---", "---", "---" }, // row 2
-		{ "---", "---", "---", "---" }, 
-		{ "---", "---", "---", "---", "---" } 
-	};
+//	public String[][] menuBtnNames = new String[][] { // each must have literals for every button defined in side bar
+//		// menu, or ignored
+//		{ "Simple SIM", "Complex SIM", "---"}, // row 1
+//		{ "---", "---", "---", "---" }, // row 3
+//		{ "---", "---", "---", "---" }, // row 2
+//		{ "---", "---", "---", "---" }, 
+//		{ "---", "---", "---", "---", "---" } 
+//	};
 		
 	public DESSimWindow(IRenderInterface _p, GUI_AppManager _AppMgr, String _n, int _flagIdx, int[] fc, int[] sc, float[] rd, float[] rdClosed, String _winTxt) {
 		super(_p, _AppMgr, _n, _flagIdx, fc, sc, rd, rdClosed, _winTxt);
@@ -158,7 +158,7 @@ public class DESSimWindow extends myDispWindow {
 		simExec = new mySimExecutive(pa, msgObj);
 		
 		setSimpleSim();
-		AppMgr.setAllMenuBtnNames(menuBtnNames);
+		
 		custMenuOffset = uiClkCoords[3];	//495	
 	}//initMe	
 		
@@ -386,15 +386,15 @@ public class DESSimWindow extends myDispWindow {
 			} // row 2 of menu side bar buttons
 			case 2: {// row 3 of menu side bar buttons
 				switch (btn) {
-					case 0: {
+					case 0: {	
 						resetButtonState();
 						break;
 					}
-					case 1: {
+					case 1: {			
 						resetButtonState();
 						break;
 					}
-					case 2: {
+					case 2: {	
 						resetButtonState();
 						break;
 					}

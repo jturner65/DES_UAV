@@ -70,8 +70,19 @@ public class UAV_DESSim extends GUI_AppManager {
 		//call for menu window
 		buildInitMenuWin(showUIMenu);
 		//menu bar init
+		String[] menuBtnTitles = new String[]{"Sim Map","Functions 2","Functions 3","Functions 4"};
+		String[][] menuBtnNames = new String[][] { // each must have literals for every button defined in side bar
+			// menu, or ignored
+			{ "Simple SIM", "Complex SIM", "---"}, // row 1
+			{ "---", "---", "---", "---" }, // row 2
+			{ "---", "---", "---", "---" }, // row 3
+			{"Verify PQ", "Verify FEL", "Show Sim", "Test Tasks"}
+		};				
+		
+		String[] menuDbgBtnNames = new String[] {};//must have literals for every button or this is ignored
+		
 		int wIdx = dispMenuIDX,fIdx=showUIMenu;
-		dispWinFrames[wIdx] = buildSideBarMenu(wIdx, fIdx, new String[]{"Sim Map","Functions 2","Functions 3","Functions 4"}, new int[] {3,4,4,4}, 5, false, false);// new DES_SimSideBarMenu(this, winTitles[wIdx], fIdx, winFillClrs[wIdx], winStrkClrs[wIdx], winRectDimOpen[wIdx], winRectDimClose[wIdx], winDescr[wIdx]);	
+		dispWinFrames[wIdx] = buildSideBarMenu(wIdx, fIdx, menuBtnTitles, menuBtnNames, menuDbgBtnNames, false, false);
 		//instanced window dimensions when open and closed - only showing 1 open at a time
 		float[] _dimOpen  =  new float[]{menuWidth, 0, pa.getWidth()-menuWidth, pa.getHeight()}, _dimClosed  =  new float[]{menuWidth, 0, hideWinWidth, pa.getHeight()};	
 		//setInitDispWinVals : use this to define the values of a display window
