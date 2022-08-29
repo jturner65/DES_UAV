@@ -413,10 +413,23 @@ public class DESSimWindow extends myDispWindow {
 			} // row 3 of menu side bar buttons
 			case 3: {// row 3 of menu side bar buttons
 				switch (btn) {
-					case 0:
-					case 1:
-					case 2:
-					case 3: {// load all training data, default map config, and build map
+					case 0: {			
+						simExec.TEST_verifyPriorityQueueFunctionality();	
+						resetButtonState();
+						break;
+					}
+					case 1:{//FEL test 
+						simExec.TEST_verifyFEL();		
+						resetButtonState();
+						break;
+					}
+					case 2:{//sim environment tester				
+						simExec.TEST_simulator();	
+						resetButtonState();
+						break;
+					}
+					case 3: {//test tasks
+						simExec.TEST_taskDists();
 						resetButtonState();
 						break;
 					}
