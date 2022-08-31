@@ -1,7 +1,7 @@
 package pkgCS6730Project1;
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
-import base_Utils_Objects.io.MessageObject;
+import base_Utils_Objects.io.messaging.MessageObject;
 
 /**
  * console version of Discrete Event Simulator with UAV teams performing tasks

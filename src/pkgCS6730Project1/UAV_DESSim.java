@@ -33,6 +33,10 @@ public class UAV_DESSim extends GUI_AppManager {
 	    UAV_DESSim me = new UAV_DESSim();
 	    UAV_DESSim.invokeProcessingMain(me, passedArgs);	
 	}
+	@Override
+	protected void setRuntimeArgsVals(String[] _passedArgs) {
+	}
+
 
 	/**
 	 * whether or not we want to restrict window size on widescreen monitors
