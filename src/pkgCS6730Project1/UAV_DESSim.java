@@ -100,7 +100,7 @@ public class UAV_DESSim extends GUI_AppManager {
 
 		wIdx = dispDES_SimWin; fIdx= showDESwin;
 		setInitDispWinVals(wIdx, _dimOpen, _dimClosed,new boolean[]{false,true,true,true}, new int[]{210,220,250,255},new int[]{255,255,255,255},new int[]{180,180,180,255},new int[]{100,100,100,255}); 
-		dispWinFrames[wIdx] = new DESSimWindow(pa, this, winTitles[wIdx], fIdx, winFillClrs[wIdx], winStrkClrs[wIdx], winRectDimOpen[wIdx], winRectDimClose[wIdx], winDescr[wIdx]);		
+		dispWinFrames[wIdx] = new DESSimWindow(pa, this, wIdx, fIdx);		
 		//specify windows that cannot be shown simultaneously here
 		initXORWins(new int[]{showDESwin},new int[]{dispDES_SimWin});
 		
