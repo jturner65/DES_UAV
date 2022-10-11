@@ -8,6 +8,7 @@ import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.base.base_UpdateFromUIData;
 import base_UI_Objects.windowUI.base.myDispWindow;
 import base_UI_Objects.windowUI.drawnObjs.myDrawnSmplTraj;
+import base_UI_Objects.windowUI.uiObjs.GUIObj_Type;
 import base_Utils_Objects.io.messaging.MsgCodes;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.doubles.myVector;
@@ -226,12 +227,12 @@ public class DESSimWindow extends myDispWindow {
 	@Override
 	protected final void setupGUIObjsAras(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals) {
 		tmpListObjVals.put(gIDX_UAVTeamSize, new String[] {"2","3","4","5","6","7","8","9"});				                                                                                                                              			
-		tmpUIObjArray.put(gIDX_FrameTimeScale, new Object[] { new double[]{1.0f,10000.0f,1.0f}, 1.0*mySimExecutive.frameTimeScale, "Sim Speed Multiplier",new boolean []{false, false, true}});  
-		tmpUIObjArray.put(gIDX_UAVTeamSize, new Object[] { new double[]{0,tmpListObjVals.get(gIDX_UAVTeamSize).length-1, 1.0f}, 1.0*mySimulator.uavTeamSize - Integer.parseInt(tmpListObjVals.get(gIDX_UAVTeamSize)[0]), "UAV Team Size",new boolean []{true, true, true}});          
-		tmpUIObjArray.put(gIDX_ExpLength, new Object[] { new double[]{1.0f, 1440, 1.0f}, 720.0, "Experiment Duration",new boolean []{true, false, true}});    
-		tmpUIObjArray.put(gIDX_NumExpTrials, new Object[] { new double[]{1.0f, 100, 1.0f}, 1.0, "# Experimental Trials",new boolean []{true, false, true}});  
+		tmpUIObjArray.put(gIDX_FrameTimeScale, new Object[] { new double[]{1.0f,10000.0f,1.0f}, 1.0*mySimExecutive.frameTimeScale, "Sim Speed Multiplier", GUIObj_Type.FloatVal, new boolean[]{true}});  
+		tmpUIObjArray.put(gIDX_UAVTeamSize, new Object[] { new double[]{0,tmpListObjVals.get(gIDX_UAVTeamSize).length-1, 1.0f}, 1.0*mySimulator.uavTeamSize - Integer.parseInt(tmpListObjVals.get(gIDX_UAVTeamSize)[0]), "UAV Team Size", GUIObj_Type.ListVal, new boolean[]{true}});          
+		tmpUIObjArray.put(gIDX_ExpLength, new Object[] { new double[]{1.0f, 1440, 1.0f}, 720.0, "Experiment Duration", GUIObj_Type.IntVal, new boolean[]{true}});    
+		tmpUIObjArray.put(gIDX_NumExpTrials, new Object[] { new double[]{1.0f, 100, 1.0f}, 1.0, "# Experimental Trials", GUIObj_Type.IntVal, new boolean[]{true}});  
 					
-		//tmpUIObjArray.put(gIDX_MapType,new Object[] { new double[]{0.0, tmpListObjVals.get(gIDX_MapType).length-1, 1},0.0, "Map Type to Show", new boolean[]{true, true, true}}); 
+		//tmpUIObjArray.put(gIDX_MapType,new Object[] { new double[]{0.0, tmpListObjVals.get(gIDX_MapType).length-1, 1},0.0, "Map Type to Show", GUIObj_Type.ListVal, new boolean[]{true}}); 
 	
 	}//setupGUIObjsAras
 	
