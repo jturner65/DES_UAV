@@ -167,9 +167,6 @@ public class DESSimWindow extends myDispWindow {
 	protected base_UpdateFromUIData buildUIDataUpdateObject() {return null;	}
 
 	@Override
-	protected void buildUIUpdateStruct_Indiv(TreeMap<Integer, Integer> intValues, TreeMap<Integer, Float> floatValues,TreeMap<Integer, Boolean> boolValues) {	}
-
-	@Override
 	protected int[] getFlagIDXsToInitToTrue() {return null;}
 	
 	@Override
