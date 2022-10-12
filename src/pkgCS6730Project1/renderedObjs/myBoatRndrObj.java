@@ -4,9 +4,9 @@ import base_UI_Objects.my_procApplet;
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
-import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.entities.myUAVObj;
 import pkgCS6730Project1.renderedObjs.base.myRenderObj;
+import pkgCS6730Project1.sim.base.mySimulator;
 import processing.core.PShape;
 import processing.core.PConstants;
 

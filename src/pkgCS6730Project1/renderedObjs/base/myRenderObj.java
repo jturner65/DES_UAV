@@ -5,8 +5,8 @@ import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
-import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.renderedObjs.myRndrObjClr;
+import pkgCS6730Project1.sim.base.mySimulator;
 import processing.core.PShape;
 import processing.core.PConstants;
 

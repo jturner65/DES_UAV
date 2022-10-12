@@ -8,7 +8,7 @@ import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.GUI_AppManager;
-import pkgCS6730Project1.mySimulator;
+import pkgCS6730Project1.sim.base.mySimulator;
 
 //class referencing a single uav object
 public class myUAVObj {

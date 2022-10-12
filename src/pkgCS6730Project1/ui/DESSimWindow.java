@@ -1,4 +1,4 @@
-package pkgCS6730Project1;
+package pkgCS6730Project1.ui;
 
 import java.io.File;
 import java.util.*;
@@ -10,6 +10,10 @@ import base_UI_Objects.windowUI.base.myDispWindow;
 import base_UI_Objects.windowUI.drawnObjs.myDrawnSmplTraj;
 import base_UI_Objects.windowUI.uiObjs.GUIObj_Type;
 import base_Utils_Objects.io.messaging.MsgCodes;
+import pkgCS6730Project1.sim.mySimExecutive;
+import pkgCS6730Project1.sim.base.mySimulator;
+import pkgCS6730Project1.sim.layouts.ComplexDesSim;
+import pkgCS6730Project1.sim.layouts.SimpleDesSim;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.doubles.myVector;
 
@@ -100,7 +104,7 @@ public class DESSimWindow extends myDispWindow {
 	}//setInitFlags	
 
 	private void setComplexSim() {		
-		if(cmplxSim == null) {cmplxSim = new complexDesSim(simExec, 5000);	} 
+		if(cmplxSim == null) {cmplxSim = new ComplexDesSim(simExec, 5000);	} 
 		simExec.initSimWorld(cmplxSim, true);
 		boolean showVis =  (pa != null);
 		setPrivFlags(drawVisIDX, showVis);		
@@ -117,7 +121,7 @@ public class DESSimWindow extends myDispWindow {
 	}//initComplexSim
 	
 	private void setSimpleSim() {
-		if(smplSim == null) {smplSim = new simpleDesSim(simExec, 100);	} 
+		if(smplSim == null) {smplSim = new SimpleDesSim(simExec, 100);	} 
 		simExec.initSimWorld(smplSim, true);
 		boolean showVis = (pa != null);
 		setPrivFlags(drawVisIDX, showVis);		

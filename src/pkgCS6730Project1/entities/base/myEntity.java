@@ -2,8 +2,8 @@ package pkgCS6730Project1.entities.base;
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import pkgCS6730Project1.DESSimWindow;
-import pkgCS6730Project1.mySimulator;
+import pkgCS6730Project1.sim.base.mySimulator;
+import pkgCS6730Project1.ui.DESSimWindow;
 
 //base class for all entities
 public abstract class myEntity {	

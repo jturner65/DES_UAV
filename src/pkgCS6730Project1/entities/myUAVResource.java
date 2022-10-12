@@ -4,11 +4,11 @@ import java.util.concurrent.*;
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import pkgCS6730Project1.DESSimWindow;
-import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.entities.base.EntityType;
 import pkgCS6730Project1.entities.base.myEntity;
 import pkgCS6730Project1.events.myEvent;
+import pkgCS6730Project1.sim.base.mySimulator;
+import pkgCS6730Project1.ui.DESSimWindow;
 
 /**
  * class containing functionality shared by all resources in UAV DES sim

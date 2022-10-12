@@ -1,4 +1,4 @@
-package pkgCS6730Project1;
+package pkgCS6730Project1.sim.task;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;

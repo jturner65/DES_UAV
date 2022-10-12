@@ -1,4 +1,4 @@
-package pkgCS6730Project1;
+package pkgCS6730Project1.sim;
 import java.io.*;
 import java.nio.file.*;
 import java.time.Instant;
@@ -10,6 +10,8 @@ import base_Utils_Objects.priorityQueue.myMinQueue;
 import base_Utils_Objects.priorityQueue.base.myPriorityQueue;
 import pkgCS6730Project1.events.EventType;
 import pkgCS6730Project1.events.myEvent;
+import pkgCS6730Project1.sim.base.mySimulator;
+import pkgCS6730Project1.ui.DESSimWindow;
 
 //class to manage the functionality of the simulation executive
 public class mySimExecutive {
@@ -231,14 +233,14 @@ public class mySimExecutive {
 	}//drawMe	
 	
 	//display message and time now
-	protected void showTimeMsgNow(String callingClass, String callingMethod, String _str, long stTime) {
+	public void showTimeMsgNow(String callingClass, String callingMethod, String _str, long stTime) {
 		dispOutput(callingClass, callingMethod,_str+" Time Now : "+(getCurTime() - stTime));
 	}
 	
 	//get time from "start time"
 	//1518700615691 is epoch instant @ 8:17 am 2/15/18
 	//public long getCurTime() {return getCurTime(1518700615691L);}
-	protected long getCurTime() {			
+	public long getCurTime() {			
 		Instant instant = Instant.now();
 		long millis = instant.toEpochMilli() - execBuiltTime;//milliseconds since 1/1/1970, subtracting when this sim exec was built to keep millis low			
 		return millis;
@@ -247,12 +249,12 @@ public class mySimExecutive {
 	//returns a positive int value in millis of current wall time since sim start
 	protected long getCurSimTime() {	return getCurTime() - simStartTime;}
 	//returns current simNow time - now is appropriately scaled time of sim, and incremented at each simMe call based on render time
-	protected float getNowTime() {	return nowTime;}
+	public float getNowTime() {	return nowTime;}
 	//return a positive value in minutes from beginning of simulation
 	protected float getCurSimTimeMinutes() { return getCurSimTime()/60000.0f;}	
 	
-	protected void setTimeScale(float _ts) {		frameTimeScale = _ts;	}
-	protected float getTimeScale() {		return frameTimeScale;}	
+	public void setTimeScale(float _ts) {		frameTimeScale = _ts;	}
+	public float getTimeScale() {		return frameTimeScale;}	
 	
 	//split up newline-parsed strings into an array of strings, for display on screen
 	protected String[] getInfoStrAra(String str){return str.split("\n",-1);}

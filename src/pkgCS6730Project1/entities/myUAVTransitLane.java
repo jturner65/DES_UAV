@@ -5,10 +5,10 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
-import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.entities.base.EntityType;
 import pkgCS6730Project1.events.EventType;
 import pkgCS6730Project1.events.myEvent;
+import pkgCS6730Project1.sim.base.mySimulator;
 
 //class representing transition from one task to another - acts also as a queue
 //Transit lane always has one entry and one exit

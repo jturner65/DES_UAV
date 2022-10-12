@@ -1,8 +1,8 @@
 package pkgCS6730Project1.renderedObjs;
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
-import pkgCS6730Project1.mySimulator;
 import pkgCS6730Project1.renderedObjs.base.myRenderObj;
+import pkgCS6730Project1.sim.base.mySimulator;
 import processing.core.PConstants;
 
 public class mySphereRndrObj extends myRenderObj {

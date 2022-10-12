@@ -2,6 +2,7 @@ package pkgCS6730Project1;
 
 import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.base.myDispWindow;
+import pkgCS6730Project1.ui.DESSimWindow;
 
 /**
  * CS6730 Project 1 : UAV Discrete Event Simulator
