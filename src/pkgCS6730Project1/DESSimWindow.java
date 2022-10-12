@@ -40,8 +40,6 @@ public class DESSimWindow extends myDispWindow {
 	
 	/////////
 	//custom debug/function ui button names -empty will do nothing
-//	public String[] menuDbgBtnNames = new String[] {"Verify PQ", "Verify FEL", "Show Sim", "Test Tasks"};//must have literals for every button or this is ignored
-//	public String[] menuFuncBtnNames = new String[] {"Use Main Sim", "Use Huge Sim"};//must have literals for every button or ignored
 	
 	//private child-class flags - window specific
 	public static final int 
@@ -59,15 +57,6 @@ public class DESSimWindow extends myDispWindow {
 			condUAVSweepExpIDX  = 11;						//sweep through UAV Team Sizes
 
 	public static final int numPrivFlags = 12;
-	
-//	public String[][] menuBtnNames = new String[][] { // each must have literals for every button defined in side bar
-//		// menu, or ignored
-//		{ "Simple SIM", "Complex SIM", "---"}, // row 1
-//		{ "---", "---", "---", "---" }, // row 3
-//		{ "---", "---", "---", "---" }, // row 2
-//		{ "---", "---", "---", "---" }, 
-//		{ "---", "---", "---", "---", "---" } 
-//	};
 		
 	public DESSimWindow(IRenderInterface _p, GUI_AppManager _AppMgr, int _winIdx, int _flagIdx) {
 		super(_p, _AppMgr, _winIdx, _flagIdx);
@@ -162,10 +151,20 @@ public class DESSimWindow extends myDispWindow {
 		
 		custMenuOffset = uiClkCoords[3];	//495	
 	}//initMe	
-		
+	
+	/**
+	 * This function would provide an instance of the override class for base_UpdateFromUIData, which would
+	 * be used to communicate changes in UI settings directly to the value consumers.
+	 */
 	@Override
-	protected base_UpdateFromUIData buildUIDataUpdateObject() {return null;	}
-
+	protected base_UpdateFromUIData buildUIDataUpdateObject() {
+		return null;
+	}
+	/**
+	 * This function is called on ui value update, to pass new ui values on to window-owned consumers
+	 */
+	protected final void updateCalcObjUIVals() {}
+	
 	@Override
 	protected int[] getFlagIDXsToInitToTrue() {return null;}
 	
