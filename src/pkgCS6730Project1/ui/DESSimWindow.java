@@ -1,21 +1,22 @@
 package pkgCS6730Project1.ui;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.TreeMap;
 
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
+import base_Math_Objects.vectorObjs.doubles.myPoint;
+import base_Math_Objects.vectorObjs.doubles.myVector;
 import base_UI_Objects.GUI_AppManager;
-import base_UI_Objects.windowUI.base.base_UpdateFromUIData;
 import base_UI_Objects.windowUI.base.myDispWindow;
 import base_UI_Objects.windowUI.drawnObjs.myDrawnSmplTraj;
+import base_UI_Objects.windowUI.uiData.UIDataUpdater;
 import base_UI_Objects.windowUI.uiObjs.GUIObj_Type;
 import base_Utils_Objects.io.messaging.MsgCodes;
 import pkgCS6730Project1.sim.mySimExecutive;
 import pkgCS6730Project1.sim.base.mySimulator;
 import pkgCS6730Project1.sim.layouts.ComplexDesSim;
 import pkgCS6730Project1.sim.layouts.SimpleDesSim;
-import base_Math_Objects.vectorObjs.doubles.myPoint;
-import base_Math_Objects.vectorObjs.doubles.myVector;
 
 public class DESSimWindow extends myDispWindow {
 	//simulation executive
@@ -83,8 +84,8 @@ public class DESSimWindow extends myDispWindow {
 		tmpBtnNamesArray.add(new Object[] {"Showing TLane Lbls", "Show TLane Lbls", dispTLnsLblsIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Showing Team Lbls", "Show Team Lbls",  dispUAVLblsIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Drawing UAV Boats", "Drawing UAV Spheres",   drawBoatsIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Experimenting", "Conduct Experiment", conductExpIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Team SweepSize Experiment", "Conduct Team Sweep Experiment", condUAVSweepExpIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Experimenting", "Run Experiment", conductExpIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Team SweepSize Experiment", "Run Team Sweep Experiment", condUAVSweepExpIDX});  
 		return numPrivFlags;
 	}//initAllPrivBtns	
 	
@@ -161,8 +162,8 @@ public class DESSimWindow extends myDispWindow {
 	 * be used to communicate changes in UI settings directly to the value consumers.
 	 */
 	@Override
-	protected base_UpdateFromUIData buildUIDataUpdateObject() {
-		return null;
+	protected UIDataUpdater buildUIDataUpdateObject() {
+		return new DESSimUIDataUpdater(this);
 	}
 	/**
 	 * This function is called on ui value update, to pass new ui values on to window-owned consumers
@@ -205,7 +206,7 @@ public class DESSimWindow extends myDispWindow {
 			case conductExpIDX			: {
 				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
 				if(val) {
-					simExec.initializeTrials((int) uiVals[gIDX_ExpLength], (int) uiVals[gIDX_NumExpTrials], true);
+					simExec.initializeTrials(uiUpdateData.getIntValue(gIDX_ExpLength), uiUpdateData.getIntValue(gIDX_NumExpTrials), true);
 					AppMgr.setSimIsRunning(true);
 					addPrivBtnToClear(conductExpIDX);
 				} 
@@ -213,7 +214,7 @@ public class DESSimWindow extends myDispWindow {
 			case condUAVSweepExpIDX			: {
 				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
 				if(val) {
-					simExec.initializeTrials((int) uiVals[gIDX_ExpLength], (int) uiVals[gIDX_NumExpTrials], false);
+					simExec.initializeTrials(uiUpdateData.getIntValue(gIDX_ExpLength), uiUpdateData.getIntValue(gIDX_NumExpTrials), false);
 					AppMgr.setSimIsRunning(true);
 					addPrivBtnToClear(condUAVSweepExpIDX);
 				} 
@@ -236,30 +237,48 @@ public class DESSimWindow extends myDispWindow {
 	
 	}//setupGUIObjsAras
 	
-	@Override
-	protected void setUIWinVals(int UIidx) {
-		float val = (float)guiObjs[UIidx].getVal();
-		if(val != uiVals[UIidx]){//if value has changed...
-			uiVals[UIidx] = val;
-			switch(UIidx){		
-				case gIDX_FrameTimeScale 			:{
-					simExec.setTimeScale(val);
-					break;}
-				case gIDX_UAVTeamSize : {
-					mySimulator.uavTeamSize = (int)val + 2;//add idx 0 as min size
-					msgObj.dispInfoMessage("DESSimWindow", "setUIWinVals", "UAV team size desired is : " + mySimulator.uavTeamSize);
-					//rebuild sim exec and sim environment whenever team size changes
-					simExec.initSimExec(true);				
-					break;}
-				case gIDX_ExpLength : {//determines experiment length				
-					break;}
-				case gIDX_NumExpTrials : {//# of trials for experiments
-					
-				}
-
-			default : {break;}
+	/**
+	 * Called if int-handling guiObjs[UIidx] (int or list) has new data which updated UI adapter. 
+	 * Intended to support custom per-object handling by owning window.
+	 * Only called if data changed!
+	 * @param UIidx Index of gui obj with new data
+	 * @param ival integer value of new data
+	 * @param oldVal integer value of old data in UIUpdater
+	 */	@Override
+	protected final void setUI_IntValsCustom(int UIidx, int ival, int oldVal) {
+		switch(UIidx){		
+			case gIDX_UAVTeamSize : {
+				mySimulator.uavTeamSize = ival + 2;//add idx 0 as min size
+				msgObj.dispInfoMessage("DESSimWindow", "setUIWinVals", "UAV team size desired is : " + mySimulator.uavTeamSize);
+				//rebuild sim exec and sim environment whenever team size changes
+				simExec.initSimExec(true);				
+				break;}
+			case gIDX_ExpLength 		: {break;}//determines experiment length				
+			case gIDX_NumExpTrials 		: {break;}//# of trials for experiments
+			default : {
+				msgObj.dispWarningMessage(className, "setUI_IntValsCustom", "No int-defined gui object mapped to idx :"+UIidx);
 			}
-		}
+		}		
+	}
+	/**
+	 * Called if float-handling guiObjs[UIidx] has new data which updated UI adapter.  
+	 * Intended to support custom per-object handling by owning window.
+	 * Only called if data changed!
+	 * @param UIidx Index of gui obj with new data
+	 * @param val float value of new data
+	 * @param oldVal integer value of old data in UIUpdater
+	 */
+	@Override
+	protected final void setUI_FloatValsCustom(int UIidx, float val, float oldVal) {
+		switch(UIidx){		
+			case gIDX_FrameTimeScale 			:{
+				simExec.setTimeScale(val);
+				break;}
+
+			default : {
+				msgObj.dispWarningMessage(className, "setUI_FloatValsCustom", "No int-defined gui object mapped to idx :"+UIidx);
+			}
+		}		
 	}
 
 	@Override
@@ -329,7 +348,7 @@ public class DESSimWindow extends myDispWindow {
 	@Override
 	protected void setVisScreenDimsPriv() {}
 	@Override
-	protected final void setCustMenuBtnNames() {	}
+	protected final void setCustMenuBtnLabels() {	}
 	@Override
 	protected final void launchMenuBtnHndlr(int funcRow, int btn) {
 		msgObj.dispMessage(className, "launchMenuBtnHndlr", "Begin requested action : Click Functions "+(funcRow+1)+" in " + name + " : btn : " + btn, MsgCodes.info4);
@@ -534,7 +553,5 @@ public class DESSimWindow extends myDispWindow {
 	protected final void delTrajToScrIndiv(int subScrKey, String newTrajKey) {}
 	@Override
 	public final void processTrajIndiv(myDrawnSmplTraj drawnTraj) {}
-
-
 }//DESSimWindow
 
