@@ -723,6 +723,8 @@ public abstract class mySimulator {
 		} while (pos.z < ctr.z);
 		return pos;
 	}	
+	
+	
 	//handle passed event - dispatch event to appropriate entity with appropriate values
 	public myEvent handleEvent(myEvent _ev) {
 		//dispOutput("\tHandling event : " + _ev.name);

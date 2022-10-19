@@ -36,12 +36,6 @@ public class DESSimWindow extends myDispWindow {
 		gIDX_UAVTeamSize			= 1, 
 		gIDX_ExpLength				= 2,			//length of time for experiment, in minutes
 		gIDX_NumExpTrials			= 3; 
-	//initial values - need one per object
-
-	public final int numGUIObjs = 4;											//# of gui objects for ui	
-	
-	//display variables
-	//private float[] UIrectBox;	//box holding x,y,w,h values of black rectangle to hold UI sim display values
 	
 	/////////
 	//custom debug/function ui button names -empty will do nothing
@@ -222,9 +216,21 @@ public class DESSimWindow extends myDispWindow {
 			
 			default:					{}
 		}		
-	}//setPrivFlags	
-		
-
+	}//setPrivFlags
+	
+	/**
+	 * Build all UI objects to be shown in left side bar menu for this window.  This is the first child class function called by initThisWin
+	 * @param tmpUIObjArray : map of object data, keyed by UI object idx, with array values being :                    
+	 *           the first element double array of min/max/mod values                                                   
+	 *           the 2nd element is starting value                                                                      
+	 *           the 3rd elem is label for object                                                                       
+	 *           the 4th element is object type (GUIObj_Type enum)
+	 *           the 5th element is boolean array of : (unspecified values default to false)
+	 *           	{value is sent to owning window, 
+	 *           	value is sent on any modifications (while being modified, not just on release), 
+	 *           	changes to value must be explicitly sent to consumer (are not automatically sent)}    
+	 * @param tmpListObjVals : map of list object possible selection values
+	 */
 	@Override
 	protected final void setupGUIObjsAras(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals) {
 		tmpListObjVals.put(gIDX_UAVTeamSize, new String[] {"2","3","4","5","6","7","8","9"});				                                                                                                                              			
@@ -232,9 +238,6 @@ public class DESSimWindow extends myDispWindow {
 		tmpUIObjArray.put(gIDX_UAVTeamSize, new Object[] { new double[]{0,tmpListObjVals.get(gIDX_UAVTeamSize).length-1, 1.0f}, 1.0*mySimulator.uavTeamSize - Integer.parseInt(tmpListObjVals.get(gIDX_UAVTeamSize)[0]), "UAV Team Size", GUIObj_Type.ListVal, new boolean[]{true}});          
 		tmpUIObjArray.put(gIDX_ExpLength, new Object[] { new double[]{1.0f, 1440, 1.0f}, 720.0, "Experiment Duration", GUIObj_Type.IntVal, new boolean[]{true}});    
 		tmpUIObjArray.put(gIDX_NumExpTrials, new Object[] { new double[]{1.0f, 100, 1.0f}, 1.0, "# Experimental Trials", GUIObj_Type.IntVal, new boolean[]{true}});  
-					
-		//tmpUIObjArray.put(gIDX_MapType,new Object[] { new double[]{0.0, tmpListObjVals.get(gIDX_MapType).length-1, 1},0.0, "Map Type to Show", GUIObj_Type.ListVal, new boolean[]{true}}); 
-	
 	}//setupGUIObjsAras
 	
 	/**
@@ -349,9 +352,15 @@ public class DESSimWindow extends myDispWindow {
 	protected void setVisScreenDimsPriv() {}
 	@Override
 	protected final void setCustMenuBtnLabels() {	}
+	/**
+	 * type is row of buttons (1st idx in curCustBtn array) 2nd idx is btn
+	 * @param funcRow idx for button row
+	 * @param btn idx for button within row (column)
+	 * @param label label for this button (for display purposes)
+	 */
 	@Override
-	protected final void launchMenuBtnHndlr(int funcRow, int btn) {
-		msgObj.dispMessage(className, "launchMenuBtnHndlr", "Begin requested action : Click Functions "+(funcRow+1)+" in " + name + " : btn : " + btn, MsgCodes.info4);
+	protected final void launchMenuBtnHndlr(int funcRow, int btn, String label){
+		msgObj.dispMessage(className, "launchMenuBtnHndlr", "Begin requested action : Click '" + label +"' (Row:"+(funcRow+1)+"|Col:"+btn+") in " + name, MsgCodes.info4);
 		switch (funcRow) {
 			case 0: {// row 1 of menu side bar buttons
 				// {"Gen Training Data", "Save Training data","Load Training Data"}, //row 1
