@@ -1,7 +1,7 @@
 package pkgCS6730Project1;
 
 import base_UI_Objects.GUI_AppManager;
-import base_UI_Objects.windowUI.base.myDispWindow;
+import base_UI_Objects.windowUI.base.Base_DispWindow;
 import pkgCS6730Project1.ui.DESSimWindow;
 
 /**
@@ -66,7 +66,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	@Override
 	protected void initAllDispWindows() {
 		showInfo = true;
-		//includes 1 for menu window (never < 1) - always have same # of visFlags as myDispWindows
+		//includes 1 for menu window (never < 1) - always have same # of visFlags as Base_DispWindows
 		int numWins = numVisFlags;		
 		//titles and descs, need to be set before sidebar menu is defined
 		String[] _winTitles = new String[]{"","UAV DES Sim"},//,"SOM Map UI"},
@@ -145,7 +145,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	//address all flag-setting here, so that if any special cases need to be addressed they can be
 	protected void setVisFlag_Indiv(int idx, boolean val ){
 		switch (idx){
-			case showUIMenu 	    : { dispWinFrames[dispMenuIDX].setFlags(myDispWindow.showIDX,val);    break;}											//whether or not to show the main ui window (sidebar)			
+			case showUIMenu 	    : { dispWinFrames[dispMenuIDX].setFlags(Base_DispWindow.showIDX,val);    break;}											//whether or not to show the main ui window (sidebar)			
 			case showDESwin			: { setWinFlagsXOR(dispDES_SimWin, val); break;}//setDispAndModMapMgr(showCOTS_2DMorph, dispCOTS_2DMorph, val);break;}
 			default : {break;}
 		}

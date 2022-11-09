@@ -4,7 +4,7 @@ package pkgCS6730Project1.entities;
 import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
-import base_UI_Objects.windowUI.base.myDispWindow;
+import base_UI_Objects.windowUI.base.Base_DispWindow;
 import pkgCS6730Project1.entities.base.EntityType;
 import pkgCS6730Project1.entities.base.myEntity;
 import pkgCS6730Project1.renderedObjs.base.myRenderObj;
@@ -119,10 +119,10 @@ public class myUAVTeam extends myEntity {
 			pa.popMatState();
 			//individual UAVs are relative to loc
 			if(sim.getDrawBoats()){//broken apart to minimize if checks - only potentially 2 per team per frame instead of thousands
-				if(debugAnim){		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeDbgFrame(myDispWindow.AppMgr, pa,delT);}}
+				if(debugAnim){		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeDbgFrame(Base_DispWindow.AppMgr, pa,delT);}}
 				else {				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMe(pa,delT);}}	  					
 			} else {
-				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeBall(myDispWindow.AppMgr, pa,debugAnim);  }
+				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeBall(Base_DispWindow.AppMgr, pa,debugAnim);  }
 			}
 		if(drawLbls) {	dispEntityLabel(pa, win);		}
 		pa.popMatState();

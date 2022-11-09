@@ -8,17 +8,17 @@ import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.doubles.myVector;
 import base_UI_Objects.GUI_AppManager;
-import base_UI_Objects.windowUI.base.myDispWindow;
-import base_UI_Objects.windowUI.drawnObjs.myDrawnSmplTraj;
+import base_UI_Objects.windowUI.base.Base_DispWindow;
+import base_UI_Objects.windowUI.drawnObjs.DrawnSimpleTraj;
 import base_UI_Objects.windowUI.uiData.UIDataUpdater;
-import base_UI_Objects.windowUI.uiObjs.GUIObj_Type;
+import base_UI_Objects.windowUI.uiObjs.base.GUIObj_Type;
 import base_Utils_Objects.io.messaging.MsgCodes;
 import pkgCS6730Project1.sim.mySimExecutive;
 import pkgCS6730Project1.sim.base.mySimulator;
 import pkgCS6730Project1.sim.layouts.ComplexDesSim;
 import pkgCS6730Project1.sim.layouts.SimpleDesSim;
 
-public class DESSimWindow extends myDispWindow {
+public class DESSimWindow extends Base_DispWindow {
 	//simulation executive
 	private mySimExecutive simExec;
 	private mySimulator smplSim, cmplxSim;
@@ -561,6 +561,6 @@ public class DESSimWindow extends myDispWindow {
 	@Override
 	protected final void delTrajToScrIndiv(int subScrKey, String newTrajKey) {}
 	@Override
-	public final void processTrajIndiv(myDrawnSmplTraj drawnTraj) {}
+	public void processTrajIndiv(DrawnSimpleTraj drawnTraj) {}
 }//DESSimWindow
 
