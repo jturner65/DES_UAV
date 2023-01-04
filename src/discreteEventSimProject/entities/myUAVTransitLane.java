@@ -2,7 +2,7 @@ package discreteEventSimProject.entities;
 
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import discreteEventSimProject.entities.base.EntityType;

@@ -4,7 +4,7 @@ import java.nio.file.*;
 import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
-import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IRenderInterface;
 import base_Utils_Objects.io.messaging.MessageObject;
 import base_Utils_Objects.priorityQueue.myMinQueue;
 import base_Utils_Objects.priorityQueue.base.myPriorityQueue;

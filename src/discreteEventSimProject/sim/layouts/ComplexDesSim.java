@@ -9,7 +9,7 @@ import discreteEventSimProject.sim.base.mySimulator;
 
 /**
  * randomly generate a simulation that is very complex
- * @author 7strb
+ * @author John Turner
  *
  */
 public class ComplexDesSim extends mySimulator{

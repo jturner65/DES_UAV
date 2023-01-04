@@ -1,6 +1,6 @@
 package discreteEventSimProject.renderedObjs;
 
-import base_JavaProjTools_IRender.base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IRenderInterface;
 import discreteEventSimProject.renderedObjs.base.myRenderObj;
 import discreteEventSimProject.sim.base.mySimulator;
 import processing.core.PConstants;
