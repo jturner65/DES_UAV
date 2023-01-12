@@ -1,5 +1,8 @@
 package discreteEventSimProject;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
 import discreteEventSimProject.ui.DESSimWindow;
@@ -11,7 +14,10 @@ import discreteEventSimProject.ui.DESSimWindow;
 
 public class UAV_DESSim extends GUI_AppManager {
 
-	public String prjNmLong = "CS6730 Project 1 : UAV Des Simulation", prjNmShrt = "Prj1_UAV_DESSim";
+	public final String prjNmShrt = "UAV_DESSim_UI";
+	public final String prjNmLong = "UAV Discrete Event Simulation";
+	public final String projDesc = "Demonstrate Future Event List-driven sequential discrete event simulation via UI.";
+	
 	public String authorString = "John Turner";
 	public final int[] bground = new int[]{244,244,255,255};		//bground color
 	
@@ -34,11 +40,19 @@ public class UAV_DESSim extends GUI_AppManager {
 	    UAV_DESSim me = new UAV_DESSim();
 	    UAV_DESSim.invokeProcessingMain(me, passedArgs);	
 	}
+	
+	protected UAV_DESSim() {super();}
+	
+	/**
+	 * Set various relevant runtime arguments in argsMap
+	 * @param _passedArgs command-line arguments
+	 */
 	@Override
-	protected void setRuntimeArgsVals(String[] _passedArgs) {
+	protected TreeMap<String,Object> setRuntimeArgsVals(Map<String, Object> _passedArgsMap) {
+
+		return (TreeMap<String, Object>) _passedArgsMap;
 	}
-
-
+	
 	/**
 	 * whether or not we want to restrict window size on widescreen monitors
 	 * 
@@ -48,7 +62,12 @@ public class UAV_DESSim extends GUI_AppManager {
 	 */
 	@Override
 	protected int setAppWindowDimRestrictions() {	return 1;}	
-	
+	@Override
+	public String getPrjNmShrt() {return prjNmShrt;}
+	@Override
+	public String getPrjNmLong() {return prjNmLong;}
+	@Override
+	public String getPrjDescr() {return projDesc;}	
 	
 	@Override
 	protected void setup_Indiv() {		setBkgrnd(); setDesired3DGridDims(1500);}
@@ -118,10 +137,6 @@ public class UAV_DESSim extends GUI_AppManager {
 	protected void initProgram_Indiv(){	}//initProgram	
 	@Override
 	protected void initVisProg_Indiv() {}	
-	@Override
-	protected String getPrjNmLong() {return prjNmLong;}
-	@Override
-	protected String getPrjNmShrt() {		return prjNmShrt;	}
 
 	//////////////////////////////////////////
 	/// graphics and base functionality utilities and variables
