@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import base_Render_Interface.IRenderInterface;
-import base_Utils_Objects.AppManager.Console_AppManager;
-import base_Utils_Objects.AppManager.argParse.cmdLineArgs.base.Base_CmdLineArg;
+import base_Utils_Objects.appManager.Console_AppManager;
+import base_Utils_Objects.appManager.argParse.cmdLineArgs.base.Base_CmdLineArg;
 import base_Utils_Objects.io.messaging.MessageObject;
 import discreteEventSimProject.sim.mySimExecutive;
 import discreteEventSimProject.sim.base.mySimulator;

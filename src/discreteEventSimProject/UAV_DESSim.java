@@ -75,11 +75,11 @@ public class UAV_DESSim extends GUI_AppManager {
 	public void setBkgrnd(){pa.setRenderBackground(bground[0],bground[1],bground[2],bground[3]);}//setBkgrnd	
 
 	@Override
-	protected void initMainFlags_Indiv() {
-		setMainFlagToShow_debugMode(true);
-		setMainFlagToShow_runSim(true);
-		setMainFlagToShow_singleStep(true);
-		setMainFlagToShow_showRtSideMenu(true);
+	protected void initBaseFlags_Indiv() {
+		setBaseFlagToShow_debugMode(true);
+		setBaseFlagToShow_runSim(true);
+		setBaseFlagToShow_singleStep(true);
+		setBaseFlagToShow_showRtSideMenu(true);
 	}
 
 	@Override
@@ -92,7 +92,10 @@ public class UAV_DESSim extends GUI_AppManager {
 				_winDescr = new String[] {"","Display UAV Discrete Event Simulator"};
 		initWins(numWins,_winTitles, _winDescr);
 		//call for menu window
-		buildInitMenuWin(showUIMenu);
+		buildInitMenuWin();
+		//instanced window dimensions when open and closed - only showing 1 open at a time
+		float[] _dimOpen  = getDefaultWinDimOpen(), 
+				_dimClosed  = getDefaultWinDimClosed();	
 		//menu bar init
 		String[] menuBtnTitles = new String[]{"Sim Map","Functions 2","Functions 3","Functions 4"};
 		String[][] menuBtnNames = new String[][] { // each must have literals for every button defined in side bar
@@ -107,8 +110,7 @@ public class UAV_DESSim extends GUI_AppManager {
 		
 		int wIdx = dispMenuIDX,fIdx=showUIMenu;
 		dispWinFrames[wIdx] = buildSideBarMenu(wIdx, fIdx, menuBtnTitles, menuBtnNames, menuDbgBtnNames, false, false);
-		//instanced window dimensions when open and closed - only showing 1 open at a time
-		float[] _dimOpen  =  new float[]{menuWidth, 0, pa.getWidth()-menuWidth, pa.getHeight()}, _dimClosed  =  new float[]{menuWidth, 0, hideWinWidth, pa.getHeight()};	
+
 		//setInitDispWinVals : use this to define the values of a display window
 		//int _winIDX, 
 		//float[] _dimOpen, float[] _dimClosed  : dimensions opened or closed
