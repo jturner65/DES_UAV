@@ -97,10 +97,11 @@ public class myUAVTransitLane extends myUAVResource{
 		return distToGo;
 	}
 	
-	//arrival is when a team has been first inserted into this transit lane, has just left previous task
-	//queue doesn't care about being in use, time is always based on distance between tasks and UAV speed
-	//team put in queue when arrived at queue (which is after moving through transit lane)
-	//TODO teams in queue will be rendered sequentially
+	/** 
+	 * Arrival is when a team has been first inserted into this transit lane, has just left previous task 
+	 * Queue doesn't care about being in use, time is always based on distance between tasks and UAV speed 
+	 * Team put in queue when arrived at queue (which is after moving through transit lane)
+	 */
 	@Override
 	public myEvent arriveAtRes(myEvent ev) {
 		long timeProc = ev.getTimestamp();
@@ -125,7 +126,9 @@ public class myUAVTransitLane extends myUAVResource{
 		return newEv;
 	}//arriveAtRes
 	
-	//event generatd when task has accepted the team, so this event generates no response event
+	/**
+	 * event generated when task has accepted the team, so this event generates no response event
+	 */
 	@Override
 	public myEvent leaveRes(myEvent ev) {
 		if (queueIsEmpty()) { return null;}
@@ -164,7 +167,11 @@ public class myUAVTransitLane extends myUAVResource{
 		return newEvent;
 	}//leaveRes
 	
-	//handles entering and leaving the queue - move to explicit location when entering queue - once in queue, is available for arrival
+	/**
+	 * handles entering and leaving the queue - move to explicit location when entering queue - once in queue, is available for arrival
+	 * @param ev
+	 * @return
+	 */
 	public myEvent enterQueue(myEvent ev) {
 		//add team to queue with event time as key
 		long timeArrive = ev.getTimestamp();
@@ -186,7 +193,10 @@ public class myUAVTransitLane extends myUAVResource{
 		return newEvent;
 	}//entered queue	
 //	
-	//return the time of the first uav team's entry to this queue
+	/**
+	 * return the time of the first uav team's entry to this queue
+	 * @return
+	 */
 	public long getFirstUAVTeamTime() {
 		if (teamQ.size() > 0) {	return teamQ.firstKey();}
 		else {		return Long.MAX_VALUE;}
@@ -194,7 +204,9 @@ public class myUAVTransitLane extends myUAVResource{
 	
 	public boolean queueIsEmpty() {return teamQ.size() == 0;}
 	
-	//put together list of values regarding this UAV team to show on screen
+	/**
+	 * put together list of values regarding this UAV team to show on screen
+	 */
 	protected String[] showStatus() {
 		String[] res = {
 			"Name : " + name ,

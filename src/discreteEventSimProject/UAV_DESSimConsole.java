@@ -1,13 +1,11 @@
 package discreteEventSimProject;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.HashMap;
 
 import base_Render_Interface.IRenderInterface;
 import base_Utils_Objects.appManager.Console_AppManager;
 import base_Utils_Objects.appManager.argParse.cmdLineArgs.base.Base_CmdLineArg;
-import base_Utils_Objects.io.messaging.MessageObject;
 import discreteEventSimProject.sim.mySimExecutive;
 import discreteEventSimProject.sim.base.mySimulator;
 import discreteEventSimProject.sim.layouts.SimpleDesSim;
@@ -53,13 +51,12 @@ public class UAV_DESSimConsole extends Console_AppManager {
 	}//	
 
 	protected void initExec() {
-		TreeMap<String, Object> argsMap = getArgsMap();
+		HashMap<String, Object> argsMap = getArgsMap();
 		
 		IRenderInterface dummy = null;
 		mySimulator.uavTeamSize = (Integer) argsMap.get("numUAVPerTeam");
 		mySimExecutive.frameTimeScale = (Float) argsMap.get("frameTimeScale");
 		
-		MessageObject msgObj = MessageObject.buildMe(false);
 		//instance sim exec and run loop
 		mySimExecutive simExec = new mySimExecutive(dummy, msgObj); 
 		mySimulator des = new SimpleDesSim(simExec, 100);
@@ -85,10 +82,13 @@ public class UAV_DESSimConsole extends Console_AppManager {
 		simLoop(simExec, runType);
 	}//initExec()
 	
+	/**
+	 * Set various relevant runtime arguments in argsMap
+	 * @param _passedArgs command-line arguments
+	 */
 	@Override
-	protected TreeMap<String, Object> setRuntimeArgsVals(Map<String, Object> _passedArgsMap) {
-		//Not overriding any args
-		return (TreeMap<String, Object>) _passedArgsMap;
+	protected HashMap<String,Object> setRuntimeArgsVals(HashMap<String, Object> _passedArgsMap) {
+		return  _passedArgsMap;
 	}
 	
 	/**

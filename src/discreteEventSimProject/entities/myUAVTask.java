@@ -102,7 +102,11 @@ public class myUAVTask extends myUAVResource{
 		}
 	}//arriveAtTask	
 	
-	//return an event requesting the first UAV with appropriate (lowest) timestamp from one of the parents of this task
+	/**
+	 * return an event requesting the first UAV with appropriate (lowest) timestamp from one of the parents of this task
+	 * @param timeNow
+	 * @return
+	 */
 	private myEvent getFirstParentUAV(long timeNow) {
 		long minTS = Long.MAX_VALUE-1;
 		myUAVResource minP = null;
@@ -114,8 +118,12 @@ public class myUAVTask extends myUAVResource{
 		return new myEvent(timeNow,EventType.LeaveResource, null, minP, this);		
 	}//getFirstParentUAV
 	
-	//if this task is ready then will build a LeaveResource event for parent queue 
-	//otherwise will set a flag so that leave resource can build an LeaveResource event for parent queue
+	/**
+	 * if this task is ready then will build a LeaveResource event for parent queue  
+	 * otherwise will set a flag so that leave resource can build an LeaveResource event for parent queue
+	 * @param ev
+	 * @return
+	 */
 	public myEvent consumerReady(myEvent ev) {
 		long timeProc = ev.getTimestamp();
 		if(getEntityFlags(taskIsFullIDX)) {//this is full, return a null event - when this task is done it will generate a "ready for input" event
@@ -128,9 +136,15 @@ public class myUAVTask extends myUAVResource{
 		}		
 	}//consumerReady
 	
-	//returns event used to determine where to go when leaving this task
-	//timeAhead is the "now" time that the arrival event was processed
-	//draws randomly for which transit lane to take, should always have lane at 0 key	
+	/**
+	 * returns event used to determine where to go when leaving this task. 
+	 * TimeAhead is the "now" time that the arrival event was processed. 
+	 * Draws randomly for which transit lane to take, should always have lane at 0 key	
+	 * @param timeAhead
+	 * @param team
+	 * @param ev
+	 * @return
+	 */
 	private myEvent _leaveResEnd(long timeAhead, myUAVTeam team, myEvent ev) {		
 		float _draw = ThreadLocalRandom.current().nextFloat();
 		//get biggest key less than or equal to _draw - with only 1 entry, will always return same entry
@@ -158,8 +172,10 @@ public class myUAVTask extends myUAVResource{
 		return res;		
 	}//_leaveResEnd
 	
-	//returns event used to determine where to go when leaving this task
-	//timeProc is the "now" time that the arrival event was processed
+	/**
+	 * returns event used to determine where to go when leaving this task 
+	 * timeProc is the "now" time that the arrival event was processed
+	 */
 	@Override
 	public myEvent leaveRes( myEvent ev) {
 		long timeProc = ev.getTimestamp();

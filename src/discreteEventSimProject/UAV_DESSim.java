@@ -1,7 +1,6 @@
 package discreteEventSimProject;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.HashMap;
 
 import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
@@ -48,9 +47,8 @@ public class UAV_DESSim extends GUI_AppManager {
 	 * @param _passedArgs command-line arguments
 	 */
 	@Override
-	protected TreeMap<String,Object> setRuntimeArgsVals(Map<String, Object> _passedArgsMap) {
-
-		return (TreeMap<String, Object>) _passedArgsMap;
+	protected HashMap<String,Object> setRuntimeArgsVals(HashMap<String, Object> _passedArgsMap) {
+		return  _passedArgsMap;
 	}
 	
 	/**
@@ -137,8 +135,6 @@ public class UAV_DESSim extends GUI_AppManager {
 	@Override
 	//called multiple times, whenever re-initing
 	protected void initProgram_Indiv(){	}//initProgram	
-	@Override
-	protected void initVisProg_Indiv() {}	
 
 	//////////////////////////////////////////
 	/// graphics and base functionality utilities and variables

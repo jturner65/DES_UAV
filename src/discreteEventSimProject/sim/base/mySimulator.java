@@ -268,9 +268,9 @@ public abstract class mySimulator {
 			case debugSimIDX 			: {break;}		
 			case drawVisIDX				: {break;}		//draw visualization - if false should ignore all processing/papplet stuff				
 			case drawBoatsIDX			: {break;}		//either draw boats or draw spheres for consumer UAV team members				
-			case drawUAVTeamsIDX		: {break;}		//either draw boats or draw spheres for consumer UAV team members				
-			case drawTaskLocsIDX		: {break;}		//either draw boats or draw spheres for consumer UAV team members				
-			case drawTLanesIDX			: {break;}		//either draw boats or draw spheres for consumer UAV team members								
+			case drawUAVTeamsIDX		: {break;}		//draw UAV teams				
+			case drawTaskLocsIDX		: {break;}		//draw task locations at end of task lanes
+			case drawTLanesIDX			: {break;}		//draw task lanes between task locations								
 			case dispTaskLblsIDX		: {break;}
 			case dispTLnsLblsIDX		: {break;}
 			case dispUAVLblsIDX			: {break;}			
@@ -343,8 +343,11 @@ public abstract class mySimulator {
 		}		
 		return maxIDX;
 	}
-	//draw result information on right sidebar
-	//UIRectBox is dims of enclosing box 
+	/**
+	 * draw result information on right sidebar
+	 * @param pa
+	 * @param yOff
+	 */
 	public void drawResultBar(IRenderInterface pa, float yOff) {
 		yOff-=4;
 		float sbrMult = 1.2f, lbrMult = 1.5f;//offsets multiplier for barriers between contextual ui elements
@@ -428,8 +431,11 @@ public abstract class mySimulator {
 	/////////////////////
 	// experimenting and reporting functions
 	
-	//test diminishing returns functionality for tasks with different optimal UAV team sizes.
-	//build dummy task descriptions, use these to test how performance changes when sweeping power value
+	/**
+	 * test diminishing returns functionality for tasks with different optimal UAV team sizes. 
+	 * Builds dummy task descriptions, uses these to test how performance changes when sweeping power value
+	 * @return
+	 */
 	public String testTaskTimeVals() {
 		//build report base dir, in case it doesn't exist yet
 		rptExpDir = baseDirStr + File.separatorChar + rptDateNowPrfx + "dir";
@@ -457,7 +463,10 @@ public abstract class mySimulator {
 		return taskResDir;
 	}//testTaskTimeVals		
 	
-	//functions for experimental trials
+	/**
+	 * functions for experimental trials
+	 * @param numTrials
+	 */
 	public void initTrials(int numTrials) {
 		uavRes = new long[numTrials][];
 		tlRes = new long[numTrials][][];
@@ -468,7 +477,12 @@ public abstract class mySimulator {
 		exec.createRptDir(rptExpDir);		
 	}//initTrials
 	
-	//end a round of experiments and save this round's results
+	/**
+	 * end a round of experiments and save this round's results
+	 * @param curTrial
+	 * @param numTrials
+	 * @param expDurMSec
+	 */
 	public void endExperiment(int curTrial, int numTrials, long expDurMSec) {
 		//finish up individual experiment - save results at they are now, with appropriate timestamp, uav count, and other appropriate values for file name
 		//record results
@@ -489,7 +503,12 @@ public abstract class mySimulator {
 		exec.saveReport(bseFileName + "_TasksReport.csv", taskResStrs);	
 	}//endExperiment
 	
-	//finish entire set of trials, save last trial's data and then calculate and save aggregate/average data
+	/**
+	 * finish entire set of trials, save last trial's data and then calculate and save aggregate/average data
+	 * @param curTrial
+	 * @param numTrials
+	 * @param expDurMSec
+	 */
 	public void endTrials(int curTrial, int numTrials, long expDurMSec) {
 		endExperiment(curTrial,numTrials,expDurMSec);		
 		//aggregate results and save to special files/directories
@@ -508,7 +527,10 @@ public abstract class mySimulator {
 		taskRes = new long[numTrials][][];		
 	}//	
 	
-	//build final results for UAV data - find total values in each string array, average over all arrays
+	/**
+	 * build final results for UAV data - find total values in each string array, average over all arrays
+	 * @return
+	 */
 	private String[] buildFinalResUAV() {
 		ArrayList<String> res = new ArrayList<String>();
 		int numTrials = uavRes.length;			
@@ -533,7 +555,10 @@ public abstract class mySimulator {
 		return res.toArray(new String[0]);		
 	}//buildFinalResUAV
 	
-	//build final results for transit lane data - find total values in each string array, average over all arrays
+	/**
+	 * build final results for transit lane data - find total values in each string array, average over all arrays
+	 * @return
+	 */
 	private String[] buildFinalResTL() {
 		ArrayList<String> res = new ArrayList<String>();
 		int numTrials = tlRes.length;
@@ -560,7 +585,10 @@ public abstract class mySimulator {
 		return res.toArray(new String[0]);		
 	}//buildFinalResUAV
 	
-	//build final results for Task data - find total values in each data array, average over all arrays, build per-task string array to hold csv-seped answers
+	/**
+	 * build final results for Task data - find total values in each data array, average over all arrays, build per-task string array to hold csv-seped answers
+	 * @return
+	 */
 	private String[] buildFinalResTask() {
 		ArrayList<String> res = new ArrayList<String>();		
 		float numTrials = 1.0f*taskRes.length;
@@ -588,7 +616,10 @@ public abstract class mySimulator {
 		return res.toArray(new String[0]);		
 	}//buildFinalResUAV
 	
-	//different # of teams every time, so need to just have team totals for this trial
+	/**
+	 * different # of teams every time, so need to just have team totals for this trial
+	 * @return
+	 */
 	private long[] buildUAVDataVals() {
 		long[] res = new long[5];
 		for(int i=0;i<teams.size();++i) {
@@ -602,7 +633,10 @@ public abstract class mySimulator {
 		return res;
 	}//buildUAVDataVals
 	
-	//need per lane per value array of arrays of longs
+	/**
+	 * need per lane per value array of arrays of longs
+	 * @return
+	 */
 	private long[][] buildTLDataVals() {
 		long[][] res = new long[transitLanes.length][];
 		for(int i=0;i<transitLanes.length;++i) {
@@ -615,8 +649,10 @@ public abstract class mySimulator {
 		return res;
 	}//buildTLDataVals
 	
-	//first idx is task, 2nd idx is value idx 
-	//holds per task # of teams proced and ttl run time
+	/**
+	 * first idx is task, 2nd idx is value idx  holds per task # of teams proced and ttl run time
+	 * @return
+	 */
 	private long[][] buildTaskDataVals() {
 		long[][] res = new long[tasks.length][];		
 		for(int i=0;i<tasks.length;++i) {
@@ -661,8 +697,15 @@ public abstract class mySimulator {
 		return res.toArray(new String[0]);
 	}//buildCSVTLData	
 	
-	//build csv data for all tasks' descriptions performance metrics
-	//include sweeping through sclFact to see the effect of changing stdev
+	/**
+	 * build csv data for all tasks' descriptions performance metrics. 
+	 * Include sweeping through sclFact to see the effect of changing stdev
+	 * @param minSize
+	 * @param maxSize
+	 * @param sclFact
+	 * @param eqPwr
+	 * @return
+	 */
 	private String[] buildCSVTaskData(int minSize, int maxSize, float sclFact, float eqPwr) {
 		ArrayList<String> res = new ArrayList<String>();
 		//add header
@@ -724,8 +767,11 @@ public abstract class mySimulator {
 		return pos;
 	}	
 	
-	
-	//handle passed event - dispatch event to appropriate entity with appropriate values
+	/**
+	 * handle passed event - dispatch event to appropriate entity with appropriate values
+	 * @param _ev
+	 * @return
+	 */
 	public myEvent handleEvent(myEvent _ev) {
 		//dispOutput("\tHandling event : " + _ev.name);
 		//handle event - event has following types : StartTask(0), FinishTask(1), EnterQueue(2), LeaveQueue(3);	
