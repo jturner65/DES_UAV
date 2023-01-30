@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
+import base_Utils_Objects.io.messaging.MsgCodes;
 import discreteEventSimProject.ui.DESSimWindow;
 
 /**
@@ -67,6 +68,20 @@ public class UAV_DESSim extends GUI_AppManager {
 	@Override
 	public String getPrjDescr() {return projDesc;}	
 	
+
+	/**
+	 * Set minimum level of message object console messages to display for this application. If null then all messages displayed
+	 * @return
+	 */
+	@Override
+	protected final MsgCodes getMinConsoleMsgCodes() {return null;}
+	/**
+	 * Set minimum level of message object log messages to save to log for this application. If null then all messages saved to log.
+	 * @return
+	 */
+	@Override
+	protected final MsgCodes getMinLogMsgCodes() {return null;}
+
 	@Override
 	protected void setup_Indiv() {		setBkgrnd(); setDesired3DGridDims(1500);}
 	@Override

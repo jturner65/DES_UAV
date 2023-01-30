@@ -6,6 +6,7 @@ import java.util.HashMap;
 import base_Render_Interface.IRenderInterface;
 import base_Utils_Objects.appManager.Console_AppManager;
 import base_Utils_Objects.appManager.argParse.cmdLineArgs.base.Base_CmdLineArg;
+import base_Utils_Objects.io.messaging.MsgCodes;
 import discreteEventSimProject.sim.mySimExecutive;
 import discreteEventSimProject.sim.base.mySimulator;
 import discreteEventSimProject.sim.layouts.SimpleDesSim;
@@ -141,6 +142,19 @@ public class UAV_DESSimConsole extends Console_AppManager {
 	public String getPrjNmShrt() {return prjNmShrt;}
 	@Override
 	public String getPrjDescr() {return projDesc;}
+
+	/**
+	 * Set minimum level of message object console messages to display for this application. If null then all messages displayed
+	 * @return
+	 */
+	@Override
+	protected final MsgCodes getMinConsoleMsgCodes() {return null;}
+	/**
+	 * Set minimum level of message object log messages to save to log for this application. If null then all messages saved to log.
+	 * @return
+	 */
+	@Override
+	protected final MsgCodes getMinLogMsgCodes() {return null;}
 	
 	/**
 	 * main for non-graphical execution of this program
