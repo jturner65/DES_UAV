@@ -3,7 +3,6 @@ package discreteEventSimProject;
 import java.util.HashMap;
 
 import base_UI_Objects.GUI_AppManager;
-import base_UI_Objects.windowUI.base.Base_DispWindow;
 import base_Utils_Objects.io.messaging.MsgCodes;
 import discreteEventSimProject.ui.DESSimWindow;
 
@@ -173,7 +172,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	//address all flag-setting here, so that if any special cases need to be addressed they can be
 	protected void setVisFlag_Indiv(int idx, boolean val ){
 		switch (idx){
-			case showUIMenu 	    : { dispWinFrames[dispMenuIDX].setFlags(Base_DispWindow.showIDX,val);    break;}											//whether or not to show the main ui window (sidebar)			
+			case showUIMenu 	    : { dispWinFrames[dispMenuIDX].dispFlags.setShowWin(val);    break;}											//whether or not to show the main ui window (sidebar)			
 			case showDESwin			: { setWinFlagsXOR(dispDES_SimWin, val); break;}//setDispAndModMapMgr(showCOTS_2DMorph, dispCOTS_2DMorph, val);break;}
 			default : {break;}
 		}
