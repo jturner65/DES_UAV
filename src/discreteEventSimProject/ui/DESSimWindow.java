@@ -88,28 +88,28 @@ public class DESSimWindow extends Base_DispWindow {
 	
 	//reset initial flag states for each map type so that each sim world mirrors UI state
 	private void resetDesFlags() {		
-		simExec.setExecFlags(mySimExecutive.drawVisIDX, getPrivFlags(drawVisIDX));
-		simExec.des.setSimFlags(mySimulator.drawBoatsIDX, getPrivFlags(drawBoatsIDX));				
-		simExec.des.setSimFlags(mySimulator.drawUAVTeamsIDX, getPrivFlags(drawUAVTeamsIDX));				
-		simExec.des.setSimFlags(mySimulator.drawTaskLocsIDX, getPrivFlags(drawTaskLocsIDX));				
-		simExec.des.setSimFlags(mySimulator.drawTLanesIDX, getPrivFlags(drawTLanesIDX));				
-		simExec.des.setSimFlags(mySimulator.dispTaskLblsIDX, getPrivFlags(dispTaskLblsIDX));				
-		simExec.des.setSimFlags(mySimulator.dispTLnsLblsIDX, getPrivFlags(dispTLnsLblsIDX));				
-		simExec.des.setSimFlags(mySimulator.dispUAVLblsIDX, getPrivFlags(dispUAVLblsIDX));				
+		simExec.setExecFlags(mySimExecutive.drawVisIDX, privFlags.getFlag(drawVisIDX));
+		simExec.des.setSimFlags(mySimulator.drawBoatsIDX, privFlags.getFlag(drawBoatsIDX));				
+		simExec.des.setSimFlags(mySimulator.drawUAVTeamsIDX, privFlags.getFlag(drawUAVTeamsIDX));				
+		simExec.des.setSimFlags(mySimulator.drawTaskLocsIDX, privFlags.getFlag(drawTaskLocsIDX));				
+		simExec.des.setSimFlags(mySimulator.drawTLanesIDX, privFlags.getFlag(drawTLanesIDX));				
+		simExec.des.setSimFlags(mySimulator.dispTaskLblsIDX, privFlags.getFlag(dispTaskLblsIDX));				
+		simExec.des.setSimFlags(mySimulator.dispTLnsLblsIDX, privFlags.getFlag(dispTLnsLblsIDX));				
+		simExec.des.setSimFlags(mySimulator.dispUAVLblsIDX, privFlags.getFlag(dispUAVLblsIDX));				
 	}//setInitFlags	
 
 	private void setComplexSim() {		
 		if(cmplxSim == null) {cmplxSim = new ComplexDesSim(simExec, 5000);	} 
 		simExec.initSimWorld(cmplxSim, true);
 		boolean showVis =  (pa != null);
-		setPrivFlags(drawVisIDX, showVis);		
-		setPrivFlags(drawUAVTeamsIDX, showVis);	
-		setPrivFlags(drawBoatsIDX, showVis);	
-		setPrivFlags(drawTaskLocsIDX, showVis);	
-		setPrivFlags(drawTLanesIDX, false);				
-		setPrivFlags(dispTaskLblsIDX, false);	
-		setPrivFlags(dispTLnsLblsIDX, false);	
-		setPrivFlags(dispUAVLblsIDX, false);	
+		privFlags.setFlag(drawVisIDX, showVis);		
+		privFlags.setFlag(drawUAVTeamsIDX, showVis);	
+		privFlags.setFlag(drawBoatsIDX, showVis);	
+		privFlags.setFlag(drawTaskLocsIDX, showVis);	
+		privFlags.setFlag(drawTLanesIDX, false);				
+		privFlags.setFlag(dispTaskLblsIDX, false);	
+		privFlags.setFlag(dispTLnsLblsIDX, false);	
+		privFlags.setFlag(dispUAVLblsIDX, false);	
 		resetDesFlags();
 		//pa.setSimIsRunning(false);
 		
@@ -119,14 +119,14 @@ public class DESSimWindow extends Base_DispWindow {
 		if(smplSim == null) {smplSim = new SimpleDesSim(simExec, 100);	} 
 		simExec.initSimWorld(smplSim, true);
 		boolean showVis = (pa != null);
-		setPrivFlags(drawVisIDX, showVis);		
-		setPrivFlags(drawUAVTeamsIDX, showVis);	
-		setPrivFlags(drawBoatsIDX, showVis);	
-		setPrivFlags(drawTaskLocsIDX, showVis);	
-		setPrivFlags(drawTLanesIDX, showVis);			
-		setPrivFlags(dispTaskLblsIDX, showVis);	
-		setPrivFlags(dispTLnsLblsIDX, showVis);	
-		setPrivFlags(dispUAVLblsIDX, showVis);	
+		privFlags.setFlag(drawVisIDX, showVis);		
+		privFlags.setFlag(drawUAVTeamsIDX, showVis);	
+		privFlags.setFlag(drawBoatsIDX, showVis);	
+		privFlags.setFlag(drawTaskLocsIDX, showVis);	
+		privFlags.setFlag(drawTLanesIDX, showVis);			
+		privFlags.setFlag(dispTaskLblsIDX, showVis);	
+		privFlags.setFlag(dispTLnsLblsIDX, showVis);	
+		privFlags.setFlag(dispUAVLblsIDX, showVis);	
 		resetDesFlags();
 		//turn off simulation if running
 		//pa.setSimIsRunning(false);	
@@ -166,15 +166,25 @@ public class DESSimWindow extends Base_DispWindow {
 	
 	@Override
 	protected int[] getFlagIDXsToInitToTrue() {return null;}
-	
+	/**
+	 * UI code-level Debug mode functionality. Called only from flags structure
+	 * @param val
+	 */
 	@Override
-	//set flag values and execute special functionality for this sequencer
-	//skipKnown will allow settings to be reset if passed redundantly
-	public void setPrivFlags(int idx, boolean val){	
-		boolean curVal = getPrivFlags(idx);
-		if(val == curVal){return;}
-		int flIDX = idx/32, mask = 1<<(idx%32);
-		privFlags[flIDX] = (val ?  privFlags[flIDX] | mask : privFlags[flIDX] & ~mask);
+	public void handleDebugMode(boolean val) {}
+	
+	/**
+	 * Application-specific Debug mode functionality (application-specific). Called only from privflags structure
+	 * @param val
+	 */
+	@Override
+	public void handlePrivFlagsDebugMode(boolean val) {	}
+	
+	/**
+	 * Handle application-specific flag setting
+	 */
+	@Override
+	public void handlePrivFlags_Indiv(int idx, boolean val, boolean oldVal){
 		switch(idx){
 			case debugAnimIDX 			: {
 				simExec.setExecFlags(mySimExecutive.debugExecIDX,val);
@@ -216,7 +226,7 @@ public class DESSimWindow extends Base_DispWindow {
 			
 			default:					{}
 		}		
-	}//setPrivFlags
+	}//privFlags.setFlag
 	
 	/**
 	 * Build all UI objects to be shown in left side bar menu for this window.  This is the first child class function called by initThisWin
@@ -300,7 +310,7 @@ public class DESSimWindow extends Base_DispWindow {
 	//modAmtMillis is time passed per frame in milliseconds
 	protected boolean simMe(float modAmtMillis) {//run simulation
 		boolean done = simExec.simMe(modAmtMillis);
-		if(done) {setPrivFlags(conductExpIDX, false);}
+		if(done) {privFlags.setFlag(conductExpIDX, false);}
 		return done;	
 	}//simMe
 	
