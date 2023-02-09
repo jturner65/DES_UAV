@@ -13,6 +13,7 @@ import base_UI_Objects.windowUI.drawnTrajectories.DrawnSimpleTraj;
 import base_UI_Objects.windowUI.uiData.UIDataUpdater;
 import base_UI_Objects.windowUI.uiObjs.base.GUIObj_Type;
 import base_Utils_Objects.io.messaging.MsgCodes;
+import base_Utils_Objects.tools.flags.Base_BoolFlags;
 import discreteEventSimProject.sim.mySimExecutive;
 import discreteEventSimProject.sim.base.mySimulator;
 import discreteEventSimProject.sim.layouts.ComplexDesSim;
@@ -42,7 +43,7 @@ public class DESSimWindow extends Base_DispWindow {
 	
 	//private child-class flags - window specific
 	public static final int 
-			debugAnimIDX 		= 0,						//debug
+			//debugAnimIDX 		= 0,						//debug
 			resetSimIDX			= 1,						//whether or not to reset sim	
 			drawVisIDX 			= 2,						//draw visualization - if false SIM exec and sim should ignore all processing/papplet stuff
 			drawBoatsIDX		= 3,						//whether to draw animated boats or simple spheres for consumer UAVs
@@ -68,7 +69,7 @@ public class DESSimWindow extends Base_DispWindow {
 
 		// add an entry for each button, in the order they are wished to be displayed
 		// true tag, false tag, btn IDX
-		tmpBtnNamesArray.add(new Object[] {"Visualization Debug", "Enable Debug", debugAnimIDX});  
+		tmpBtnNamesArray.add(new Object[] {"Visualization Debug", "Enable Debug", Base_BoolFlags.debugIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Resetting Simulation", "Reset Simulation",   resetSimIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Drawing Vis", "Render Visualization",  drawVisIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Drawing UAV Teams", "Draw UAV Teams",  drawUAVTeamsIDX});  
@@ -133,14 +134,21 @@ public class DESSimWindow extends Base_DispWindow {
 		
 	}//initSimpleSim	
 	
-	@Override
-	protected void initMe() {//all ui objects set by here
+	
+	/**
+	 * Initialize any UI control flags appropriate for all boids window application
+	 */
+	protected final void initDispFlags() {
 		//this window is runnable
 		dispFlags.setIsRunnable(true);
 		//this window uses a customizable camera
 		dispFlags.setUseCustCam(true);
 		// capable of using right side menu
-		dispFlags.setDrawRtSideMenu(true);
+		dispFlags.setDrawRtSideMenu(true);		
+	}
+	
+	@Override
+	protected void initMe() {//all ui objects set by here
 		//called once
 		//initPrivFlags(numPrivFlags);
 		//initialize sim exec to simple world sim
@@ -178,7 +186,9 @@ public class DESSimWindow extends Base_DispWindow {
 	 * @param val
 	 */
 	@Override
-	protected final void handlePrivFlagsDebugMode_Indiv(boolean val) {	}
+	protected final void handlePrivFlagsDebugMode_Indiv(boolean val) {	
+		simExec.setExecFlags(mySimExecutive.debugExecIDX,val);		
+	}
 	
 	/**
 	 * Handle application-specific flag setting
@@ -186,9 +196,6 @@ public class DESSimWindow extends Base_DispWindow {
 	@Override
 	public void handlePrivFlags_Indiv(int idx, boolean val, boolean oldVal){
 		switch(idx){
-			case debugAnimIDX 			: {
-				simExec.setExecFlags(mySimExecutive.debugExecIDX,val);
-				break;}
 			case resetSimIDX			: {
 				if(val) {simExec.initSimExec(true); addPrivBtnToClear(resetSimIDX);}break;}
 			case drawVisIDX				:{
@@ -335,7 +342,7 @@ public class DESSimWindow extends Base_DispWindow {
 		
 	//draw custom 2d constructs below interactive component of menu
 	@Override
-	public void drawCustMenuObjs(){
+	public void drawCustMenuObjs(float animTimeMod){
 		pa.pushMatState();
 		//all sub menu drawing within push mat call
 		pa.translate(0,custMenuOffset+yOff);		
