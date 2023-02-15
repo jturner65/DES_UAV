@@ -4,10 +4,10 @@ package discreteEventSimProject.entities;
 import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
+import base_UI_Objects.renderedObjs.base.Base_RenderObj;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
 import discreteEventSimProject.entities.base.EntityType;
 import discreteEventSimProject.entities.base.myEntity;
-import discreteEventSimProject.renderedObjs.base.myRenderObj;
 import discreteEventSimProject.sim.base.mySimulator;
 import discreteEventSimProject.ui.DESSimWindow;
 
@@ -23,7 +23,7 @@ public class myUAVTeam extends myEntity {
 	
 	public static final float teamSpeed = 1;	//speed of UAV team moving from task to task m/sec (assume constant) :: 5 m/s is ~11 mph
 												//if ever not made final need to update value held in myUAVTransitLane when changed (referenced for precalc)			
-	public myRenderObj tmpl, sphTmpl;				//template to render boid; simplified sphere template
+	public Base_RenderObj tmpl, sphTmpl;				//template to render boid; simplified sphere template
 	
 	//////////
 	//metrics of team performance
@@ -49,25 +49,29 @@ public class myUAVTeam extends myEntity {
 	private static int teamIncr = 0;
 	private int curType;
 	
+	private int teamSize;
+	
 	public myUAVTeam(mySimulator _sim, String _name, int _teamSize, myPointf _initLoc){
 		super(_sim, _name, _initLoc, new EntityType[] {EntityType.Consumer});
 		//set so always remembers where it started
 		teamID = teamIncr++;
 		curType = teamID % sim.NumUniqueTeams;//what type of boat to show
 		initLoc = new myPointf(_initLoc);
-		initTeam(_teamSize);
+		teamSize = _teamSize;
 		labelVals = new float[] {-name.length() * 3.0f, -(2.0f*rad + 70), 0};
 		lblColors = new int[] {0,0,0,255};
 	}//myBoidFlock constructor
 	
-	//make UAV team - initialize/reinitialize teams
-	public void initTeam(int _teamSize){
+	/**
+	 * make UAV team - initialize/reinitialize teams
+	 */
+	public void initTeam(){
 		//base location of UAV team - UAV individual units drawn relative to this location
 		loc = new myPointf(initLoc);
-		uavTeam = new myUAVObj[_teamSize];
+		uavTeam = new myUAVObj[teamSize];
 		//sim.dispOutput("\tmyUAVTeam : make UAV team of size : "+ _teamSize+ " name : " + name);
 		//2nd idx : 0 is normal, 1 is location
-		myPointf[][] teamLocs = sim.getRegularSphereList(rad, _teamSize, 1.0f);
+		myPointf[][] teamLocs = sim.getRegularSphereList(rad, teamSize, 1.0f);
 		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c] =  new myUAVObj(this,teamLocs[c][1]);}
 		motionTraj = new myVectorf();
 		uavVelVec = new myVectorf();
@@ -97,17 +101,32 @@ public class myUAVTeam extends myEntity {
 	}//setEntityFlags
 
 	//set the template of this UAV team
-	public void setTemplate(myRenderObj[] _tmpl, myRenderObj[] _sphrTmpl){
+	public void setTemplate(Base_RenderObj[] _tmpl, Base_RenderObj[] _sphrTmpl){
 		tmpl = _tmpl[curType];
 		sphTmpl = _sphrTmpl[curType];
 	}//set after init - all flocks should be made
+	
+	
+	/**
+	 * Set the render template to use for this flock
+	 * @param _tmpl
+	 */
+	public void setCurrTemplate(Base_RenderObj _tmpl) {tmpl = _tmpl;}
+	
+	/**
+	 * Retrieve the current template used for boids
+	 * @return
+	 */
+	public Base_RenderObj getCurrTemplate(){return tmpl;}
 	
 //	//finds valid coordinates if torroidal walls, but doesn't change coords
 //	public myPointf findValidWrapCoordsForDraw(myPointf _coords){return new myPointf(((_coords.x+pa.gridDimX) % pa.gridDimX),((_coords.y+pa.gridDimY) % pa.gridDimY),((_coords.z+pa.gridDimZ) % pa.gridDimZ));	}//findValidWrapCoords	
 //	//sets coords to be valid if torroidal walls
 //	public void setValidWrapCoordsForDraw(myPointf _coords){_coords.set(((_coords.x+pa.gridDimX) % pa.gridDimX),((_coords.y+pa.gridDimY) % pa.gridDimY),((_coords.z+pa.gridDimZ) % pa.gridDimZ));	}//findValidWrapCoords	
 	
-	//move creatures to random start positions
+	/**
+	 *
+	 */
 	public void drawEntity(IRenderInterface pa, DESSimWindow win, float delT, boolean drawMe, boolean drawLbls){
 		pa.pushMatState();
 		pa.translate(loc);

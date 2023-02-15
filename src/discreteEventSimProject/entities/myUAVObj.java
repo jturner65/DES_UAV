@@ -3,14 +3,17 @@ package discreteEventSimProject.entities;
 import java.util.concurrent.ThreadLocalRandom;
 
 import base_Render_Interface.IRenderInterface;
-import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.GUI_AppManager;
 import discreteEventSimProject.sim.base.mySimulator;
 
-//class referencing a single uav object
+/**
+ * class referencing a single uav object
+ * @author John Turner
+ *
+ */
 public class myUAVObj {
 	public myUAVTeam f;
 	public int ID;
@@ -19,10 +22,14 @@ public class myUAVObj {
 	//graphics and animation controlling variables
 	public static final int numAnimFrames = 90;
 	private myVectorf scaleBt;													//scale of rendered object
-	private float animCntr;
-	public float animPhase;
-	//
-	public int animAraIDX;//index in numAnimFrames-sized array of current animation state
+	/**
+	 * animation controlling variables
+	 */	
+	private double animCntr;
+	/**
+	 * Fraction of animation cycle currently at
+	 */
+	public double animPhase;
 	
 	public static final float maxAnimCntr = 1000.0f, baseAnimSpd = 1.0f;
 	
@@ -45,9 +52,8 @@ public class myUAVObj {
 		//p = _p;		
 		f = _f; 		
 		//preCalcAnimSpd = (float) ThreadLocalRandom.current().nextDouble(.5f,2.0);		
-		animPhase = (float) ThreadLocalRandom.current().nextDouble(.25f, .75f ) ;//keep initial phase between .25 and .75 so that cyclic-force UAVs start moving right away
-		animCntr = animPhase * maxAnimCntr;
-		animAraIDX = (int)(animPhase * numAnimFrames);	
+		animPhase = ThreadLocalRandom.current().nextDouble(.25f, .75f ) ;//keep initial phase between .25 and .75 so that cyclic-force UAVs start moving right away
+		animCntr = animPhase * f.getCurrTemplate().getMaxAnimCounter();
 
 		rotVec = myVectorf.RIGHT.cloneMe(); 			//initial setup
 		orientation = new myVectorf[3];
@@ -64,7 +70,7 @@ public class myUAVObj {
 	}//constructor
 	
 	//align the UAV along the current orientation matrix
-	private void alignUAV(IRenderInterface pa, float delT){
+	private void alignUAV(IRenderInterface pa, double delT){
 		rotVec.set(O_axisAngle[1],O_axisAngle[2],O_axisAngle[3]);
 		float rotAngle = (float) (oldRotAngle + ((O_axisAngle[0]-oldRotAngle) * delT));
 		pa.rotate(rotAngle,rotVec.x, rotVec.y, rotVec.z);
@@ -149,7 +155,7 @@ public class myUAVObj {
 	
 	private void drawTmpl(IRenderInterface p) {
 		p.pushMatState();
-		f.tmpl.drawMe(animAraIDX, ID);
+		f.getCurrTemplate().drawMe(animPhase, ID);
 		p.popMatState();
 	}
 
@@ -159,15 +165,13 @@ public class myUAVObj {
 		p.pushMatState();
 			p.translate(coords.x,coords.y,coords.z);		//move to location
 			alignUAV(p, delT);
-			p.rotate(MyMathUtils.HALF_PI_F,1,0,0);
-			p.rotate(MyMathUtils.HALF_PI_F,0,1,0);
 			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size
 			drawTmpl(p);
 //			p.pushStyle();
 //			f.tmpl.drawMe(animAraIDX, ID);
 //			p.popStyle();			
 		p.popMatState();
-		animIncr();
+		animIncr(velocity.magn*.1f);
 	}//drawme	
 	
 	public void drawMeDbgFrame(GUI_AppManager AppMgr, IRenderInterface p, float delT){
@@ -175,15 +179,13 @@ public class myUAVObj {
 			p.translate(coords.x,coords.y,coords.z);		//move to location
 			drawMyVec(p, rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
 			alignUAV(p, delT);
-			p.rotate(MyMathUtils.HALF_PI_F,1,0,0);
-			p.rotate(MyMathUtils.HALF_PI_F,0,1,0);
 			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
 			drawTmpl(p);
 //			p.pushStyle();
 //			f.tmpl.drawMe(animAraIDX, ID);
 //			p.popStyle();			
 		p.popMatState();
-		animIncr();		
+		animIncr(velocity.magn*.1f);		
 	}
 	
 	//draw this UAV as a ball - replace with sphere render obj 
@@ -192,7 +194,7 @@ public class myUAVObj {
 			p.translate(coords.x,coords.y,coords.z);		//move to location
 			if(debugAnim){drawMyVec(p,rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);}
 			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
-			f.sphTmpl.drawMe(animAraIDX, ID);
+			f.sphTmpl.drawMe(animPhase, ID);
 		p.popMatState();
 		//animIncr();
 	}//drawme 
@@ -205,10 +207,11 @@ public class myUAVObj {
 		p.popMatState();
 	}
 	
-	private void animIncr(){
-		animCntr += (baseAnimSpd + (velocity.magn *.1f));//*preCalcAnimSpd;						//set animMod based on velocity -> 1 + mag of velocity	
-		animPhase = ((animCntr % maxAnimCntr)/maxAnimCntr);									//phase of animation cycle
-		animAraIDX = (int)(animPhase * numAnimFrames);	
+	private void animIncr(float vel){
+		animCntr += (baseAnimSpd + vel);//*preCalcAnimSpd;						//set animMod based on velocity -> 1 + mag of velocity	
+		double maxAnimCntr = f.getCurrTemplate().getMaxAnimCounter();
+		animCntr %= maxAnimCntr;
+		animPhase = (animCntr/maxAnimCntr);									//phase of animation cycle
 	}//animIncr		
 	
 	public String toString(){

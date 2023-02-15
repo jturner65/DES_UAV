@@ -9,15 +9,16 @@ import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.my_procApplet;
+import base_UI_Objects.renderedObjs.Boat_RenderObj;
+import base_UI_Objects.renderedObjs.Sphere_RenderObj;
+import base_UI_Objects.renderedObjs.base.Base_RenderObj;
+import base_UI_Objects.renderedObjs.base.RenderObj_ClrPalette;
 import discreteEventSimProject.entities.myUAVTask;
 import discreteEventSimProject.entities.myUAVTeam;
 import discreteEventSimProject.entities.myUAVTransitLane;
 import discreteEventSimProject.entities.base.myEntity;
 import discreteEventSimProject.events.EventType;
 import discreteEventSimProject.events.myEvent;
-import discreteEventSimProject.renderedObjs.myBoatRndrObj;
-import discreteEventSimProject.renderedObjs.mySphereRndrObj;
-import discreteEventSimProject.renderedObjs.base.myRenderObj;
 import discreteEventSimProject.sim.mySimExecutive;
 import discreteEventSimProject.sim.task.taskDesc;
 import discreteEventSimProject.ui.DESSimWindow;
@@ -97,15 +98,48 @@ public abstract class mySimulator {
 	public String[] UAVTeamNames = new String[]{"Privateers", "Pirates", "Corsairs", "Marauders", "Freebooters"};
 	public PImage[] UAVBoatSails;						//image sigils for sails	
 	public String[] UAVTypeNames = new String[]{"Boats"};
-	public final int NumUniqueTeams = UAVTeamNames.length, numBoidTypes = UAVTypeNames.length;			
+	public final int NumUniqueTeams = UAVTeamNames.length, numBoidTeams = UAVTypeNames.length;			
 	//array of template objects to render
 	//need individual array for each type of object, sphere (simplified) render object
-	protected myRenderObj[] rndrTmpl,//set depending on UI choice for complex rndr obj 
+	protected Base_RenderObj[] rndrTmpl,//set depending on UI choice for complex rndr obj 
 		boatRndrTmpl,
 		//add more rendr obj arrays here
 		sphrRndrTmpl;//simplified rndr obj (sphere)	
-	protected ConcurrentSkipListMap<String, myRenderObj[]> cmplxRndrTmpls;	
+	protected ConcurrentSkipListMap<String, Base_RenderObj[]> cmplxRndrTmpls;	
 	
+	
+	// colors for render objects
+	//divisors for stroke color from fill color
+	private static final int
+		sphereClrIDX = 0,
+		boatClrIDX = 1;
+	private static final int numBoidTypes = 2;
+	private static final int[][] specClr = new int[][]{
+		{255,255,255,255},		//sphere
+		{255,255,255,255}};		//boat
+	//Divide fill color for each type by these values for stroke
+	private static final float[][] strokeScaleFact = new float[][]{
+		{1.25f,0.42f,1.33f,0.95f,3.3f},    			//sphere    
+		{1.25f,0.42f,1.33f,0.95f,3.3f}};   			//boat
+		
+	//scale all fill colors by this value for emissive value
+	private static final float[] emitScaleFact = new float[] {0.7f, 0.9f};
+	//stroke weight for sphere, boat
+	private static final float[] strkWt = new float[] {1.0f, 1.0f};
+	//shininess for sphere, boat
+	private static final float[] shn = new float[] {5.0f,5.0f};
+	
+	//per type, per flock fill colors
+	private static final int[][][] objFillColors = new int[][][]{
+		{{110, 65, 30,255},	{30, 30, 30,255}, {130, 22, 10,255}, {22, 188, 110,255},	{22, 10, 130,255}},		//sphere
+		{{110, 65, 30,255}, {20, 20, 20,255}, {130, 22, 10,255}, {22, 128, 50,255}, {22, 10, 150,255}}				//boats
+	};
+	
+	
+	/**
+	 * # of animation frames per animation cycle for animating objects
+	 */	
+	protected int numAnimFramesPerType = 90;
 	public mySimulator(mySimExecutive _exec, int _maxNumUAVs) {
 		exec=_exec;
 		maxNumUAVs = _maxNumUAVs;
@@ -127,16 +161,18 @@ public abstract class mySimulator {
 		initSimFlags();
 		//set up render object templates for different UAV Teams
 		if(exec.pa != null) {	
-			my_procApplet pa = (my_procApplet) exec.pa;
-			sphrRndrTmpl = new mySphereRndrObj[NumUniqueTeams];
-			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new mySphereRndrObj(exec.pa, this, i);	}	
-			cmplxRndrTmpls = new ConcurrentSkipListMap<String, myRenderObj[]> (); 
+			IRenderInterface pa = exec.pa;
+			RenderObj_ClrPalette[] palettes = new RenderObj_ClrPalette[numBoidTypes];
+			for (int i=0;i<numBoidTypes;++i) {palettes[i] = buildRenderObjPalette(pa, i);}			
+			sphrRndrTmpl = new Sphere_RenderObj[NumUniqueTeams];
+			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new Sphere_RenderObj(exec.pa, i, palettes[sphereClrIDX]);	}	
+			cmplxRndrTmpls = new ConcurrentSkipListMap<String, Base_RenderObj[]> (); 
 			UAVBoatSails = new PImage[NumUniqueTeams];
-			boatRndrTmpl = new myBoatRndrObj[NumUniqueTeams];
+			boatRndrTmpl = new Boat_RenderObj[NumUniqueTeams];
 			for(int i=0; i<NumUniqueTeams; ++i){	
-				UAVBoatSails[i] = pa.loadImage(UAVTeamNames[i]+".jpg");
+				UAVBoatSails[i] = ((my_procApplet)pa).loadImage(UAVTeamNames[i]+".jpg");
 				//build boat render object for each individual flock type
-				boatRndrTmpl[i] = new myBoatRndrObj(pa, this, i);		
+				boatRndrTmpl[i] = new Boat_RenderObj(pa, i, numAnimFramesPerType, palettes[boatClrIDX]);		
 			}		
 			cmplxRndrTmpls.put(UAVTypeNames[0], boatRndrTmpl);
 			rndrTmpl = cmplxRndrTmpls.get(UAVTypeNames[0]);//start by rendering boats
@@ -144,6 +180,35 @@ public abstract class mySimulator {
 		initSimPriv();
 		isGrpTask = getIsGroupAra();
 	}//initOnce
+	
+	
+	/**
+	 * Build render object color palette for passed type of flock
+	 * @param _type
+	 * @return
+	 */
+	private final RenderObj_ClrPalette buildRenderObjPalette(IRenderInterface pa, int _type) {
+		RenderObj_ClrPalette palette = new RenderObj_ClrPalette(pa, NumUniqueTeams);
+		//set main color
+		palette.setColor(-1, objFillColors[_type][0], objFillColors[_type][0], objFillColors[_type][0], specClr[_type], new int[]{0,0,0,0}, strkWt[_type], shn[_type]);
+		//scale stroke color from fill color
+		palette.scaleMainStrokeColor(strokeScaleFact[_type][0]);
+		//set alpha after scaling
+		palette.setMainStrokeColorAlpha(objFillColors[_type][0][3]);
+		//set per-flock colors
+		for(int i=0; i<NumUniqueTeams; ++i){	
+			palette.setColor(i, objFillColors[_type][i], objFillColors[_type][i], objFillColors[_type][i], specClr[_type], new int[]{0,0,0,0}, strkWt[_type], shn[_type]);
+			//scale stroke colors
+			palette.scaleInstanceStrokeColor(i, strokeScaleFact[_type][i]);
+			//set alpha after scaling
+			palette.setInstanceStrokeColorAlpha(i, objFillColors[_type][i][3]);
+		}
+		//scale all emissive values - scaled from fill color
+		palette.scaleAllEmissiveColors(emitScaleFact[_type]);
+		//disable ambient
+		palette.disableAmbient();
+		return palette;
+	}
 	
 	protected myUAVTransitLane buildTransitLane(myUAVTask[] _tasks, int stIdx, int endIdx, float laneVel, boolean showMsg) {
 		String TLName =  "TransitLane_From_" + tasks[stIdx].name+"_to_"+ tasks[endIdx].name;
@@ -279,7 +344,11 @@ public abstract class mySimulator {
 	}//setExecFlags
 	
 	
-	//build event to represent initial process - this will be called when FEL is empty
+	/**
+	 * Build event to represent initial process - this will be called when FEL is empty
+	 * @param nowTime
+	 * @return
+	 */
 	public myEvent buildInitialEvent(float nowTime) {
 		long longNowTime = (long)Math.round(nowTime);
 		myUAVTeam newTeam = addNewTeam(longNowTime);
@@ -288,7 +357,11 @@ public abstract class mySimulator {
 		return ev;
 	}//buildInitialEvent
 	
-	//add a team to the simulation and put them in task 1 - can only occur when task 1 is unoccupied
+	/**
+	 * Add a team to the simulation and put them in task 1 - can only occur when task 1 is unoccupied
+	 * @param nowTime
+	 * @return
+	 */
 	public myUAVTeam addNewTeam(long nowTime) {
 		int nextTeamNum = teams.size()+1;
 		if((nextTeamNum * uavTeamSize) > this.maxNumUAVs){//too many UAVs in play
@@ -301,6 +374,7 @@ public abstract class mySimulator {
 		if(exec.pa != null) {
 			team.setTemplate(rndrTmpl, sphrRndrTmpl);
 		}
+		team.initTeam();
 		teams.add(team);
 		return team;
 	}//addNewTeam()
