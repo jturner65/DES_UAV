@@ -19,6 +19,15 @@ public class UAV_DESSim extends GUI_AppManager {
 	
 	public String authorString = "John Turner";
 	public final int[] bground = new int[]{244,244,255,255};		//bground color
+
+	private boolean useSphereBKGnd = false;
+	
+	private String bkSkyBox = "bkgrndTex.jpg";
+	
+	/**
+	 * size of 3d grid cube side
+	 */
+	private final int GridDim_3D = 1500;
 	
 	private final int
 		showUIMenu 		= 0,			//whether or not to show sidebar menu
@@ -52,6 +61,28 @@ public class UAV_DESSim extends GUI_AppManager {
 	}
 	
 	/**
+	 * Called in pre-draw initial setup, before first init
+	 * potentially override setup variables on per-project basis.
+	 * Do not use for setting background color or Skybox anymore.
+	 *  	(Current settings in my_procApplet) 	
+	 *  	strokeCap(PROJECT);
+	 *  	textSize(txtSz);
+	 *  	textureMode(NORMAL);			
+	 *  	rectMode(CORNER);	
+	 *  	sphereDetail(4);	 * 
+	 */
+	@Override
+	protected void setupAppDims_Indiv() {setDesired3DGridDims(GridDim_3D);}
+	@Override
+	protected boolean getUseSkyboxBKGnd(int winIdx) {	return useSphereBKGnd;}
+	@Override
+	protected String getSkyboxFilename(int winIdx) {	return bkSkyBox;}
+	@Override
+	protected int[] getBackgroundColor(int winIdx) {return bground;}
+	@Override
+	protected int getNumDispWindows() {	return numVisFlags;	}
+	
+	/**
 	 * whether or not we want to restrict window size on widescreen monitors
 	 * 
 	 * @return 0 - use monitor size regardless
@@ -82,11 +113,6 @@ public class UAV_DESSim extends GUI_AppManager {
 	protected final MsgCodes getMinLogMsgCodes() {return null;}
 
 	@Override
-	protected void setup_Indiv() {		setBkgrnd(); setDesired3DGridDims(1500);}
-	@Override
-	public void setBkgrnd(){pa.setRenderBackground(bground[0],bground[1],bground[2],bground[3]);}//setBkgrnd	
-
-	@Override
 	protected void initBaseFlags_Indiv() {
 		setBaseFlagToShow_debugMode(true);
 		setBaseFlagToShow_runSim(true);
@@ -97,12 +123,10 @@ public class UAV_DESSim extends GUI_AppManager {
 	@Override
 	protected void initAllDispWindows() {
 		showInfo = true;
-		//includes 1 for menu window (never < 1) - always have same # of visFlags as Base_DispWindows
-		int numWins = numVisFlags;		
 		//titles and descs, need to be set before sidebar menu is defined
 		String[] _winTitles = new String[]{"","UAV DES Sim"},//,"SOM Map UI"},
 				_winDescr = new String[] {"","Display UAV Discrete Event Simulator"};
-		initWins(numWins,_winTitles, _winDescr);
+		setWinTitlesAndDescs(_winTitles, _winDescr);
 		//call for menu window
 		buildInitMenuWin();
 		//instanced window dimensions when open and closed - only showing 1 open at a time
@@ -134,7 +158,7 @@ public class UAV_DESSim extends GUI_AppManager {
 
 		wIdx = dispDES_SimWin; fIdx= showDESwin;
 		setInitDispWinVals(wIdx, _dimOpen, _dimClosed,new boolean[]{false,true,true,true}, new int[]{210,220,250,255},new int[]{255,255,255,255},new int[]{180,180,180,255},new int[]{100,100,100,255}); 
-		dispWinFrames[wIdx] = new DESSimWindow(pa, this, wIdx, fIdx);		
+		dispWinFrames[wIdx] = new DESSimWindow(ri, this, wIdx, fIdx);		
 		//specify windows that cannot be shown simultaneously here
 		initXORWins(new int[]{showDESwin},new int[]{dispDES_SimWin});
 		
@@ -242,7 +266,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	public int[] getClr_Custom(int colorVal, int alpha) {	return new int[] {255,255,255,alpha};}
 
 	@Override
-	protected void setSmoothing() {pa.setSmoothing(0);		}
+	protected void setSmoothing() {ri.setSmoothing(0);		}
 
 	
 }//papplet class
