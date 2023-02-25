@@ -8,31 +8,46 @@ import base_Render_Interface.IRenderInterface;
 import base_Utils_Objects.io.messaging.MessageObject;
 import base_Utils_Objects.priorityQueue.myMinQueue;
 import base_Utils_Objects.priorityQueue.base.myPriorityQueue;
-import discreteEventSimProject.events.EventType;
-import discreteEventSimProject.events.myEvent;
-import discreteEventSimProject.sim.base.mySimulator;
-import discreteEventSimProject.ui.DESSimWindow;
+import discreteEventSimProject.events.DES_EventType;
+import discreteEventSimProject.events.DES_Event;
+import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.ui.base.Base_DESWindow;
 
-//class to manage the functionality of the simulation executive
-public class mySimExecutive {
+/**
+ * class to manage the functionality of the simulation executive
+ * @author John Turner
+ *
+ */
+public class DES_SimExec {
 	//ref to owning application (if papplet) or null if console
-	public IRenderInterface pa;	
+	public IRenderInterface ri;	
 	/**
 	 * msg object for output to console or log
 	 */
 	protected MessageObject msgObj;
-	//simulator 
-	public mySimulator des;	
-	//Priority queue holding future event list
-	private myPriorityQueue<myEvent> FEL;
-	//time of simulation start, in millis
+	/**
+	 * simulator 
+	 */
+	public DES_Simulator des;	
+	/**
+	 * Priority queue holding future event list
+	 */
+	private myPriorityQueue<DES_Event> FEL;
+	/**
+	 * time of simulation start, in millis
+	 */
 	private long simStartTime;
-	//time exec built, in millis - used as offset for instant to provide smaller values for timestamp
+	/**
+	 * time exec built, in millis - used as offset for instant to provide smaller values for timestamp
+	 */
 	private final long execBuiltTime;
-	//current simulation time in milliseconds from simStartTime - will be scaled by calling window to manage sim speed
-	//set at start of every simMe call
+	/**
+	 * current simulation time in milliseconds from simStartTime - will be scaled by calling window to manage sim speed; set at start of every simMe call
+	 */
 	private float nowTime;
-	//scaling time to speed up simulation == amount to multiply modAmtMillis by
+	/**
+	 * scaling time to speed up simulation == amount to multiply modAmtMillis by
+	 */
 	public static float frameTimeScale = 1000.0f;		
 	//flags relevant to simulator executive execution
 	private int[] execFlags;	
@@ -49,26 +64,39 @@ public class mySimExecutive {
 	private long expDurMSec;
 	//# of experiments to conduct, to get multiple result sets
 	private int numTrials = 1, curTrial = 1;
-	//size of teams used in trials
-	private int uavTeamSizeTrial, dfltTeamSizeTrl = mySimulator.uavTeamSize;
+	/**
+	 * size of teams used in trials
+	 */
+	private int uavTeamSizeTrial;
+	private int dfltTeamSizeTrl;
+	
 	private final int minTrlUAVSz = 2, maxTrlUAVSz = 9;
 	
 
-	//pass null for command line version - define empty class called IRenderInterface
-	public mySimExecutive(IRenderInterface _pa, MessageObject _msgObj) {
+	/**
+	 * pass null for command line version - define empty class called IRenderInterface
+	 * @param _pa
+	 * @param _msgObj
+	 */
+	public DES_SimExec(IRenderInterface _pa, MessageObject _msgObj) {
 		msgObj = _msgObj;
-		if(_pa != null) {pa= _pa;}
+		if(_pa != null) {ri= _pa;}
 		else {dispOutput("mySimExecutive ctor","Null IRenderInterface PApplet, assuming console only");}
 		Instant now = Instant.now();
 		execBuiltTime = now.toEpochMilli();//milliseconds since 1/1/1970 when this exec was built.
 		initExecFlags();
 	}//mySimExecutive ctor
 	
-	//initialize once - must be called by instancing method before the executive is executed
-	public void initSimWorld(mySimulator _des, boolean showMSg) {
+	/**
+	 * initialize once - must be called by instancing method before the executive is executed
+	 * @param _des
+	 * @param showMSg
+	 */
+	public void initSimWorld(DES_Simulator _des, boolean showMSg) {
 		des = _des;
+		dfltTeamSizeTrl = des.getUavTeamSize();
 		//set team size back to original value before it would ahve been changed by sweeping trials
-		mySimulator.uavTeamSize = dfltTeamSizeTrl;
+		des.setUavTeamSize(dfltTeamSizeTrl);
 		//reset all experiment values when sim world is changed - default behavior is sim will go forever, until stopped
 		expDurMSec = Long.MAX_VALUE;
 		numTrials = Integer.MAX_VALUE;
@@ -78,11 +106,14 @@ public class mySimExecutive {
 		initSimExec(showMSg);
 	}//
 	
-	//start or restart simulation - whenever this.uavTeamSize is changed, this is called
+	/**
+	 * start or restart simulation - whenever this.uavTeamSize is changed, this is called
+	 * @param showMsg
+	 */
 	public void initSimExec(boolean showMsg) {
 		simStartTime = getCurTime();
 		//rebuild FEL
-		FEL = new myMinQueue<myEvent>(50);
+		FEL = new myMinQueue<DES_Event>(50);
 		//rebuild simulation environment
 		des.initSim(showMsg);
 		//reset Now to be 0
@@ -98,9 +129,9 @@ public class mySimExecutive {
 		curTrial = 1;
 		if(!_useSetTeamSize) {
 			//save current value of team size for when trials are finished
-			dfltTeamSizeTrl = mySimulator.uavTeamSize;
+			dfltTeamSizeTrl = des.getUavTeamSize();
 			uavTeamSizeTrial = minTrlUAVSz;
-			mySimulator.uavTeamSize = uavTeamSizeTrial;
+			des.setUavTeamSize(uavTeamSizeTrial);
 		}
 		
 		des.initTrials(numTrials);
@@ -131,7 +162,7 @@ public class mySimExecutive {
 	private void endTrialsForTmSz() {
 		des.endTrials(curTrial,numTrials,expDurMSec);	
 		++uavTeamSizeTrial;
-		mySimulator.uavTeamSize = uavTeamSizeTrial;
+		des.setUavTeamSize(uavTeamSizeTrial);
 		curTrial = 1;
 		des.initTrials(numTrials);
 		startExperiment();
@@ -147,18 +178,18 @@ public class mySimExecutive {
 		execFlags[flIDX] = (val ?  execFlags[flIDX] | mask : execFlags[flIDX] & ~mask);
 		switch(idx){
 			case debugExecIDX 			: {
-				des.setSimFlags(mySimulator.debugSimIDX, val);
+				des.setSimFlags(DES_Simulator.debugSimIDX, val);
 				break;}
 			case conductExpIDX			: {//if true then conducting an experiment.  reset simulation to beginning with current settings and then run until # of minutes have passed	
 				break;}			
 			case drawVisIDX				: {//draw visualization - if false should ignore all processing/papplet stuff
-				des.setSimFlags(mySimulator.drawVisIDX, val);				
+				des.setSimFlags(DES_Simulator.drawVisIDX, val);				
 				break;}
 		}			
 	}//setExecFlags
 	
 	//add an event to FEL - verifies not null
-	public void addEvent(myEvent resEv) {if(resEv != null) {		FEL.insert(resEv);}	}//addEvent
+	public void addEvent(DES_Event resEv) {if(resEv != null) {		FEL.insert(resEv);}	}//addEvent
 	
 	//public static int eventsProcced=0;
 	//to simulate 12 hours is 12 * 3600000 == 43,200,000 milliseconds which would be approx 1,309,090 frames with multiplier set to 1.
@@ -178,7 +209,7 @@ public class mySimExecutive {
 			nowTime = expDurMSec;
 			expDoneNow = true;
 		}		
-		myEvent ev = FEL.peekFirst();			//peek at first time stamp in FEL
+		DES_Event ev = FEL.peekFirst();			//peek at first time stamp in FEL
 		if(ev == null) {//no event waiting to process - start a UAV team in the process
 			ev = des.buildInitialEvent(nowTime);
 			addEvent(ev);
@@ -189,7 +220,7 @@ public class mySimExecutive {
 			//ev == null means no events on FEL
 			ev = FEL.removeFirst();
 			//eventsProcced++;
-			myEvent resEv = des.handleEvent(ev);
+			DES_Event resEv = des.handleEvent(ev);
 			addEvent(resEv);
 			//peek at next event to check if it should be executed now
 			ev = FEL.peekFirst();
@@ -226,10 +257,10 @@ public class mySimExecutive {
 	
 	//draw simulation results for visualization
 	//animTimeMod is in seconds
-	public void drawMe(float animTimeMod, DESSimWindow win) {
+	public void drawMe(float animTimeMod, Base_DESWindow win) {
 		if(!getExecFlags(drawVisIDX)) {return;}//not drawing, return
 		//call simulator to render sim world
-		des.drawMe(pa,animTimeMod* frameTimeScale, win);
+		des.drawMe(ri,animTimeMod* frameTimeScale, win);
 	}//drawMe	
 	
 	//display message and time now
@@ -339,7 +370,7 @@ public class mySimExecutive {
 		dispOutput("TEST_verifyFEL","heap idx: 0 elem is always null/unused ");
 		for(int i=1;i<heap.length;++i) {
 			if(null == heap[i]) {dispOutput("TEST_verifyFEL","heap idx: " + i +" elem is null/unused ");}
-			else {dispOutput("TEST_verifyFEL","heap idx: " + i +" elem : " +((myEvent)heap[i]).toStrBrf());}
+			else {dispOutput("TEST_verifyFEL","heap idx: " + i +" elem : " +((DES_Event)heap[i]).toStrBrf());}
 		}
 		dispOutput("TEST_verifyFEL","\nFEL Test 3 : Verifying FEL Contents and access.");
 		TEST_PQShowElemsReAdd(FEL, "FEL");
@@ -366,10 +397,10 @@ public class mySimExecutive {
 	//verify functionality of priority queue
 	public void TEST_verifyPriorityQueueFunctionality() {
 		int numTestElems = 20;
-		myPriorityQueue<myEvent> tmpPQ = new myMinQueue<myEvent>(50);
+		myPriorityQueue<DES_Event> tmpPQ = new myMinQueue<DES_Event>(50);
 		
 		//build array of test data
-		myEvent[] tmpAra = TEST_buildTestAra(numTestElems);
+		DES_Event[] tmpAra = TEST_buildTestAra(numTestElems);
 		dispOutput("TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
 		dispOutput("TEST_verifyPriorityQueueFunctionality","\nPQ Test 1 : adding random elements, removing first element in order\n");
 		//add elements in tmpAra to tmpPQ
@@ -402,15 +433,15 @@ public class mySimExecutive {
 		
 	}//verifyQueue
 	//build array of test data
-	private myEvent[] TEST_buildTestAra(int numTestElems){
-		myEvent[] tmpAra = new myEvent[numTestElems];
+	private DES_Event[] TEST_buildTestAra(int numTestElems){
+		DES_Event[] tmpAra = new DES_Event[numTestElems];
 		for (int i =0;i<numTestElems;++i) {
-			tmpAra[i] = new myEvent(ThreadLocalRandom.current().nextInt(), EventType.EnterQueue, null, null, null);//no entity attached to these events
+			tmpAra[i] = new DES_Event(ThreadLocalRandom.current().nextInt(), DES_EventType.EnterQueue, null, null, null);//no entity attached to these events
 		}
 		return tmpAra;
 	}
 	//add test data to passed PQ
-	private void TEST_buildPQWithAra(myPriorityQueue<myEvent> tmpPQ, myEvent[] tmpAra, String pqName, boolean showMsgs) {
+	private void TEST_buildPQWithAra(myPriorityQueue<DES_Event> tmpPQ, DES_Event[] tmpAra, String pqName, boolean showMsgs) {
 		if(showMsgs) {dispOutput("TEST_buildPQWithAra","Before loading "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}
 		for (int i =0;i<tmpAra.length;++i) {
 			tmpPQ.insert(tmpAra[i]);
@@ -419,8 +450,8 @@ public class mySimExecutive {
 		if(showMsgs) {dispOutput("TEST_buildPQWithAra","\nAfter adding "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}		
 	}//TEST_buildPQWithAra
 	
-	private void TEST_PQShowElemsReAdd(myPriorityQueue<myEvent> tmpPQ, String lPfx) {
-		myEvent[] tmpAra = new myEvent[tmpPQ.get_numElems()];	
+	private void TEST_PQShowElemsReAdd(myPriorityQueue<DES_Event> tmpPQ, String lPfx) {
+		DES_Event[] tmpAra = new DES_Event[tmpPQ.get_numElems()];	
 		int idx=0;
 		while (!tmpPQ.isEmpty()){
 			tmpAra[idx] = tmpPQ.removeFirst();
@@ -432,13 +463,13 @@ public class mySimExecutive {
 		}
 	}//TEST_dequeAndShowElems
 	
-	private void TEST_dequeAndShowElems(myPriorityQueue<myEvent> tmpPQ, String lPfx) {
+	private void TEST_dequeAndShowElems(myPriorityQueue<DES_Event> tmpPQ, String lPfx) {
 		int num = tmpPQ.get_numElems();
 		for (int i=0;i<num;++i) {
 			dispOutput("TEST_dequeAndShowElems",lPfx + "Elem # "+i+" in tmpPQ of Size " +tmpPQ.size() + " : " + tmpPQ.removeFirst() );
 		}
 	}//TEST_dequeAndShowElems
-	private void TEST_heapSortAndShowContents(myPriorityQueue<myEvent> tmpPQ, String pqName) {
+	private void TEST_heapSortAndShowContents(myPriorityQueue<DES_Event> tmpPQ, String pqName) {
 		@SuppressWarnings("rawtypes")
 		Comparable[] tmpSortedAra = tmpPQ.getSortedElems();
 		if(tmpSortedAra.length == 0) {
@@ -447,7 +478,7 @@ public class mySimExecutive {
 		}
 		dispOutput("TEST_heapSortAndShowContents","\nNow Displaying elements in "+pqName+" in heap sort order : ");
 		for(int i=0;i<tmpSortedAra.length;++i) {
-			dispOutput("TEST_heapSortAndShowContents","\tElem # " + i + " in sorted results : " + ((myEvent)tmpSortedAra[i]).toStrBrf() );
+			dispOutput("TEST_heapSortAndShowContents","\tElem # " + i + " in sorted results : " + ((DES_Event)tmpSortedAra[i]).toStrBrf() );
 		}
 	}//TEST_heapSortAndShowContents
 

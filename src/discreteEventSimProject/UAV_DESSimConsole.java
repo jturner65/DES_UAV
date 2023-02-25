@@ -7,8 +7,8 @@ import base_Render_Interface.IRenderInterface;
 import base_Utils_Objects.appManager.Console_AppManager;
 import base_Utils_Objects.appManager.argParse.cmdLineArgs.base.Base_CmdLineArg;
 import base_Utils_Objects.io.messaging.MsgCodes;
-import discreteEventSimProject.sim.mySimExecutive;
-import discreteEventSimProject.sim.base.mySimulator;
+import discreteEventSimProject.sim.DES_SimExec;
+import discreteEventSimProject.sim.base.DES_Simulator;
 import discreteEventSimProject.sim.layouts.SimpleDesSim;
 
 /**
@@ -30,7 +30,7 @@ public class UAV_DESSimConsole extends Console_AppManager {
 	//testType == 0 is regular fixed length experiment
 	//testType == 1 is FEL test
 	//testType == 2 is test of priority queue functionality
-	public static void simLoop(mySimExecutive simExec, int testType) {
+	public static void simLoop(DES_SimExec simExec, int testType) {
 		//modAmtMillis is delta T between each "frame" in graphical simulation
 		float modAmtMillis = 33.0f;//33 milliseconds
 		boolean doneExp = false;//done with experiment?
@@ -55,12 +55,13 @@ public class UAV_DESSimConsole extends Console_AppManager {
 		HashMap<String, Object> argsMap = getArgsMap();
 		
 		IRenderInterface dummy = null;
-		mySimulator.uavTeamSize = (Integer) argsMap.get("numUAVPerTeam");
-		mySimExecutive.frameTimeScale = (Float) argsMap.get("frameTimeScale");
+		int uavTeamSize = (int)argsMap.get("numUAVPerTeam");
+		DES_SimExec.frameTimeScale = (Float) argsMap.get("frameTimeScale");
 		
 		//instance sim exec and run loop
-		mySimExecutive simExec = new mySimExecutive(dummy, msgObj); 
-		mySimulator des = new SimpleDesSim(simExec, 100);
+		DES_SimExec simExec = new DES_SimExec(dummy, msgObj); 
+		DES_Simulator des = new SimpleDesSim(simExec, 0, 100);
+		des.setUavTeamSize(uavTeamSize);
 		simExec.initSimWorld(des, true);
 		
 		int runType = 0;

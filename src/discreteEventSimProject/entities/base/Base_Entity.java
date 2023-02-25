@@ -2,15 +2,19 @@ package discreteEventSimProject.entities.base;
 
 import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import discreteEventSimProject.sim.base.mySimulator;
-import discreteEventSimProject.ui.DESSimWindow;
+import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.ui.base.Base_DESWindow;
 
-//base class for all entities
-public abstract class myEntity {	
+/**
+ * base class for all entities
+ * @author John Turner
+ *
+ */
+public abstract class Base_Entity {	
 	public int ID;//provide unique count-based ID to all entities
 	public static int IDcount = 0;
 	
-	public mySimulator sim;
+	public DES_Simulator sim;
 	
 	public String name;
 	public myPointf loc;			//initial location of this entity (may change if it moves)
@@ -40,7 +44,7 @@ public abstract class myEntity {
 	//types of entity as per Birta ABCMod - is ara because may be compound type
 	public EntityType[] types;		
 	
-	public myEntity(mySimulator _sim, String _name, myPointf _loc, EntityType[] _types) {
+	public Base_Entity(DES_Simulator _sim, String _name, myPointf _loc, EntityType[] _types) {
 		sim=_sim;	name = _name; loc = new myPointf(_loc);types=_types;
 		ID = IDcount++;	
 		timeVals = new long[numTimeVals];
@@ -57,19 +61,24 @@ public abstract class myEntity {
 	//return array of strings for status info for display
 	protected abstract String[] showStatus();
 	
-	//display this entity's label information
-	protected void dispEntityLabel(IRenderInterface pa, DESSimWindow win) {
-		win.unSetCamOrient();
-		pa.pushMatState();
-			pa.translate(labelVals[0],labelVals[1],labelVals[2]);
-			pa.setFill(lblColors,255);
-			pa.scale(.5f,.5f,.5f);
+	/**
+	 * display this entity's label information
+	 * @param ri
+	 * @param win
+	 */
+	public final void dispEntityLabel(IRenderInterface ri, Base_DESWindow win) {
+		ri.pushMatState();
+			ri.translate(loc);
+			win.unSetCamOrient();
+			ri.translate(labelVals[0],labelVals[1],labelVals[2]);
+			ri.setFill(lblColors,255);
+			ri.scale(.5f,.5f,.5f);
 			String[] currStatus = this.showStatus();
 			for(int i=0;i<currStatus.length;++i){
-				pa.showText(currStatus[i], 0,(i+1)*10.0f, 0); 
+				ri.showText(currStatus[i], 0,(i+1)*10.0f, 0); 
 			}
-		pa.popMatState();
-		win.setCamOrient();
+			win.setCamOrient();
+		ri.popMatState();
 
 	}//dispEntityLabel
 	
@@ -80,8 +89,17 @@ public abstract class myEntity {
 	public long getTTLQueueTime() {return timeVals[ttlQueueTime];}
 	public long getTTLNumTeamsProc() {return timeVals[ttlNumTeamsProc];}
 	
-	//draw this entity
-	public abstract void drawEntity(IRenderInterface pa, DESSimWindow win, float delT, boolean drawMe, boolean drawLbls);
+	/**
+	 * draw this entity
+	 * @param pa
+	 * @param win
+	 * @param delT
+	 * @param drawMe
+	 */
+	public abstract void drawEntity(IRenderInterface pa, Base_DESWindow win, float delT, boolean drawMe);
+	
+	
+	
 	
 	public String toString() {
 		String res = "Entity ID : " + ID + " | Name : " + name + "\n";

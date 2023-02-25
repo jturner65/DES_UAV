@@ -1,4 +1,4 @@
-package discreteEventSimProject.entities;
+package discreteEventSimProject.entities.consumers;
 
 
 import base_Render_Interface.IRenderInterface;
@@ -7,17 +7,17 @@ import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
 import discreteEventSimProject.entities.base.EntityType;
-import discreteEventSimProject.entities.base.myEntity;
-import discreteEventSimProject.sim.base.mySimulator;
-import discreteEventSimProject.ui.DESSimWindow;
+import discreteEventSimProject.entities.base.Base_Entity;
+import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.ui.base.Base_DESWindow;
 
 /**
  * class holding the graphical and simulation parameters for a UAV team entity of a certain size.  
  * @author john
  *
  */
-public class myUAVTeam extends myEntity {	
-	public myUAVObj[] uavTeam;
+public class UAV_Team extends Base_Entity {	
+	public UAV_Obj[] uavTeam;
 	
 	public static final float rad = 5;			//radius of sphere upon which team members will be placed
 	
@@ -51,7 +51,7 @@ public class myUAVTeam extends myEntity {
 	
 	private int teamSize;
 	
-	public myUAVTeam(mySimulator _sim, String _name, int _teamSize, myPointf _initLoc){
+	public UAV_Team(DES_Simulator _sim, String _name, int _teamSize, myPointf _initLoc){
 		super(_sim, _name, _initLoc, new EntityType[] {EntityType.Consumer});
 		//set so always remembers where it started
 		teamID = teamIncr++;
@@ -68,11 +68,11 @@ public class myUAVTeam extends myEntity {
 	public void initTeam(){
 		//base location of UAV team - UAV individual units drawn relative to this location
 		loc = new myPointf(initLoc);
-		uavTeam = new myUAVObj[teamSize];
+		uavTeam = new UAV_Obj[teamSize];
 		//sim.dispOutput("\tmyUAVTeam : make UAV team of size : "+ _teamSize+ " name : " + name);
 		//2nd idx : 0 is normal, 1 is location
 		myPointf[][] teamLocs = sim.getRegularSphereList(rad, teamSize, 1.0f);
-		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c] =  new myUAVObj(this,teamLocs[c][1]);}
+		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c] =  new UAV_Obj(this,teamLocs[c][1]);}
 		motionTraj = new myVectorf();
 		uavVelVec = new myVectorf();
 		stLoc = new myPointf(initLoc);
@@ -119,32 +119,26 @@ public class myUAVTeam extends myEntity {
 	 */
 	public Base_RenderObj getCurrTemplate(){return tmpl;}
 	
-//	//finds valid coordinates if torroidal walls, but doesn't change coords
-//	public myPointf findValidWrapCoordsForDraw(myPointf _coords){return new myPointf(((_coords.x+pa.gridDimX) % pa.gridDimX),((_coords.y+pa.gridDimY) % pa.gridDimY),((_coords.z+pa.gridDimZ) % pa.gridDimZ));	}//findValidWrapCoords	
-//	//sets coords to be valid if torroidal walls
-//	public void setValidWrapCoordsForDraw(myPointf _coords){_coords.set(((_coords.x+pa.gridDimX) % pa.gridDimX),((_coords.y+pa.gridDimY) % pa.gridDimY),((_coords.z+pa.gridDimZ) % pa.gridDimZ));	}//findValidWrapCoords	
-	
 	/**
 	 *
 	 */
-	public void drawEntity(IRenderInterface pa, DESSimWindow win, float delT, boolean drawMe, boolean drawLbls){
-		pa.pushMatState();
-		pa.translate(loc);
+	public void drawEntity(IRenderInterface ri, Base_DESWindow win, float delT, boolean drawMe){
+		ri.pushMatState();
+			ri.translate(loc);
 			boolean debugAnim = sim.getDebug();
-			pa.pushMatState();
-			pa.setColorValStroke(IRenderInterface.gui_Black, 255);
-			pa.setStrokeWt(2.0f);
-			if(debugAnim) {pa.drawLine(new myPointf(), motionTraj);}//motion trajectory vector
-			pa.popMatState();
+			ri.pushMatState();
+			ri.setColorValStroke(IRenderInterface.gui_Black, 255);
+			ri.setStrokeWt(2.0f);
+			if(debugAnim) {ri.drawLine(new myPointf(), motionTraj);}//motion trajectory vector
+			ri.popMatState();
 			//individual UAVs are relative to loc
 			if(sim.getDrawBoats()){//broken apart to minimize if checks - only potentially 2 per team per frame instead of thousands
-				if(debugAnim){		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeDbgFrame(Base_DispWindow.AppMgr, pa,delT);}}
-				else {				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMe(pa,delT);}}	  					
+				if(debugAnim){		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeDbgFrame(Base_DispWindow.AppMgr, ri,delT);}}
+				else {				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMe(ri,delT);}}	  					
 			} else {
-				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeBall(Base_DispWindow.AppMgr, pa,debugAnim);  }
+				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeBall(Base_DispWindow.AppMgr, ri,debugAnim);  }
 			}
-		if(drawLbls) {	dispEntityLabel(pa, win);		}
-		pa.popMatState();
+		ri.popMatState();
 	}//drawTeam
 	
 	//public void leaveTransitLane() {setEntityFlags(inTransitLane, false);}
@@ -247,7 +241,7 @@ public class myUAVTeam extends myEntity {
 		String res = super.toString();
 		res += "\tTeam Size " + uavTeam.length + "\n";
 		res +="cur motion time : " + curMotionTime + " stLoc :  " + stLoc.toStrBrf() + " end loc : " + endLoc.toStrBrf() + " | Motion Dur : " + motionDur + " | motionTraj : " + motionTraj.toString() +"\n";
-		for(myUAVObj bd : uavTeam){			res+="\t     UAV "+bd.toString(); res+="\n";	}
+		for(UAV_Obj bd : uavTeam){			res+="\t     UAV "+bd.toString(); res+="\n";	}
 		return res;
 	}
 

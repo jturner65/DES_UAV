@@ -3,8 +3,10 @@ package discreteEventSimProject;
 import java.util.HashMap;
 
 import base_UI_Objects.GUI_AppManager;
+import base_UI_Objects.windowUI.sidebar.SidebarMenu;
 import base_Utils_Objects.io.messaging.MsgCodes;
-import discreteEventSimProject.ui.DESSimWindow;
+import discreteEventSimProject.ui.DynamicDESWindow;
+import discreteEventSimProject.ui.StaticDESWindow;
 
 /**
  * CS6730 Project 1 : UAV Discrete Event Simulator
@@ -29,17 +31,18 @@ public class UAV_DESSim extends GUI_AppManager {
 	 */
 	private final int GridDim_3D = 1500;
 	
-	private final int
-		showUIMenu 		= 0,			//whether or not to show sidebar menu
-		showDESwin		= 1;			//whether to show 1st window
-
-	public final int numVisFlags = 2;
-	
-	//idx's in dispWinFrames for each window - 0 is always left side menu window
+	/**
+	 * idx's in dispWinFrames for each window - 0 is always left side menu window
+	 * Side menu is dispMenuIDX == 0
+	 */
 	private static final int
-		dispDES_SimWin = 1
-		;
+		dispDES_SimWin_1 = 1,
+		dispDES_SimWin_2 = 2;
 	
+	/**
+	 * # of visible windows including side menu (always at least 1 for side menu)
+	 */
+	private static final int numVisWins = 3;	
 ///////////////
 //CODE STARTS
 ///////////////	
@@ -80,7 +83,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	@Override
 	protected int[] getBackgroundColor(int winIdx) {return bground;}
 	@Override
-	protected int getNumDispWindows() {	return numVisFlags;	}
+	protected int getNumDispWindows() {	return numVisWins;	}
 	
 	/**
 	 * whether or not we want to restrict window size on widescreen monitors
@@ -117,35 +120,33 @@ public class UAV_DESSim extends GUI_AppManager {
 		setBaseFlagToShow_debugMode(true);
 		setBaseFlagToShow_runSim(true);
 		setBaseFlagToShow_singleStep(true);
-		setBaseFlagToShow_showRtSideMenu(true);
+		setBaseFlagToShow_showRtSideMenu(true);	
+		setBaseFlagToShow_showDrawableCanvas(false);
 	}
 
 	@Override
 	protected void initAllDispWindows() {
 		showInfo = true;
 		//titles and descs, need to be set before sidebar menu is defined
-		String[] _winTitles = new String[]{"","UAV DES Sim"},//,"SOM Map UI"},
-				_winDescr = new String[] {"","Display UAV Discrete Event Simulator"};
+		String[] _winTitles = new String[]{"","UAV DES Sim 1","UAV DES Sim 2"},
+				_winDescr = new String[] {"","Display UAV Discrete Event Simulator 1","Display UAV Discrete Event Simulator 2"};
 		setWinTitlesAndDescs(_winTitles, _winDescr);
-		//call for menu window
-		buildInitMenuWin();
 		//instanced window dimensions when open and closed - only showing 1 open at a time
 		float[] _dimOpen  = getDefaultWinDimOpen(), 
 				_dimClosed  = getDefaultWinDimClosed();	
 		//menu bar init
-		String[] menuBtnTitles = new String[]{"Sim Map","Functions 2","Functions 3","Functions 4"};
+		String[] menuBtnTitles = new String[]{"Sim Layouts","Functions 1","Functions 2","Verifications"};
 		String[][] menuBtnNames = new String[][] { // each must have literals for every button defined in side bar
 			// menu, or ignored
-			{ "Simple SIM", "Complex SIM", "---"}, // row 1
+			{ "Layout 0","Layout 1","Layout 2","Layout 3","Layout 4"}, // row 1
 			{ "---", "---", "---", "---" }, // row 2
 			{ "---", "---", "---", "---" }, // row 3
 			{"Verify PQ", "Verify FEL", "Show Sim", "Test Tasks"}
 		};				
 		
 		String[] menuDbgBtnNames = new String[] {};//must have literals for every button or this is ignored
-		
-		int wIdx = dispMenuIDX,fIdx=showUIMenu;
-		dispWinFrames[wIdx] = buildSideBarMenu(wIdx, fIdx, menuBtnTitles, menuBtnNames, menuDbgBtnNames, false, false);
+		//build menu
+		buildSideBarMenu(menuBtnTitles, menuBtnNames, menuDbgBtnNames, true, false);
 
 		//setInitDispWinVals : use this to define the values of a display window
 		//int _winIDX, 
@@ -156,19 +157,21 @@ public class UAV_DESSim extends GUI_AppManager {
 		//int[] _fill, int[] _strk, 			: window fill and stroke colors
 		//int _trajFill, int _trajStrk)			: trajectory fill and stroke colors, if these objects can be drawn in window (used as alt color otherwise)
 
-		wIdx = dispDES_SimWin; fIdx= showDESwin;
-		setInitDispWinVals(wIdx, _dimOpen, _dimClosed,new boolean[]{false,true,true,true}, new int[]{210,220,250,255},new int[]{255,255,255,255},new int[]{180,180,180,255},new int[]{100,100,100,255}); 
-		dispWinFrames[wIdx] = new DESSimWindow(ri, this, wIdx, fIdx);		
+		int wIdx = dispDES_SimWin_1;
+		setInitDispWinVals(wIdx, _dimOpen, _dimClosed,new boolean[]{false,true,true,true}, new int[]{210,240,250,255},new int[]{255,255,255,255},new int[]{180,180,180,255},new int[]{100,100,100,255}); 
+		dispWinFrames[wIdx] = new StaticDESWindow(ri, this, wIdx);		
+		wIdx = dispDES_SimWin_2;
+		setInitDispWinVals(wIdx, _dimOpen, _dimClosed,new boolean[]{false,true,true,true}, new int[]{240,210,250,255},new int[]{255,255,255,255},new int[]{180,180,180,255},new int[]{100,100,100,255}); 
+		dispWinFrames[wIdx] = new DynamicDESWindow(ri, this, wIdx);		
 		//specify windows that cannot be shown simultaneously here
-		initXORWins(new int[]{showDESwin},new int[]{dispDES_SimWin});
+		initXORWins(new int[]{dispDES_SimWin_1, dispDES_SimWin_2},new int[]{dispDES_SimWin_1, dispDES_SimWin_2});
 		
-	}
+	}//initAllDispWindows
 
 	@Override
 	protected void initOnce_Indiv() {
 		//which objects to initially show
-		setVisFlag(showUIMenu, true);					//show input UI menu
-		setVisFlag(showDESwin, true);
+		setVisFlag(dispDES_SimWin_1, true);
 	}
 	@Override
 	//called multiple times, whenever re-initing
@@ -191,13 +194,13 @@ public class UAV_DESSim extends GUI_AppManager {
 	 * @return
 	 */
 	@Override
-	public int getNumVisFlags() {return numVisFlags;}
+	public int getNumVisFlags() {return numVisWins;}
 	@Override
 	//address all flag-setting here, so that if any special cases need to be addressed they can be
 	protected void setVisFlag_Indiv(int idx, boolean val ){
 		switch (idx){
-			case showUIMenu 	    : { dispWinFrames[dispMenuIDX].dispFlags.setShowWin(val);    break;}											//whether or not to show the main ui window (sidebar)			
-			case showDESwin			: { setWinFlagsXOR(dispDES_SimWin, val); break;}//setDispAndModMapMgr(showCOTS_2DMorph, dispCOTS_2DMorph, val);break;}
+			case dispDES_SimWin_1			: { setWinFlagsXOR(dispDES_SimWin_1, val); break;}
+			case dispDES_SimWin_2 			: { setWinFlagsXOR(dispDES_SimWin_2, val); break;}
 			default : {break;}
 		}
 	}
@@ -228,12 +231,12 @@ public class UAV_DESSim extends GUI_AppManager {
 	}
 
 	@Override
-	public float[] getUIRectVals(int idx) {
+	public float[] getUIRectVals_Indiv(int idx, float[] menuClickDim) {
 		//this.pr("In getUIRectVals for idx : " + idx);
 		switch(idx){
-		case dispMenuIDX 				: { return new float[0];}			//idx 0 is parent menu sidebar
-		case dispDES_SimWin				: { return dispWinFrames[dispMenuIDX].uiClkCoords;}
-		default :  return dispWinFrames[dispMenuIDX].uiClkCoords;
+		case dispDES_SimWin_1				: { return menuClickDim;}
+		case dispDES_SimWin_2				: { return menuClickDim;}
+		default :  return menuClickDim;
 		}
 	}
 	
@@ -251,6 +254,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	public void handleShowWin(int btn, int val, boolean callFlags){//display specific windows - multi-select/ always on if sel
 		if(!callFlags){//called from setflags - only sets button state in UI to avoid infinite loop
 			//setMenuBtnState(mySideBarMenu.btnShowWinIdx,btn, val);
+			setMenuBtnState(SidebarMenu.btnShowWinIdx,btn, val);
 		} else {//called from clicking on buttons in UI
 		
 			//val is btn state before transition 

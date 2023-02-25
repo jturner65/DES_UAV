@@ -13,54 +13,78 @@ import base_UI_Objects.renderedObjs.Boat_RenderObj;
 import base_UI_Objects.renderedObjs.Sphere_RenderObj;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
 import base_UI_Objects.renderedObjs.base.RenderObj_ClrPalette;
-import discreteEventSimProject.entities.myUAVTask;
-import discreteEventSimProject.entities.myUAVTeam;
-import discreteEventSimProject.entities.myUAVTransitLane;
-import discreteEventSimProject.entities.base.myEntity;
-import discreteEventSimProject.events.EventType;
-import discreteEventSimProject.events.myEvent;
-import discreteEventSimProject.sim.mySimExecutive;
-import discreteEventSimProject.sim.task.taskDesc;
-import discreteEventSimProject.ui.DESSimWindow;
+import discreteEventSimProject.entities.base.Base_Entity;
+import discreteEventSimProject.entities.consumers.UAV_Team;
+import discreteEventSimProject.entities.resources.UAV_Task;
+import discreteEventSimProject.entities.resources.UAV_TransitLane;
+import discreteEventSimProject.events.DES_EventType;
+import discreteEventSimProject.events.DES_Event;
+import discreteEventSimProject.sim.DES_SimExec;
+import discreteEventSimProject.sim.task.DES_TaskDesc;
+import discreteEventSimProject.ui.base.Base_DESWindow;
 import processing.core.*;
 
 /**
- * concrete class to manage specific simulation environment and event handling for DES simulation - owned by and called from sim executive
+ * base class to manage specific simulation environment and event handling for DES simulation - owned by and called from sim executive
+ * Specifics of descrete event simulation specified in child class
  * @author john
  */
-public abstract class mySimulator {
-	//owning executor
-	public mySimExecutive exec;
-	//fixed structure holding task resources in this simulation
-	public myUAVTask[] tasks;	
-	//fixed structure holding transit lane resource queues in this simulation
-	public myUAVTransitLane[] transitLanes;
-	//variable structure holding collection of uavteams in play in this simulation
-	public ArrayList<myUAVTeam> teams;		
-	//single transitionlane from last task to first task, to provide recycling of teams
-	public myUAVTransitLane holdingLane;
-	//maximum # of UAV units available - can't put more than this many into play - can specify in constructor
-	protected final int maxNumUAVs;	
-
-	//locations of tasks TODO make this random?  might be interesting to see how it impacts sim
+public abstract class DES_Simulator {
+	/**
+	 * owning executor
+	 */
+	public DES_SimExec exec;
+	/**
+	 * fixed structure holding task resources in this simulation
+	 */
+	public UAV_Task[] tasks;	
+	/**
+	 * fixed structure holding transit lane resource queues in this simulation
+	 */
+	public UAV_TransitLane[] transitLanes;
+	/**
+	 * variable structure holding collection of uavteams in play in this simulation
+	 */
+	public ArrayList<UAV_Team> teams;		
+	/**
+	 * single transition lane from last task to first task, to provide recycling of teams
+	 */
+	public UAV_TransitLane holdingLane;
+	/**
+	 * maximum # of UAV units available - can't put more than this many into play - can specify in constructor
+	 */
+	protected final int maxNumUAVs;
+	/**
+	 * locations of tasks TODO make this random?  might be interesting to see how it impacts sim
+	 */
 	protected myPointf[] taskLocs;
-	//optimal team size for each task
+	/**
+	 * optimal team size for each task
+	 */
 	protected int[] taskOptSize;
-	//time required for optimal team size to complete task, in minutes.(mult by 60000 for milliseconds)
+	/**
+	 * time required for optimal team size to complete task, in minutes.(mult by 60000 for milliseconds)
+	 */
 	protected float[] optTeamTTCMins;
-	//stdev multiplier (if != 0 then uses TTC as mean of gaussian with stdev == mult * optTeamSize/teamSize)
+	/**
+	 * stdev multiplier (if != 0 then uses TTC as mean of gaussian with stdev == mult * optTeamSize/teamSize)
+	 */
 	protected float[] stdDevTTCMult;
-	//transit lane : idxs of tasks connecting each lane (parent, child)
+	/**
+	 * transit lane : idxs of tasks connecting each lane (parent, child)
+	 */
 	protected int[][] TL_taskIdxs;
-	//whether a particular task is a group task or not
-	protected boolean [] isGrpTask; 
-		
-	//size of UAV teams - modified by UI or commandline entry TODO
-	public static int uavTeamSize = 4;
-	
-	public static final float epsValCalc = .00000001f;
-	
-	//flags relevant to simulator executive execution
+	/**
+	 * whether a particular task is a group task or not
+	 */
+	protected boolean [] isGrpTask;		
+	/**
+	 * size of UAV teams - modified by UI or command-line entry
+	 */
+	protected int uavTeamSize = 4;	
+	/**
+	 * flags relevant to simulator executive execution
+	 */
 	protected int[] simFlags;	
 	public static final int
 					debugSimIDX 		= 0,
@@ -77,24 +101,39 @@ public abstract class mySimulator {
 	protected static final int numSimFlags = 10;
 	////////////////////////
 	// reporting stuff
-	//string representation of date for report data
+	/**
+	 * string representation of date for report data
+	 */
 	private String rptDateNowPrfx;
 	private String rptExpDir;
-	//main directory to put experiments
+	/**
+	 * main directory to put experiments
+	 */
 	private String baseDirStr;
-	//arrays of each trial's results for each type of metric - at end of experiment, save total results as avgs of specific results in these arrays
-	//private String[][] uavResStrs, tlResStrs, taskResStrs;
-	//arrays to hold each trial's results for each type of metric - at end of experiment, save total results as avgs of specific results in these arrays
-	//per trial totals of all uavs' performance
+	/**
+	 * Which sim layout to build
+	 */
+	protected int simLayoutToUse = 0;
+	
+	/**
+	 * arrays to hold each trial's results for each type of metric.
+	 * At end of experiment, save total results as avgs of specific results in these arrays
+	 */
+	/**
+	 * per trial totals of all uavs' performance
+	 */
 	private long[][] uavRes;
-	//per trial, per task or per transit lane, per measured result value array of all exp data
+	/**
+	 * per trial, per task or per transit lane, per measured result value array of all exp data
+	 */
 	private long[][][] taskRes,tlRes;
 	
 	
 	/////////////////////////
 	// rendering stuff
-//	// structure holding UAV teams and the rendered versions of them - move to myRenderObj? - from boids project
-	//only 5 different flocks will display nicely on side menu
+	/**
+	 * This was taken from boids project
+	 */
 	public String[] UAVTeamNames = new String[]{"Privateers", "Pirates", "Corsairs", "Marauders", "Freebooters"};
 	public PImage[] UAVBoatSails;						//image sigils for sails	
 	public String[] UAVTypeNames = new String[]{"Boats"};
@@ -103,7 +142,6 @@ public abstract class mySimulator {
 	//need individual array for each type of object, sphere (simplified) render object
 	protected Base_RenderObj[] rndrTmpl,//set depending on UI choice for complex rndr obj 
 		boatRndrTmpl,
-		//add more rendr obj arrays here
 		sphrRndrTmpl;//simplified rndr obj (sphere)	
 	protected ConcurrentSkipListMap<String, Base_RenderObj[]> cmplxRndrTmpls;	
 	
@@ -133,21 +171,28 @@ public abstract class mySimulator {
 	private static final int[][][] objFillColors = new int[][][]{
 		{{110, 65, 30,255},	{30, 30, 30,255}, {130, 22, 10,255}, {22, 188, 110,255},	{22, 10, 130,255}},		//sphere
 		{{110, 65, 30,255}, {20, 20, 20,255}, {130, 22, 10,255}, {22, 128, 50,255}, {22, 10, 150,255}}				//boats
-	};
-	
+	};	
 	
 	/**
 	 * # of animation frames per animation cycle for animating objects
 	 */	
-	protected int numAnimFramesPerType = 90;
-	public mySimulator(mySimExecutive _exec, int _maxNumUAVs) {
+	protected final int numAnimFramesPerType = 90;
+	
+	/**
+	 * 
+	 * @param _exec
+	 * @param _maxNumUAVs
+	 */
+	public DES_Simulator(DES_SimExec _exec, int _maxNumUAVs, int _simLayoutToUse) {
 		exec=_exec;
 		maxNumUAVs = _maxNumUAVs;
-		initOnce();
+		simLayoutToUse = _simLayoutToUse;
 	}//ctor
 	
-	//called 1 time for all simulations
-	private void initOnce() {
+	/**
+	 * called 1 time for all simulations
+	 */
+	protected void initMe() {
 		Instant now = Instant.now();
 		rptDateNowPrfx = "ExpDate_"+now.toString()+"_";
 		rptDateNowPrfx=rptDateNowPrfx.replace(":", "-");
@@ -160,19 +205,19 @@ public abstract class mySimulator {
 		//setup flag array
 		initSimFlags();
 		//set up render object templates for different UAV Teams
-		if(exec.pa != null) {	
-			IRenderInterface pa = exec.pa;
+		if(exec.ri != null) {	
+			IRenderInterface ri = exec.ri;
 			RenderObj_ClrPalette[] palettes = new RenderObj_ClrPalette[numBoidTypes];
-			for (int i=0;i<numBoidTypes;++i) {palettes[i] = buildRenderObjPalette(pa, i);}			
+			for (int i=0;i<numBoidTypes;++i) {palettes[i] = buildRenderObjPalette(ri, i);}			
 			sphrRndrTmpl = new Sphere_RenderObj[NumUniqueTeams];
-			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new Sphere_RenderObj(exec.pa, i, palettes[sphereClrIDX]);	}	
+			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new Sphere_RenderObj(exec.ri, i, palettes[sphereClrIDX]);	}	
 			cmplxRndrTmpls = new ConcurrentSkipListMap<String, Base_RenderObj[]> (); 
 			UAVBoatSails = new PImage[NumUniqueTeams];
 			boatRndrTmpl = new Boat_RenderObj[NumUniqueTeams];
 			for(int i=0; i<NumUniqueTeams; ++i){	
-				UAVBoatSails[i] = ((my_procApplet)pa).loadImage(UAVTeamNames[i]+".jpg");
+				UAVBoatSails[i] = ((my_procApplet)ri).loadImage(UAVTeamNames[i]+".jpg");
 				//build boat render object for each individual flock type
-				boatRndrTmpl[i] = new Boat_RenderObj(pa, i, numAnimFramesPerType, palettes[boatClrIDX]);		
+				boatRndrTmpl[i] = new Boat_RenderObj(ri, i, numAnimFramesPerType, palettes[boatClrIDX]);		
 			}		
 			cmplxRndrTmpls.put(UAVTypeNames[0], boatRndrTmpl);
 			rndrTmpl = cmplxRndrTmpls.get(UAVTypeNames[0]);//start by rendering boats
@@ -180,6 +225,118 @@ public abstract class mySimulator {
 		initSimPriv();
 		isGrpTask = getIsGroupAra();
 	}//initOnce
+	
+	/** 
+	 * Build sequential list of locations for tasks in a densely connected regular DAG grid and return the ArrayList of the
+	 * and the 3D array of idxs for each point as well.
+	 * 
+	 * @param locIdxs predefined location idxs array for 3 d locations of each task. Populated here and returned
+	 * @param size floating point size in the world of the square grid. The locations will be at +/- size/2 in each of x,y,z
+	 * @return Array of points of all location points in dense cubic grid for tasks.  locIdxs will also be populated with 
+	 * the idxs into this array for each task. 
+	 */ 
+	protected final myPointf[] buildDenseGridTaskLocs(int[][][] locIdxs, float size){
+		int numPerSide = locIdxs.length;		
+		float mult = size/(1.0f * (numPerSide-1));
+		float ctr = size/2.0f;
+		//dimension value for start and end location
+		float locDim = ctr + .5f * mult;
+		//start location and end location are outside the cube, at opposite corners
+		myPointf stLoc = new myPointf(-locDim, -locDim, -locDim);
+		myPointf endLoc = new myPointf(locDim, locDim, locDim);
+		System.out.println("Size : "+ size+ " St loc : "+stLoc.toStrBrf());
+		
+		ArrayList<myPointf> tmpListLocs = new ArrayList<myPointf>();
+		int idx = 1;
+		tmpListLocs.add(stLoc);
+
+		int[][] locs_y = new int[numPerSide][];
+		int[] locs_z = new int[numPerSide];
+		//have a chance to make a task at each location
+		for(int i=0; i<numPerSide; ++i) {	
+			float xCoord = i*mult - ctr;
+			locs_y = new int[numPerSide][];
+			for(int j=0; j<numPerSide; ++j) {
+				float yCoord = j*mult - ctr;
+				locs_z = new int[numPerSide];
+				for(int k=0; k<numPerSide; ++k) {
+					float zCoord = k*mult - ctr;
+					locs_z[k] = idx++; 
+					tmpListLocs.add(new myPointf(xCoord, yCoord, zCoord));
+				}
+				locs_y[j]=locs_z;
+			}			
+			locIdxs[i]=locs_y;
+		}
+		tmpListLocs.add(endLoc);		
+		return tmpListLocs.toArray(new myPointf[0]);		
+	}//buildDenseGridTaskLocs
+	
+	/**
+	 * Build a 2d array of begin->end point locations for each transit lane for the dense cube dag
+	 * @param locIdxs 3d array of idxs in task location array for each point in dag
+	 * @param lastObjIDX the idx in the task location array of the last object
+	 * @return 2d array of every transit lane's beginning and ending point locations.
+	 */
+	protected final int[][] buildDenseGridTaskLanePts(int[][][] locIdxs, int lastObjIDX) {
+		int xLast = locIdxs.length-1;
+		int yLast = locIdxs[0].length-1;
+		int zLast = locIdxs[0][0].length-1;
+		// binomial theorem to calculate total # of lanes
+		int numIdxs = 8 + xLast *(3 + xLast *((3* 3) + (xLast * 7)));
+		
+		int[][] tLaneIdxs = new int[numIdxs][];
+		int idx_TL = 0;
+		System.out.println("\n\n\n\n# idxs = "+numIdxs+"\n\n\n\n");
+		//connectstart to first 4
+		tLaneIdxs[idx_TL++] = new int[] {0,locIdxs[0][0][0]};					
+		tLaneIdxs[idx_TL++] = new int[] {0,locIdxs[1][0][0]};					
+		tLaneIdxs[idx_TL++] = new int[] {0,locIdxs[0][1][0]};					
+		tLaneIdxs[idx_TL++] = new int[] {0,locIdxs[0][0][1]};				
+		
+		//make links to all +1 coords (7 per node not counting bounds)
+		for(int i=0; i<xLast; ++i) {	
+			for(int j=0; j<yLast; ++j) {
+				for(int k=0; k<zLast; ++k) {
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i][j][k+1]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i][j+1][k]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i][j+1][k+1]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i+1][j][k]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i+1][j][k+1]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i+1][j+1][k]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i+1][j+1][k+1]}; 
+				}
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][zLast],locIdxs[i][j+1][zLast]}; 
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][zLast],locIdxs[i+1][j][zLast]}; 
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][zLast],locIdxs[i+1][j+1][zLast]}; 				
+			}	
+			tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][zLast],locIdxs[i+1][yLast][zLast]};			
+		}
+		for(int j=0; j<yLast; ++j) {
+			for(int k=0; k<zLast; ++k) {
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][k],locIdxs[xLast][j][k+1]};	
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][k],locIdxs[xLast][j+1][k]};	
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][k],locIdxs[xLast][j+1][k+1]};	
+			}
+			tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][zLast],locIdxs[xLast][j+1][zLast]};	
+		}
+		for(int k=0; k<zLast; ++k) {
+			for(int i=0;i<xLast;++i) {
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][k],locIdxs[i][yLast][k+1]};				
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][k],locIdxs[i+1][yLast][k]};				
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][k],locIdxs[i+1][yLast][k+1]};				
+			}
+			tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][yLast][k],locIdxs[xLast][yLast][k+1]};	
+		}		
+		
+		//connect last 4 task locs to exit
+		tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][yLast][zLast], lastObjIDX};					
+		tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][yLast][zLast-1], lastObjIDX};					
+		tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][yLast-1][zLast], lastObjIDX};					
+		tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast-1][yLast][zLast], lastObjIDX};
+		
+		return tLaneIdxs;
+	}
 	
 	
 	/**
@@ -209,34 +366,55 @@ public abstract class mySimulator {
 		palette.disableAmbient();
 		return palette;
 	}
-	
-	protected myUAVTransitLane buildTransitLane(myUAVTask[] _tasks, int stIdx, int endIdx, float laneVel, boolean showMsg) {
+	/**
+	 * 
+	 * @param _tasks
+	 * @param stIdx
+	 * @param endIdx
+	 * @param laneVel
+	 * @param showMsg
+	 * @return
+	 */
+	protected UAV_TransitLane buildTransitLane(UAV_Task[] _tasks, int stIdx, int endIdx, float laneVel, boolean showMsg) {
 		String TLName =  "TransitLane_From_" + tasks[stIdx].name+"_to_"+ tasks[endIdx].name;
 		//set location halfway between the two tasks this lane connects
 		myPointf loc = new myPointf(_tasks[stIdx].loc, .5f, _tasks[endIdx].loc);
-		myUAVTransitLane tl = new myUAVTransitLane(this, TLName, loc, 30.0f, laneVel);
+		UAV_TransitLane tl = new UAV_TransitLane(this, TLName, loc, 30.0f, laneVel);
 		//set all parent and child tasks for each transit lane (always has 1 parent and 1 child)
 		//add to transit
 		tl.setTransitLaneConnections(_tasks[stIdx], _tasks[endIdx]);
 		return tl;
 	}//buildTransitLane
 	
-	//build all tasks for this simulation
-	protected myUAVTask[] buildTasks(taskDesc[] tDesc, boolean showMsg) {
+	/**
+	 * build all tasks for this simulation
+	 * @param tDesc
+	 * @param showMsg
+	 * @return
+	 */
+	protected UAV_Task[] buildTasks(DES_TaskDesc[] tDesc, boolean showMsg) {
 		//set # of tasks based on passed location array tasks exist in simulation
-		myUAVTask[] _ts = new myUAVTask[tDesc.length];				
+		UAV_Task[] _ts = new UAV_Task[tDesc.length];				
 		//first build tasks 
-		for(int i=0;i<_ts.length;++i) {	_ts[i]=new myUAVTask(this, tDesc[i]);}
+		for(int i=0;i<_ts.length;++i) {	_ts[i]=new UAV_Task(this, tDesc[i]);}
 		if(showMsg) {
-			exec.dispOutput("mySimulator", "buildTasks", "All " + _ts.length + " Tasks initialized.");	
+			exec.dispOutput("DES_Simulator", "buildTasks", "All " + _ts.length + " Tasks initialized.");	
 		}
 		return _ts;
 	}//buildTasks
 	
-	//build transit lanes after tasks have been built - set transit lanes to be child and parent task's parent and child, respectively
-	protected myUAVTransitLane[] buildTransitLanes(myUAVTask[] _tasks, int[][] _TL_taskIdxs, ArrayList<Integer>[] _taskParentIDXs, ArrayList<Integer>[] _taskChildIDXs, boolean showMsg) {
+	/**
+	 * build transit lanes after tasks have been built - set transit lanes to be child and parent task's parent and child, respectively
+	 * @param _tasks
+	 * @param _TL_taskIdxs
+	 * @param _taskParentIDXs
+	 * @param _taskChildIDXs
+	 * @param showMsg
+	 * @return
+	 */
+	protected UAV_TransitLane[] buildTransitLanes(UAV_Task[] _tasks, int[][] _TL_taskIdxs, ArrayList<Integer>[] _taskParentIDXs, ArrayList<Integer>[] _taskChildIDXs, boolean showMsg) {
 		//set # transit lanes exist in simulation to be # of entries in parent/child task mapping
-		myUAVTransitLane[] _tl = new myUAVTransitLane[_TL_taskIdxs.length];		
+		UAV_TransitLane[] _tl = new UAV_TransitLane[_TL_taskIdxs.length];		
 		for(int i=0;i<_tl.length;++i) {
 			_tl[i] = buildTransitLane(_tasks, _TL_taskIdxs[i][0], _TL_taskIdxs[i][1], 1.0f, showMsg);
 			//add this idx to parent task's child list
@@ -247,22 +425,31 @@ public abstract class mySimulator {
 		//holding lane is lane from final task to initial task - in all simulations
 		holdingLane = buildTransitLane(_tasks, _tasks.length-1, 0, 10.0f, showMsg);
 		if(showMsg) {
-			exec.dispOutput("mySimulator", "buildTransitLanes","All " + _tl.length + " transitLanes initialized and connected to parents and children, along with holding lane.");
+			exec.dispOutput("DES_Simulator", "buildTransitLanes","All " + _tl.length + " transitLanes initialized and connected to parents and children, along with holding lane.");
 		}
 		return _tl;
 	}//buildTransitLanes	
 	
-	//these task descriptions will drive the task construction and consumption
-	protected taskDesc[] buildTaskDesc(myPointf[] _tlocs, boolean[] _isGrp, int[] _tOptSize, float[] _optTeamTTCMins, float[] _stdDevTTCMult, boolean showMsg) {
-		taskDesc[] tDesc = new taskDesc[_tlocs.length];
+	/**
+	 * these task descriptions will drive the task construction and consumption
+	 * @param _tlocs
+	 * @param _isGrp
+	 * @param _tOptSize
+	 * @param _optTeamTTCMins
+	 * @param _stdDevTTCMult
+	 * @param showMsg
+	 * @return
+	 */
+	protected DES_TaskDesc[] buildTaskDesc(myPointf[] _tlocs, boolean[] _isGrp, int[] _tOptSize, float[] _optTeamTTCMins, float[] _stdDevTTCMult, boolean showMsg) {
+		DES_TaskDesc[] tDesc = new DES_TaskDesc[_tlocs.length];
 		//radius of rendered sphere
 		float rad = 30.0f;
-		for (int i=0;i<tDesc.length;++i) {tDesc[i] = new taskDesc(i, _tlocs[i], _isGrp[i], _tOptSize[i],_optTeamTTCMins[i]*60000,_stdDevTTCMult[i], (_isGrp[i]?2.0f:1.0f)*rad, uavTeamSize, showMsg);}
+		for (int i=0;i<tDesc.length;++i) {tDesc[i] = new DES_TaskDesc(i, _tlocs[i], _isGrp[i], _tOptSize[i],_optTeamTTCMins[i]*60000,_stdDevTTCMult[i], (_isGrp[i]?2.0f:1.0f)*rad, uavTeamSize, showMsg);}
 		return tDesc;
 	}//buildTaskDesc
 	
 	//set parent and child transit lanes for each task
-	protected void setTaskParentChild(myUAVTask[] _tasks, myUAVTransitLane[] _tl, ArrayList<Integer>[] _taskParentIDXs, ArrayList<Integer>[] _taskChildIDXs, boolean showMsg) {
+	protected void setTaskParentChild(UAV_Task[] _tasks, UAV_TransitLane[] _tl, ArrayList<Integer>[] _taskParentIDXs, ArrayList<Integer>[] _taskChildIDXs, boolean showMsg) {
 		//set parent and child Transit lanes for each task - some tasks have multiple parents or children.  if multiple children, need to send probability structure for 
 		//cumulative prob dist
 		for(int i=0;i<_tasks.length;++i) {
@@ -279,7 +466,7 @@ public abstract class mySimulator {
 		_tasks[0].addParent(0.0f, holdingLane);
 		_tasks[_tasks.length-1].addChild(0.0f, holdingLane);
 		if(showMsg) {
-			exec.dispOutput("mySimulator", "setTaskParentChild","All " + _tasks.length + " tasks connected to parent and children transitlanes.");
+			exec.dispOutput("DES_Simulator", "setTaskParentChild","All " + _tasks.length + " tasks connected to parent and children transitlanes.");
 		}
 	}//setTaskParentChild	
 	
@@ -290,7 +477,10 @@ public abstract class mySimulator {
 	
 	//called on ever simulation reset - remakes entire sim, even on huge map is still very fast
 	//public void initSim() {initSim(true);}
-		
+	/**
+	 * called on ever simulation reset - remakes entire sim, even on huge map is still very fast
+	 * @param showMsg
+	 */
 	public void initSim(boolean showMsg) {
 		//setup arrays of values that are used to build map
 		//initSimPriv();
@@ -306,7 +496,7 @@ public abstract class mySimulator {
 		//these arrays are populated when transit lanes are made and then used to set parents and children in tasks
 		for(int i=0;i<taskParentIDXs.length;++i) {taskParentIDXs[i] = new ArrayList<Integer>();taskChildIDXs[i] = new ArrayList<Integer>();	}				
 		//first build task descriptions
-		taskDesc[] tDesc = buildTaskDesc(taskLocs,isGrpTask,taskOptSize,optTeamTTCMins,stdDevTTCMult, showMsg);
+		DES_TaskDesc[] tDesc = buildTaskDesc(taskLocs,isGrpTask,taskOptSize,optTeamTTCMins,stdDevTTCMult, showMsg);
 		//then build tasks from descriptions
 		tasks = buildTasks(tDesc, showMsg);		
 		//next build transit lanes, using centerpoint of tasks as location
@@ -315,10 +505,10 @@ public abstract class mySimulator {
 		//set parent and child Transit lanes for each task - some tasks have multiple parents or children.  if multiple children, need to send probability structure for 
 		//cumulative prob dist
 		setTaskParentChild(tasks, transitLanes, taskParentIDXs, taskChildIDXs, showMsg);
-		exec.showTimeMsgNow("mySimulator","initSim","Millis to build map", stTime);		
+		exec.showTimeMsgNow("DES_Simulator","initSim","Millis to build map", stTime);		
 		
 		//teams is dynamic - depends on how large team size is specified to be and how many UAVs exist to draw from
-		teams = new ArrayList<myUAVTeam>();		
+		teams = new ArrayList<UAV_Team>();		
 	}//initSim
 		
 	//boolean flag handling
@@ -349,11 +539,11 @@ public abstract class mySimulator {
 	 * @param nowTime
 	 * @return
 	 */
-	public myEvent buildInitialEvent(float nowTime) {
+	public DES_Event buildInitialEvent(float nowTime) {
 		long longNowTime = (long)Math.round(nowTime);
-		myUAVTeam newTeam = addNewTeam(longNowTime);
+		UAV_Team newTeam = addNewTeam(longNowTime);
 		//myEvent(long _ts, String _name, myEntity _c_ent, myEntity _r_ent)
-		myEvent ev = new myEvent(longNowTime, EventType.ArriveResource, newTeam, tasks[0], holdingLane);		
+		DES_Event ev = new DES_Event(longNowTime, DES_EventType.ArriveResource, newTeam, tasks[0], holdingLane);		
 		return ev;
 	}//buildInitialEvent
 	
@@ -362,16 +552,16 @@ public abstract class mySimulator {
 	 * @param nowTime
 	 * @return
 	 */
-	public myUAVTeam addNewTeam(long nowTime) {
+	public UAV_Team addNewTeam(long nowTime) {
 		int nextTeamNum = teams.size()+1;
 		if((nextTeamNum * uavTeamSize) > this.maxNumUAVs){//too many UAVs in play
 			return null;
 		}		
-		//myUAVTeam(IRenderInterface _p, mySimulator _sim, String _name, int _uavTeamSize, myPointf _initLoc)
+		//myUAVTeam(IRenderInterface _p, DES_Simulator _sim, String _name, int _uavTeamSize, myPointf _initLoc)
 		String name = "UAVTeam_" + nextTeamNum + "_Sz_"+uavTeamSize;
-		exec.dispOutput("mySimulator", "addNewTeam","Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
-		myUAVTeam team = new myUAVTeam(this, name, uavTeamSize, new myPointf(tasks[0].loc));//always start at initial task's location
-		if(exec.pa != null) {
+		exec.dispOutput("DES_Simulator", "addNewTeam","Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
+		UAV_Team team = new UAV_Team(this, name, uavTeamSize, new myPointf(tasks[0].loc));//always start at initial task's location
+		if(exec.ri != null) {
 			team.setTemplate(rndrTmpl, sphrRndrTmpl);
 		}
 		team.initTeam();
@@ -382,33 +572,61 @@ public abstract class mySimulator {
 	public boolean getDrawBoats() {return getSimFlags(drawBoatsIDX);}
 	public boolean getDebug() {return getSimFlags(debugSimIDX);}
 	
-	//called in exec.simMe - evolve visualization
-	//deltaT should be in milliseconds, change
+	/**
+	 * @return the uavTeamSize
+	 */
+	public int getUavTeamSize() {return uavTeamSize;}
+	/**
+	 * Set the uavTeamSize
+	 * @param _uavTeamSize
+	 */
+	public void setUavTeamSize(int _uavTeamSize) { uavTeamSize = _uavTeamSize;}
+	
+	/**
+	 * called in exec.simMe - evolve visualization deltaT should be in milliseconds, change
+	 * @param deltaT
+	 */
 	public void visSimMe(long deltaT) {
 		if(!getSimFlags(drawVisIDX)) {			return;}
-		for(myUAVTeam team : teams) {
+		for(UAV_Team team : teams) {
 			team.moveUAVTeam(deltaT);
 		}		
 	}//visSimMe
 		
-	//animTimeMod is in seconds, time that has passed since last draw call
-	public void drawMe(IRenderInterface pa, float animTimeMod, DESSimWindow win) {
+	/**
+	 * animTimeMod is in seconds, time that has passed since last draw call
+	 * @param pa
+	 * @param animTimeMod
+	 * @param win
+	 */
+	public void drawMe(IRenderInterface pa, float animTimeMod, Base_DESWindow win) {
 		//draw all transit lanes
-		//if(getSimFlags(drawTLanesIDX)) {
-		for(myUAVTransitLane tl : transitLanes) {tl.drawEntity(pa, win, animTimeMod, getSimFlags(drawTLanesIDX), getSimFlags(dispTLnsLblsIDX));}
-		holdingLane.drawEntity(pa, win, animTimeMod, getSimFlags(drawTLanesIDX), getSimFlags(dispTLnsLblsIDX));
-		//}
+		boolean drawLanes = getSimFlags(drawTLanesIDX);
+		for(UAV_TransitLane tl : transitLanes) {						tl.drawEntity(pa, win, animTimeMod, drawLanes);}
+		holdingLane.drawEntity(pa, win, animTimeMod, drawLanes);
+		if(getSimFlags(dispTLnsLblsIDX)) {
+			for(UAV_TransitLane tl : transitLanes) {					tl.dispEntityLabel(pa, win);}
+			holdingLane.dispEntityLabel(pa, win);
+		}
 		//draw all tasks
-		//if(getSimFlags(drawTaskLocsIDX)) {
-		for(myUAVTask task : tasks) {task.drawEntity(pa, win, animTimeMod, getSimFlags(drawTaskLocsIDX), getSimFlags(dispTaskLblsIDX));}
+		boolean drawTasks = getSimFlags(drawTaskLocsIDX);
+		for(UAV_Task task : tasks) {									task.drawEntity(pa, win, animTimeMod, drawTasks);}
+		if (getSimFlags(dispTaskLblsIDX)){for(UAV_Task task : tasks) {	task.dispEntityLabel(pa, win);}}
+		
 		//draw all UAV teams
 		float delT = Math.min(animTimeMod, 1.0f);
-		if(getSimFlags(drawUAVTeamsIDX)) {for(myUAVTeam team : teams) {team.drawEntity(pa, win, delT, true, getSimFlags(dispUAVLblsIDX));}}	
+		if(getSimFlags(drawUAVTeamsIDX)) {	for(UAV_Team team : teams) {team.drawEntity(pa, win, delT, true);}}	
+		if(getSimFlags(dispUAVLblsIDX)) {	for(UAV_Team team : teams) {team.dispEntityLabel(pa, win);}}	
 		
 	}//drawMe
 	
-	//return idx of max value of total run time amongst all tasks or travel lanes
-	private int findMaxIDX(myEntity[] ents, int idxToIgnore) {
+	/**
+	 * return idx of max value of total run time amongst all tasks or travel lanes
+	 * @param ents
+	 * @param idxToIgnore
+	 * @return
+	 */
+	private int findMaxIDX(Base_Entity[] ents, int idxToIgnore) {
 		long maxVal = -1;
 		int maxIDX = -1;
 		for(int i=0;i<idxToIgnore;++i) {
@@ -419,88 +637,70 @@ public abstract class mySimulator {
 	}
 	/**
 	 * draw result information on right sidebar
-	 * @param pa
+	 * @param ri
 	 * @param yOff
 	 */
-	public void drawResultBar(IRenderInterface pa, float yOff) {
+	public void drawResultBar(IRenderInterface ri, float yOff) {
 		yOff-=4;
 		float sbrMult = 1.2f, lbrMult = 1.5f;//offsets multiplier for barriers between contextual ui elements
-		pa.pushMatState();
+		ri.pushMatState();
 			int curTime = (Math.round(exec.getNowTime()/1000.0f));
 			float yVal = 0;
-			pa.setFill(255,255,0,255);	
-			pa.showText("SIMULATION OUTPUT", 0, yVal);yVal += sbrMult * yOff;
-			pa.setFill(255,255,255,255);
-			pa.showText("Sim Time : " + String.format("%08d", curTime) + " secs ", 0, yVal);//yVal += yOff;
-			pa.showText("Sim Clock Time : " + String.format("%04d", curTime/3600) + " : " + String.format("%02d", (curTime/60)%60 )+ " : " + String.format("%02d", (curTime%60)), 150, yVal);
+			ri.setFill(255,255,0,255);	
+			ri.showText("SIMULATION OUTPUT", 0, yVal);yVal += sbrMult * yOff;
+			ri.setFill(255,255,255,255);
+			ri.showText("Sim Time : " + String.format("%08d", curTime) + " secs ", 0, yVal);//yVal += yOff;
+			ri.showText("Sim Clock Time : " + String.format("%04d", curTime/3600) + " : " + String.format("%02d", (curTime/60)%60 )+ " : " + String.format("%02d", (curTime%60)), 150, yVal);
 //			yVal += yOff;
 //			pa.showText("Wall Clock Time : " + String.format("%04d", curTime/3600) + " : " + String.format("%02d", (curTime/60)%60 )+ " : " + String.format("%02d", (curTime%60)), 0, yVal);
 			yVal += lbrMult *yOff;
 			//TEAM RES - summary
 			int tmSize = teams.size();
-			pa.setFill(255,155,20,255);
-			pa.showText("Teams Summary : (for "+ String.format("%2d", tmSize) + " teams = "+String.format("%3d", (tmSize * uavTeamSize)) + " UAVs out of " + maxNumUAVs + " ttl)" , 0, yVal);yVal += yOff;
-			pa.setFill(255,255,255,255);
-			pa.showText("Team size : "+uavTeamSize , 0, yVal);yVal += yOff;
+			ri.setFill(255,155,20,255);
+			ri.showText("Teams Summary : (for "+ String.format("%2d", tmSize) + " teams = "+String.format("%3d", (tmSize * uavTeamSize)) + " UAVs out of " + maxNumUAVs + " ttl)" , 0, yVal);yVal += yOff;
+			ri.setFill(255,255,255,255);
+			ri.showText("Team size : "+uavTeamSize , 0, yVal);yVal += yOff;
 			//
 			long ttlTask=0, ttlTravel=0, ttlQueue=0, ttlRun=0,ttlProcsDone=0;
 			for(int i=0;i<tmSize;++i) {
-				myUAVTeam tm = teams.get(i);
+				UAV_Team tm = teams.get(i);
 				ttlTask += tm.getTTLTaskTime();
 				ttlTravel += tm.getTTLTravelTime();
 				ttlQueue += tm.getTTLQueueTime();
 				ttlRun += tm.getTTLRunTime()+tm.getCurTimeInProc();
 				ttlProcsDone += tm.getTTLNumTeamsProc();
 			}//	
-			pa.showText("Procs Done : ", 0, yVal);pa.showText(""+String.format("%07d", ttlProcsDone), 90, yVal);yVal += yOff;
-			pa.showText("TTL Work time : ", 0, yVal);pa.showText(""+String.format("%07d", ttlTask/1000) + " sec", 90, yVal);yVal += yOff;
-			pa.showText("TTL Travel time : ", 0, yVal);pa.showText(""+String.format("%07d",ttlTravel/1000) + " sec",90, yVal);yVal += yOff;
-			pa.showText("TTL Queue time : ", 0, yVal);pa.showText(""+String.format("%07d", ttlQueue/1000) + " sec", 90, yVal);yVal += yOff;
-			pa.showText("TTL Uptime : ", 0, yVal);pa.showText(""+String.format("%07d", ttlRun/1000) + " sec", 90, yVal);yVal += lbrMult* yOff;
+			ri.showText("Procs Done : ", 0, yVal);ri.showText(""+String.format("%07d", ttlProcsDone), 90, yVal);yVal += yOff;
+			ri.showText("TTL Work time : ", 0, yVal);ri.showText(""+String.format("%07d", ttlTask/1000) + " sec", 90, yVal);yVal += yOff;
+			ri.showText("TTL Travel time : ", 0, yVal);ri.showText(""+String.format("%07d",ttlTravel/1000) + " sec",90, yVal);yVal += yOff;
+			ri.showText("TTL Queue time : ", 0, yVal);ri.showText(""+String.format("%07d", ttlQueue/1000) + " sec", 90, yVal);yVal += yOff;
+			ri.showText("TTL Uptime : ", 0, yVal);ri.showText(""+String.format("%07d", ttlRun/1000) + " sec", 90, yVal);yVal += lbrMult* yOff;
+			
 			//task res
-			pa.setFill(255,88,255,255);
-			pa.showText("Task Totals : (" + tasks.length+ " tasks) (red is max time so far)", 0, yVal);yVal +=  sbrMult *yOff;
-			pa.setFill(255,255,255,255);
+			ri.setFill(255,88,255,255);
+			ri.showText("Task Totals : (" + tasks.length+ " tasks) (red is max time so far)", 0, yVal);yVal +=  sbrMult *yOff;
+			ri.setFill(255,255,255,255);
 
 			int hLiteIDX = findMaxIDX(tasks,tasks.length-2);
-			for(int i=0;i<tasks.length;++i) {		
-				taskDesc td = tasks[i].td;
-				pa.setFill(0,255,255,255);
-				pa.showText(""+(i+1) +" : "+tasks[i].name,0, yVal);
-				pa.setFill(255,255,255,255);
-				pa.showText("Opt Size : " + td.optUAVTeamSize + " | Opt TTC : " 
-							+ String.format("%4d",((int)(td.timeForOptToCmp/1000.0f)))+" s | StdDev : "+ String.format("%3.2f",td.stdDev),65, yVal);
-				yVal += yOff; 
-				pa.showText("#Teams Proc: " + String.format("%3d", tasks[i].getTTLNumTeamsProc()), 0, yVal);
-				if(hLiteIDX==i) {pa.setFill(255,44,80,255);}
-				pa.showText("TTL Task Time: " + String.format("%07d", tasks[i].getTTLRunTime()/1000) + " s",102,yVal);
-				pa.setFill(255,255,255,255);
-				yVal += sbrMult *yOff;
+			for(int i=0;i<tasks.length;++i) {
+				yVal = tasks[i].drawResourceDescr(ri, hLiteIDX, i, 102, yVal, yOff) + sbrMult *yOff;
 			}//for every task
 			yVal += (lbrMult - sbrMult) *yOff;//offset by same amount as other groupings
-			//transit lane res	
+			
+			//transit lane res
+			ri.setFill(255,150,99,255);
+			ri.showText("Lane Totals : (" + transitLanes.length+ " Lanes) (red is max Q time (bottleneck))", 0, yVal);yVal += sbrMult *yOff;
+			ri.setFill(255,255,255,255);
 			
 			hLiteIDX = findMaxIDX(transitLanes, transitLanes.length);		
-			pa.setFill(255,150,99,255);
-			pa.showText("Lane Totals : (" + transitLanes.length+ " Lanes) (red is max Q time (bottleneck))", 0, yVal);yVal += sbrMult *yOff;
-			pa.setFill(255,255,255,255);
-			for(int i=0;i<this.transitLanes.length;++i) {
-				pa.setFill(0,255,255,255);
-				pa.showText(""+(i+1) +" : "+transitLanes[i].name,0, yVal);yVal += yOff; 
-				pa.setFill(255,255,255,255);	
-				pa.showText("#Teams Proc: " + String.format("%3d", transitLanes[i].getTTLNumTeamsProc()), 0, yVal);
-				if(hLiteIDX==i) {pa.setFill(255,44,80,255);	}
-				pa.showText("TTL Lane Time: " + String.format("%07d", transitLanes[i].getTTLRunTime()/1000) + " s",152,yVal);yVal += yOff;
-				pa.setFill(255,255,255,255);			
-				pa.showText("Travel Time : "+String.format("%07d", transitLanes[i].getTTLTravelTime()/1000) + " s",0, yVal);//yVal += yOff; 
-				pa.showText("Q Time : " + String.format("%07d", transitLanes[i].getTTLQueueTime()/1000) + " s",152, yVal);
-				yVal += sbrMult *yOff;
+			for(int i=0;i<transitLanes.length;++i) {				
+				yVal = transitLanes[i].drawResourceDescr(ri, hLiteIDX, i, 152, yVal, yOff) + sbrMult *yOff;
 			}//for every tl		
-		pa.popMatState();	
+		ri.popMatState();	
 	}//drawResultBar	
-
+	
 	//add an event to the FEL queue
-	public void addEvent(myEvent resEv) {exec.addEvent(resEv);}
+	public void addEvent(DES_Event resEv) {exec.addEvent(resEv);}
 	
 	/////////////////////
 	// experimenting and reporting functions
@@ -522,10 +722,10 @@ public abstract class mySimulator {
 		int numTestTaskDesc = 4;
 		int[] optSzPerTask = new int[numTestTaskDesc];
 		//per power array of results for a single task
-		taskDesc[] tmpTasks = new taskDesc[numTestTaskDesc];
+		DES_TaskDesc[] tmpTasks = new DES_TaskDesc[numTestTaskDesc];
 		for(int i=0;i<numTestTaskDesc;++i) {
 			optSzPerTask[i] = (2+(i*2));
-			tmpTasks[i] = new taskDesc(i, new myPointf(0,0,0), false, optSzPerTask[i], 100000, 0,30, 4, false);//team size for these guys will be ignored
+			tmpTasks[i] = new DES_TaskDesc(i, new myPointf(0,0,0), false, optSzPerTask[i], 100000, 0,30, 4, false);//team size for these guys will be ignored
 			//file name for each task's output
 			String finalResFNme = taskResDir + File.separatorChar + "Task_OptSz_"+tmpTasks[i].optUAVTeamSize+"_pwr_"+String.format("%2.2f", minP)+"_to_"+String.format("%2.2f", maxP)+"_dimRtnsTest";
 			finalResFNme=finalResFNme.replace(".", "-");
@@ -697,7 +897,7 @@ public abstract class mySimulator {
 	private long[] buildUAVDataVals() {
 		long[] res = new long[5];
 		for(int i=0;i<teams.size();++i) {
-			myUAVTeam tm = teams.get(i);
+			UAV_Team tm = teams.get(i);
 			res[0] += tm.getTTLNumTeamsProc();				
 			res[1] += tm.getTTLTaskTime();							
 			res[2] += tm.getTTLTravelTime();						
@@ -750,7 +950,7 @@ public abstract class mySimulator {
 		String line;
 		for(int i=0;i<tmSize;++i) {
 			line = ""+i;
-			myUAVTeam tm = teams.get(i);
+			UAV_Team tm = teams.get(i);
 			tmp = tm.getTTLNumTeamsProc();						line+=","+tmp;		ttlProcsDone += tmp;			
 			tmp = tm.getTTLTaskTime();							line+=","+tmp;		ttlTask += tmp;			
 			tmp = tm.getTTLTravelTime();						line+=","+tmp;		ttlTravel += tmp;			
@@ -766,7 +966,7 @@ public abstract class mySimulator {
 	
 	private String[] buildCSVTLData() {
 		ArrayList<String> res = new ArrayList<String>();
-		res.add(myUAVTransitLane.getTLResCSV_Hdr());
+		res.add(UAV_TransitLane.getTLResCSV_Hdr());
 		for(int i=0;i<transitLanes.length;++i) {res.add(transitLanes[i].getTLResCSV()) ;}
 		return res.toArray(new String[0]);
 	}//buildCSVTLData	
@@ -783,7 +983,7 @@ public abstract class mySimulator {
 	private String[] buildCSVTaskData(int minSize, int maxSize, float sclFact, float eqPwr) {
 		ArrayList<String> res = new ArrayList<String>();
 		//add header
-		res.add(taskDesc.getTaskCompHeader_CSV(minSize, maxSize) + ", # Teams Proc, TTL Task Time(ms)");
+		res.add(DES_TaskDesc.getTaskCompHeader_CSV(minSize, maxSize) + ", # Teams Proc, TTL Task Time(ms)");
 		for(int i=0;i<tasks.length;++i) {res.add(tasks[i].td.getTaskCompTimeDataCSV(minSize, maxSize, sclFact,eqPwr)+", "+tasks[i].getTTLNumTeamsProc()+", "+tasks[i].getTTLRunTime());}		
 		return res.toArray(new String[0]);
 	}//buildCSVTaskData
@@ -846,21 +1046,21 @@ public abstract class mySimulator {
 	 * @param _ev
 	 * @return
 	 */
-	public myEvent handleEvent(myEvent _ev) {
+	public DES_Event handleEvent(DES_Event _ev) {
 		//dispOutput("\tHandling event : " + _ev.name);
 		//handle event - event has following types : StartTask(0), FinishTask(1), EnterQueue(2), LeaveQueue(3);	
 		switch (_ev.type) {
 			case ArriveResource : {		return _ev.resource.arriveAtRes(_ev);}
 			case LeaveResource : { 	return _ev.resource.leaveRes(_ev);	}
 			//events to enter transit lane queues
-			case EnterQueue : {		return ((myUAVTransitLane)_ev.resource).enterQueue(_ev);}
+			case EnterQueue : {		return ((UAV_TransitLane)_ev.resource).enterQueue(_ev);}
 			//will always be a task - this will either instance an arriveresource event immediately 
 			//or will set a flag that will cause leave resource to call a leave resource event on transit lane queue
 			//on parent lane
-			case ConsumerWaiting : {return ((myUAVTask)_ev.resource).consumerReady(_ev);}
+			case ConsumerWaiting : {return ((UAV_Task)_ev.resource).consumerReady(_ev);}
 			
 			default : {
-				exec.dispOutput("mySimulator", "handleEvent","\tmyDESSimulator::handleEvent : Unknown/unhandled event type :  " + _ev.type);
+				exec.dispOutput("DES_Simulator", "handleEvent","\tmyDESSimulator::handleEvent : Unknown/unhandled event type :  " + _ev.type);
 				return null;
 			}
 		}
@@ -877,7 +1077,7 @@ public abstract class mySimulator {
 		res += "Holding lane : \n"+holdingLane.toString();
 		res +="___________________________________________________________\n";
 		res += "# of teams currently in play : " + teams.size() + " : \n";
-		for(myUAVTeam team : teams) {res += team.toString()+"\n";}
+		for(UAV_Team team : teams) {res += team.toString()+"\n";}
 		res +="___________________________________________________________\n";		
 		return res;
 	}

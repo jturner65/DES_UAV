@@ -1,21 +1,31 @@
 package discreteEventSimProject.sim.layouts;
 
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import discreteEventSimProject.sim.mySimExecutive;
-import discreteEventSimProject.sim.base.mySimulator;
+import discreteEventSimProject.sim.DES_SimExec;
+import discreteEventSimProject.sim.base.DES_Simulator;
 
-//DES sim specified in report
-public class SimpleDesSim extends mySimulator{
+/**
+ * DES sim specified in report
+ * @author John Turner
+ *
+ */
+public class SimpleDesSim extends DES_Simulator{
 	
-	public SimpleDesSim(mySimExecutive _exec, int _numUAVs) {
-		super(_exec, _numUAVs);		
+	public SimpleDesSim(DES_SimExec _exec, int _numUAVs, int _simLayoutToUse) {
+		super(_exec, _numUAVs, _simLayoutToUse);		
+		initMe();
 	}
 	
-	//initialize DES Simulation- set up all resources - re call this every time new sim is being set up
+	/**
+	 * initialize DES Simulation- set up all resources - re call this every time new sim is being set up
+	 */
 	@Override
 	protected void initSimPriv() {//
-		//max dims are +/- 750 for x, y and z
+		
+		// use simLayoutToUse value to determine which sim to build
 		//locations of tasks - uses this to specify how large task array is
+		
+		// This is simLayoutToUse == 0
 		taskLocs = new myPointf[]{
 				new myPointf(400,400,-100),
 				new myPointf(200,200,120),

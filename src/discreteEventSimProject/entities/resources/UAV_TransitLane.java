@@ -1,4 +1,4 @@
-package discreteEventSimProject.entities;
+package discreteEventSimProject.entities.resources;
 
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -6,35 +6,52 @@ import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import discreteEventSimProject.entities.base.EntityType;
-import discreteEventSimProject.events.EventType;
-import discreteEventSimProject.events.myEvent;
-import discreteEventSimProject.sim.base.mySimulator;
+import discreteEventSimProject.entities.consumers.UAV_Team;
+import discreteEventSimProject.entities.resources.base.Base_Resource;
+import discreteEventSimProject.events.DES_EventType;
+import discreteEventSimProject.events.DES_Event;
+import discreteEventSimProject.sim.base.DES_Simulator;
 
-//class representing transition from one task to another - acts also as a queue
-//Transit lane always has one entry and one exit
-public class myUAVTransitLane extends myUAVResource{
-	//uses map to hold UAV teams transitioning to next task, keyed by arrival time (i.e. this is queue of teams)
-	//earliest arriving is first to complete transit and first to move to next task, if available
-	private ConcurrentSkipListMap<Long, myUAVTeam> teamQ;
+/**
+ * class representing transition from one task to another - acts also as a queue.
+ * Transit lane always has one entry and one exit
+ * @author John Turner
+ */
+public class UAV_TransitLane extends Base_Resource{
+	/**
+	 * uses map to hold UAV teams transitioning to next task, keyed by arrival time (i.e. this is queue of teams) 
+	 * earliest arriving is first to complete transit and first to move to next task, if available
+	 */
+	private ConcurrentSkipListMap<Long, UAV_Team> teamQ;
 	
-	//start and end location for this transit lane
+	/**
+	 * start and end location for this transit lane
+	 */
 	private myPointf stLoc, endLoc;
 	
-	//vector from parent resource to child resource - teams will follow this vector, also use this to render visualization
+	/**
+	 * vector from parent resource to child resource - teams will follow this vector, also use this to render visualization
+	 */
 	public myVectorf travelLane;
 	
-	//"velocity" multiplier for traveling this lane - for most lanes this will be 1, but for the
-	//holding lane it will be high so that UAVs that are finished with the final task are immediately available	
+	/**
+	 * "velocity" multiplier for traveling this lane - for most lanes this will be 1, 
+	 * but for the holding lane it will be high so that UAVs that are finished with the final task are immediately available	
+	 */
 	private float laneVel;
 	
-	public myUAVTransitLane(mySimulator _sim, String _name, myPointf _loc, float _rad, float _laneVel) {
-		super(_sim, _name, _loc, new EntityType[] {EntityType.Resource, EntityType.Queue},_rad);
+	public UAV_TransitLane(DES_Simulator _sim, String _name, myPointf _loc, float _rad, float _laneVel) {
+		super(_sim, _name, _loc, new EntityType[] {EntityType.Resource, EntityType.Queue},_rad, "lane");
 		laneVel = _laneVel;
 		lblColors = new int[] {0,110,20,255};
 	}//myUAVTransitLane ctor
 	
-	//initialize interdependencies after all resources are made
-	public void setTransitLaneConnections(myUAVResource _pTask, myUAVResource _cTask) {
+	/**
+	 * initialize interdependencies after all resources are made
+	 * @param _pTask
+	 * @param _cTask
+	 */
+	public void setTransitLaneConnections(Base_Resource _pTask, Base_Resource _cTask) {
 		addParent(0,_pTask);//lane only ever has 1 parent, but parent task my have multiple lanes as children
 		//each lane only ever has 1 child, child task may have multiple parent lanes
 		addChild(0, _cTask);
@@ -42,7 +59,9 @@ public class myUAVTransitLane extends myUAVResource{
 		finalInit();		
 	}//finalInit
 
-	//finalize initialization of this resource, after all connections are set
+	/**
+	 * finalize initialization of this resource, after all connections are set
+	 */
 	@Override
 	public void finalInit() {
 		// Set transit lane vector between parent and child task - travel lanes always only have 1 of each
@@ -54,26 +73,24 @@ public class myUAVTransitLane extends myUAVResource{
 		
 		travelLane = new myVectorf(stLoc, endLoc);
 		//move back from end of travel lane the radius of the child task's sphere
-		float lenTravelLane = (travelLane.magn - childResources.firstEntry().getValue().rad);
+		float lenTravelLane = (travelLane.magn - childResources.firstEntry().getValue().getRadius());
 		//change travel lane length to be length from stLoc to right outside task's sphere
 		travelLane._normalize()._mult(lenTravelLane);
 		endLoc.set(myPointf._add(stLoc, travelLane));
 		
 		sim.exec.dispOutput("myUAVTransitLane","finalInit","\t" + name + " : travel lane : "+ travelLane.toString());
 		//initialize map of teams in transit 
-		teamQ = new  ConcurrentSkipListMap<Long, myUAVTeam>();
+		teamQ = new  ConcurrentSkipListMap<Long, UAV_Team>();
 		
 		setEntityFlags(reqValsSet, true);
 	}//finalInitPriv
-	
-	//all the initialization/reinit needed to reset this resource without remaking it, and only what is needed to reset resource
-//	@Override
-//	protected void resetResource() {
-//		//initialize map of teams in transit 
-//		teamQ = new ConcurrentSkipListMap<Long, myUAVTeam>();		
-//	}//
 
-	//returns a specific point on the travel lane based on given starting point and passed distance to travel
+	/**
+	 * returns a specific point on the travel lane based on given starting point and passed distance to travel
+	 * @param _stLoc
+	 * @param distToGo
+	 * @return
+	 */
 	private myPointf getLocOnLane(myPointf _stLoc , float distToGo) {
 		myVectorf offsetVec = new myVectorf(travelLane);		
 		offsetVec._normalize()._mult(distToGo);
@@ -81,18 +98,29 @@ public class myUAVTransitLane extends myUAVResource{
 		return new myPointf(_stLoc, offsetVec);
 	}//
 	
-	//return travel time, set team values so team can move down transit lane
-	private long setTeamTTandDur(myUAVTeam _team, myPointf _stLoc, float _distToGo) {
+	/**
+	 * return travel time, set team values so team can move down transit lane
+	 * @param _team
+	 * @param _stLoc
+	 * @param _distToGo
+	 * @return
+	 */
+	private long setTeamTTandDur(UAV_Team _team, myPointf _stLoc, float _distToGo) {
 		//find end location as start location + travel vector
 		myPointf lclEndLoc = getLocOnLane (_stLoc, _distToGo);
-		long dur = (long) (_distToGo * 1000.0f / (myUAVTeam.teamSpeed*laneVel));		//meters / meters per second / 1000 == milliseconds
+		long dur = (long) (_distToGo * 1000.0f / (UAV_Team.teamSpeed*laneVel));		//meters / meters per second / 1000 == milliseconds
 		_team.setTrajAndDur(_stLoc, lclEndLoc, dur);
 		return dur;		
 	}//setTeamTTandDur
-	//return distance passed team should go to arrive at specified place in line
-	private float getDistToGo(myUAVTeam team, int place) {
+	/**
+	 * return distance passed team should go to arrive at specified place in line
+	 * @param team
+	 * @param place
+	 * @return
+	 */
+	private float getDistToGo(UAV_Team team, int place) {
 		//minimum distance to go is the distance that would require 1 millisecond to travel 
-		float minDistToGo =  (myUAVTeam.teamSpeed*laneVel)/1000.0f;
+		float minDistToGo =  (UAV_Team.teamSpeed*laneVel)/1000.0f;
 		float distToGo = Math.max(travelLane.magn - (place * team.getNoflyDist()), minDistToGo);
 		return distToGo;
 	}
@@ -103,9 +131,9 @@ public class myUAVTransitLane extends myUAVResource{
 	 * Team put in queue when arrived at queue (which is after moving through transit lane)
 	 */
 	@Override
-	public myEvent arriveAtRes(myEvent ev) {
+	public DES_Event arriveAtRes(DES_Event ev) {
 		long timeProc = ev.getTimestamp();
-		myUAVTeam team = ev.consumer;	
+		UAV_Team team = ev.consumer;	
 		//if we are entering the holding lane, finish off the time recording for the team
 		if(this.name.equals(sim.holdingLane.name)) {team.finishedProcess();		}
 		setEntityFlags(taskInUseIDX, true);
@@ -122,7 +150,7 @@ public class myUAVTransitLane extends myUAVResource{
 		timeVals[ttlRunTime] += travelDur; 
 		//allow team to monitor it's own travel time - it is also recording the time it will enter the queue
 		team.addTimeInTransit(name, travelDur, simTimeEnterQ);
-		myEvent newEv = new myEvent(simTimeEnterQ, EventType.EnterQueue, team, this, this);
+		DES_Event newEv = new DES_Event(simTimeEnterQ, DES_EventType.EnterQueue, team, this, this);
 		return newEv;
 	}//arriveAtRes
 	
@@ -130,16 +158,16 @@ public class myUAVTransitLane extends myUAVResource{
 	 * event generated when task has accepted the team, so this event generates no response event
 	 */
 	@Override
-	public myEvent leaveRes(myEvent ev) {
+	public DES_Event leaveRes(DES_Event ev) {
 		if (queueIsEmpty()) { return null;}
 		long timeProc = ev.getTimestamp();
 		sim.exec.dispOutput("myUAVTransitLane","leaveRes","\t" + name +" : leaveRes : " + timeProc + " q size : "+teamQ.size()); 
 		long firstKey = teamQ.firstKey();		
-		myUAVTeam team = teamQ.remove(firstKey);
+		UAV_Team team = teamQ.remove(firstKey);
 		//increment # of teams this entity has processed
 		++timeVals[ttlNumTeamsProc];
 
-		team.moveUAVTeamToDest(((myUAVTask)childResources.firstEntry().getValue()).getTargetLoc());//childResources.firstEntry().getValue().loc);
+		team.moveUAVTeamToDest(((UAV_Task)childResources.firstEntry().getValue()).getTargetLoc());//childResources.firstEntry().getValue().loc);
 		//team leaving queue knows how long it spent in queue
 		long timeInQueue = team.leaveQueueAddQTime(timeProc);	
 		//record how much time was spent in queue
@@ -151,7 +179,7 @@ public class myUAVTransitLane extends myUAVResource{
 			setEntityFlags(taskInUseIDX, false);
 		} else {
 		//move other teams up in queue (for visualization - setting motion target to be closer to task)
-			myUAVTeam t = teamQ.firstEntry().getValue();
+			UAV_Team t = teamQ.firstEntry().getValue();
 			float distToGo = getDistToGo(t, 0);
 			myPointf newLoc = getLocOnLane (stLoc, distToGo), oldLoc;
 			for(Long key : teamQ.keySet()) {
@@ -163,7 +191,7 @@ public class myUAVTransitLane extends myUAVResource{
 			}
 		}
 		//this will only be processed when child resource is unoccupied, either after an immediate check, or when child resource is finished
-		myEvent newEvent = new myEvent(timeProc, EventType.ArriveResource, team, childResources.firstEntry().getValue(), this);
+		DES_Event newEvent = new DES_Event(timeProc, DES_EventType.ArriveResource, team, childResources.firstEntry().getValue(), this);
 		return newEvent;
 	}//leaveRes
 	
@@ -172,27 +200,27 @@ public class myUAVTransitLane extends myUAVResource{
 	 * @param ev
 	 * @return
 	 */
-	public myEvent enterQueue(myEvent ev) {
+	public DES_Event enterQueue(DES_Event ev) {
 		//add team to queue with event time as key
 		long timeArrive = ev.getTimestamp();
 		sim.exec.dispOutput("myUAVTransitLane","enterQueue","\t" + name + " : enterQueue : " + timeArrive + " q size : "+teamQ.size()); 
-		myUAVTeam team = ev.consumer;
+		UAV_Team team = ev.consumer;
 		//move team to position in queue, based on size - size == position in queue
 		float dist2Go = getDistToGo(team, teamQ.size());
 		myPointf lclEndLoc = getLocOnLane (stLoc, dist2Go);		
 		team.moveUAVTeamToDest(lclEndLoc);
 		//verify team not at current arrival time - increment time if any teams already in queue at same time
-		myUAVTeam t = teamQ.get(timeArrive);
+		UAV_Team t = teamQ.get(timeArrive);
 		while (t != null) {
 			++timeArrive;
 			t = teamQ.get(timeArrive);
 		}
 		teamQ.put(timeArrive, team);
 		//make an event to enter the child task at this time
-		myEvent newEvent = new myEvent(timeArrive, EventType.ConsumerWaiting, teamQ.firstEntry().getValue(), childResources.firstEntry().getValue(), this);
+		DES_Event newEvent = new DES_Event(timeArrive, DES_EventType.ConsumerWaiting, teamQ.firstEntry().getValue(), childResources.firstEntry().getValue(), this);
 		return newEvent;
 	}//entered queue	
-//	
+
 	/**
 	 * return the time of the first uav team's entry to this queue
 	 * @return
@@ -218,35 +246,75 @@ public class myUAVTransitLane extends myUAVResource{
 		return res;
 	}//showStatus
 	
-	//transitlane-specifics
+	/**
+	 * transitlane-specifics
+	 */
 	@Override
-	protected void drawEntityPriv(IRenderInterface pa, boolean drawMe) {
+	protected void drawEntityPriv(IRenderInterface ri, boolean drawMe) {
 		boolean it = getEntityFlags(taskInUseIDX);
 		if((drawMe)||(it)){
-			pa.pushMatState();	
+			ri.pushMatState();	
 			if((drawMe) && (!it)) {
-				int clr = (this.laneVel > 1) ? IRenderInterface.gui_TransBlack : IRenderInterface.gui_TransGray;
-				pa.drawCylinder_NoFill(stLoc,endLoc, rad, clr, clr);
+				int clr = (this.laneVel > 1) ? IRenderInterface.gui_TransBlack : IRenderInterface.gui_TransLtGray;
+				ri.drawCylinder_NoFill(stLoc,endLoc, rad, clr, clr);
 			} else if (it) {
 				int clr =  (this.laneVel > 1) ? IRenderInterface.gui_Green : IRenderInterface.gui_Yellow;
-				pa.drawCylinder_NoFill(stLoc,endLoc, rad, IRenderInterface.gui_Red , clr);
+				ri.drawCylinder_NoFill(stLoc,endLoc, rad, IRenderInterface.gui_Red , clr);
 			}			
-			pa.popMatState();	
+			ri.popMatState();	
 		}
-		pa.translate(loc);
 	}//drawEntityPriv
+//	/**
+//	 * transitlane-specifics
+//	 */
+//	@Override
+//	protected void drawEntityPriv(IRenderInterface ri, boolean drawMe) {
+//		boolean it = getEntityFlags(taskInUseIDX);
+//
+//		if (it) {
+//			ri.pushMatState();	
+//			ri.drawCylinder_NoFill(stLoc,endLoc, rad, IRenderInterface.gui_Red, (this.laneVel > 1) ? IRenderInterface.gui_Green : IRenderInterface.gui_Yellow);
+//			ri.popMatState();	
+//		} else if (drawMe) {
+//			ri.pushMatState();	
+//			int clr = (this.laneVel > 1) ? IRenderInterface.gui_TransBlack : IRenderInterface.gui_TransLtGray;
+//			ri.drawCylinder_NoFill(stLoc,endLoc, rad, clr, clr);
+//			ri.popMatState();
+//		}
+//		ri.translate(loc);
+//	}//drawEntityPriv
+	/**
+	 * Draw the instance-class specific descirption for this entity - nothing for lanes
+	 * @param ri
+	 * @param win
+	 * @param hLiteIDX
+	 */
+	protected final void _drawRsrcsDescrStr_Indiv(IRenderInterface ri, float yVal) {}
+	
+	/**
+	 * Draw the instance-class specific description for this resource
+	 * @param ri
+	 * @param yValyOff
+	 * @return
+	 */
+	protected final float _drawRsrcsDescrPost_Indiv(IRenderInterface ri, float xVal, float yValyOff) {
+		float yVal = yValyOff;
+		ri.setFill(255,255,255,255);			
+		ri.showText("Travel Time : "+String.format("%07d", getTTLTravelTime()/1000) + " s",0, yVal);//yVal += yOff; 
+		ri.showText("Q Time : " + String.format("%07d",  getTTLQueueTime()/1000) + " s",xVal, yVal);		
+		return yVal;
+	}
 
 	public static String getTLResCSV_Hdr() {return "Transit Lane Name, Teams Processed, TTL Lane Time (ms), TTL Travel Time (ms), TTL Queue Time (ms)";}
 	
 	public String getTLResCSV() {	return name +"," + timeVals[ttlNumTeamsProc]+"," + timeVals[ttlRunTime]+"," + timeVals[ttlTravelTime]+"," + timeVals[ttlQueueTime];}
-	
-	
+		
 	public String toString(){
 		String res = "Transit Lane " + super.toString();
 		res += "\nParent Task : \n";
-		for(myUAVResource tl : parentResources.values()) {res+= "\t"+tl.name+"\n";}
+		for(Base_Resource tl : parentResources.values()) {res+= "\t"+tl.name+"\n";}
 		res += "\nChild Task \n";
-		for(myUAVResource cl : childResources.values()) {res+= "\t"+cl.name+"\n";}	
+		for(Base_Resource cl : childResources.values()) {res+= "\t"+cl.name+"\n";}	
 		return res;
 	}
 }//myUAVTransitLane

@@ -1,28 +1,38 @@
 package discreteEventSimProject.events;
 
-import discreteEventSimProject.entities.myUAVResource;
-import discreteEventSimProject.entities.myUAVTeam;
+import discreteEventSimProject.entities.consumers.UAV_Team;
+import discreteEventSimProject.entities.resources.base.Base_Resource;
 
 /**
  * an event/message, sortable on timestamp
  * @author john
  *
  */
-public class myEvent implements Comparable<myEvent> {
+public class DES_Event implements Comparable<DES_Event> {
 	public int ID;
 	private static int IDcount = 0;
-	//timestamp is in milliseconds from beginning of simulation : event's timestamp set on construction
+	/**
+	 * timestamp is in milliseconds from beginning of simulation : event's timestamp set on construction
+	 */
 	private long timeStamp;
-	//event name
+	/**
+	 * event name
+	 */
 	public final String name;
-	//consumer entity attached to this event
-	public final myUAVTeam consumer;
-	//resource entity this event is attached to - the consumer entity will use this resource; parent is the resource that generated this event
-	public final myUAVResource resource, parent;
-	//type of event
-	public final EventType type;
+	/**
+	 * consumer entity attached to this event
+	 */
+	public final UAV_Team consumer;
+	/**
+	 * resource entity this event is attached to - the consumer entity will use this resource; parent is the resource that generated this event
+	 */
+	public final Base_Resource resource, parent;
+	/**
+	 * type of event
+	 */
+	public final DES_EventType type;
 
-	public myEvent(long _ts, EventType _type, myUAVTeam _c_ent, myUAVResource _r_ent, myUAVResource _p_ent) {
+	public DES_Event(long _ts, DES_EventType _type, UAV_Team _c_ent, Base_Resource _r_ent, Base_Resource _p_ent) {
 		ID = IDcount++;
 		timeStamp = _ts;		
 		type = _type;
@@ -38,20 +48,31 @@ public class myEvent implements Comparable<myEvent> {
 		name =entName+"_"+type+"Req_"+timeStamp;
 	}//ctor
 		
-	//set a new time stamp for this even - DO NOT PERFORM ON EVENTS STILL QUEUED
+	/**
+	 * set a new time stamp for this even - DO NOT PERFORM ON EVENTS STILL QUEUED
+	 * @param _ts
+	 */
 	public void setNewTimestamp(long _ts) {timeStamp = _ts;	}
-	//return timestamp (timestamp is set during ctor)
+	/**
+	 * return timestamp (timestamp is set during ctor)
+	 * @return
+	 */
 	public long getTimestamp() {return timeStamp;}	
 	
-	//compare on timeStamp
+	/**
+	 * compare on timeStamp
+	 */
 	@Override
-	public int compareTo(myEvent otr) {
+	public int compareTo(DES_Event otr) {
 		if(otr == null) {System.out.println("Error : otr is null : this :  " + this.toString()); return 0;}
 		if(this.timeStamp == otr.timeStamp) {return 0;}
 		return (this.timeStamp > otr.timeStamp) ? 1 : -1;
 	}
 	
-	//just return name, time and timestamp
+	/**
+	 * just return name, time and timestamp
+	 * @return
+	 */
 	public String toStrBrf() {
 		String res = "Timestamp : " + timeStamp +  " | Name : " + name + " | Event Type : " + type;
 		return res;

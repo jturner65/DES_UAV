@@ -1,21 +1,21 @@
-package discreteEventSimProject.entities;
+package discreteEventSimProject.entities.consumers;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import base_Render_Interface.IRenderInterface;
+import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.GUI_AppManager;
-import discreteEventSimProject.sim.base.mySimulator;
 
 /**
- * class referencing a single uav object
+ * class referencing a single uav object TODO : harvest boids?
  * @author John Turner
  *
  */
-public class myUAVObj {
-	public myUAVTeam f;
+public class UAV_Obj {
+	public UAV_Team f;
 	public int ID;
 	private static int IDcount = 0;
 	//# of animation frames to be used to cycle 1 motion by render objects
@@ -47,7 +47,7 @@ public class myUAVObj {
 	public myVectorf velocity;
 	public myVectorf[] orientation;												//Rot matrix - 3x3 orthonormal basis matrix - cols are bases for body frame orientation in world frame
 					
-	public myUAVObj(myUAVTeam _f, myPointf _coords){
+	public UAV_Obj(UAV_Team _f, myPointf _coords){
 		ID = IDcount++;		
 		//p = _p;		
 		f = _f; 		
@@ -77,7 +77,7 @@ public class myUAVObj {
 		oldRotAngle = rotAngle;
 	}//alignUAV	
 	
-	private static float epsValCalc = mySimulator.epsValCalc, epsValCalcSq = epsValCalc * epsValCalc;
+	private static double epsValCalcSq = MyMathUtils.EPS * MyMathUtils.EPS;
 	private float[] toAxisAngle() {
 		float angle,x=rt2,y=rt2,z=rt2,s;
 		float fyrx = -orientation[O_FWD].y+orientation[O_RHT].x,
@@ -96,18 +96,18 @@ public class myUAVObj {
 			float fwd2x = (orientation[O_FWD].x+1)/2.0f,rht2y = (orientation[O_RHT].y+1)/2.0f,up2z = (orientation[O_UP].z+1)/2.0f,
 				fwd2y = fyrx2/4.0f, fwd2z = fzux2/4.0f, rht2z = rzuy2/4.0f;
 			if ((fwd2x > rht2y) && (fwd2x > up2z)) { // orientation[O_FWD].x is the largest diagonal term
-				if (fwd2x< epsValCalc) {	x = 0;} else {			x = (float) Math.sqrt(fwd2x);y = fwd2y/x;z = fwd2z/x;} 
+				if (fwd2x< MyMathUtils.EPS) {	x = 0;} else {			x = (float) Math.sqrt(fwd2x);y = fwd2y/x;z = fwd2z/x;} 
 			} else if (rht2y > up2z) { 		// orientation[O_RHT].y is the largest diagonal term
-				if (rht2y< epsValCalc) {	y = 0;} else {			y = (float) Math.sqrt(rht2y);x = fwd2y/y;z = rht2z/y;}
+				if (rht2y< MyMathUtils.EPS) {	y = 0;} else {			y = (float) Math.sqrt(rht2y);x = fwd2y/y;z = rht2z/y;}
 			} else { // orientation[O_UP].z is the largest diagonal term so base result on this
-				if (up2z< epsValCalc) {	z = 0;} else {			z = (float) Math.sqrt(up2z);	x = fwd2z/z;y = rht2z/z;}
+				if (up2z< MyMathUtils.EPS) {	z = 0;} else {			z = (float) Math.sqrt(up2z);	x = fwd2z/z;y = rht2z/z;}
 			}
 			return new float[]{angle,x,y,z}; // return 180 deg rotation
 		}
 		//no singularities - handle normally
 		myVectorf tmp = new myVectorf(rzuy, uxfz, fyrx);
 		s = tmp.magn;
-		if (s < epsValCalc){ s=1; }
+		if (s < MyMathUtils.EPS){ s=1; }
 		tmp._scale(s);//changes mag to s
 			// prevent divide by zero, should not happen if matrix is orthogonal -- should be caught by singularity test above
 		angle = (float) -Math.acos(( orientation[O_FWD].x + orientation[O_RHT].y + orientation[O_UP].z - 1)/2.0);
@@ -115,7 +115,7 @@ public class myUAVObj {
 	}//toAxisAngle
 	
 	private myVectorf getFwdVec( float delT){
-		if(velocity.magn < epsValCalc){			return orientation[O_FWD]._normalize();		}
+		if(velocity.magn < MyMathUtils.EPS){			return orientation[O_FWD]._normalize();		}
 		else {		
 			myVectorf tmp = velocity.cloneMe()._normalize();			
 			return new myVectorf(orientation[O_FWD], delT, tmp);		
@@ -135,11 +135,8 @@ public class myUAVObj {
 		orientation[O_FWD].set(getFwdVec(delT));
 		orientation[O_UP].set(getUpVec());	
 		orientation[O_RHT] = orientation[O_UP]._cross(orientation[O_FWD]); //sideways is cross of up and forward - backwards(righthanded)
-		//orientation[O_RHT] = orientation[O_FWD]._cross(orientation[O_UP]); //sideways is cross of up and forward - backwards(righthanded)
 		orientation[O_RHT]._normalize();
-		//orientation[O_RHT].set(orientation[O_RHT]._normalize());
-		//need to recalc up?  may not be perp to normal
-		if(Math.abs(orientation[O_FWD]._dot(orientation[O_UP])) > epsValCalc){
+		if(Math.abs(orientation[O_FWD]._dot(orientation[O_UP])) > MyMathUtils.EPS){
 			orientation[O_UP] = orientation[O_FWD]._cross(orientation[O_RHT]); //sideways is cross of up and forward
 			//orientation[O_UP].set(orientation[O_UP]._normalize());
 			orientation[O_RHT]._normalize();
@@ -153,49 +150,43 @@ public class myUAVObj {
 		setOrientation(delT);
 	}//moveUAV
 	
-	private void drawTmpl(IRenderInterface p) {
-		p.pushMatState();
+	private void drawTmpl(IRenderInterface ri) {
+		ri.pushMatState();
 		f.getCurrTemplate().drawMe(animPhase, ID);
-		p.popMatState();
+		ri.popMatState();
 	}
 
 	
 	//draw this body on mesh
-	public void drawMe(IRenderInterface p, float delT){
-		p.pushMatState();
-			p.translate(coords.x,coords.y,coords.z);		//move to location
-			alignUAV(p, delT);
-			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size
-			drawTmpl(p);
-//			p.pushStyle();
-//			f.tmpl.drawMe(animAraIDX, ID);
-//			p.popStyle();			
-		p.popMatState();
+	public void drawMe(IRenderInterface ri, float delT){
+		ri.pushMatState();
+			ri.translate(coords.x,coords.y,coords.z);		//move to location
+			alignUAV(ri, delT);
+			ri.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size
+			drawTmpl(ri);
+		ri.popMatState();
 		animIncr(velocity.magn*.1f);
 	}//drawme	
 	
-	public void drawMeDbgFrame(GUI_AppManager AppMgr, IRenderInterface p, float delT){
-		p.pushMatState();
-			p.translate(coords.x,coords.y,coords.z);		//move to location
-			drawMyVec(p, rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
-			alignUAV(p, delT);
-			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
-			drawTmpl(p);
-//			p.pushStyle();
-//			f.tmpl.drawMe(animAraIDX, ID);
-//			p.popStyle();			
-		p.popMatState();
+	public void drawMeDbgFrame(GUI_AppManager AppMgr, IRenderInterface ri, float delT){
+		ri.pushMatState();
+			ri.translate(coords.x,coords.y,coords.z);		//move to location
+			drawMyVec(ri, rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
+			alignUAV(ri, delT);
+			ri.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
+			drawTmpl(ri);
+		ri.popMatState();
 		animIncr(velocity.magn*.1f);		
 	}
 	
 	//draw this UAV as a ball - replace with sphere render obj 
-	public void drawMeBall(GUI_AppManager AppMgr, IRenderInterface p, boolean debugAnim){
-		p.pushMatState();
-			p.translate(coords.x,coords.y,coords.z);		//move to location
-			if(debugAnim){drawMyVec(p,rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);}
-			p.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
+	public void drawMeBall(GUI_AppManager AppMgr, IRenderInterface ri, boolean debugAnim){
+		ri.pushMatState();
+			ri.translate(coords.x,coords.y,coords.z);		//move to location
+			if(debugAnim){drawMyVec(ri,rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);}
+			ri.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
 			f.sphTmpl.drawMe(animPhase, ID);
-		p.popMatState();
+		ri.popMatState();
 		//animIncr();
 	}//drawme 
 	

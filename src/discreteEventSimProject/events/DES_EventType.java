@@ -7,7 +7,7 @@ import java.util.Map;
  * Types of events that can be generated
  * @author John Turner
  */
-public enum EventType {
+public enum DES_EventType {
 	ArriveResource(0), LeaveResource(1), EnterQueue(2), ConsumerWaiting(3);		
 	private int value; 
 	private static final String[] _typeExplanation = new String[] {
@@ -18,11 +18,11 @@ public enum EventType {
 	};
 	private static final String[] _typeName = new String[] {"ArriveAtResource","LeaveResource","EnterQueue","ConsumerWaiting"};
 	public static String[] getListOfTypes() {return _typeName;}	
-	private static Map<Integer, EventType> map = new HashMap<Integer, EventType>(); 
-	static { for (EventType enumV : EventType.values()) { map.put(enumV.value, enumV);}}
-	private EventType(int _val){value = _val;} 
+	private static Map<Integer, DES_EventType> map = new HashMap<Integer, DES_EventType>(); 
+	static { for (DES_EventType enumV : DES_EventType.values()) { map.put(enumV.value, enumV);}}
+	private DES_EventType(int _val){value = _val;} 
 	public int getVal(){return value;} 	
-	public static EventType getVal(int idx){return map.get(idx);}
+	public static DES_EventType getVal(int idx){return map.get(idx);}
 	public static int getNumVals(){return map.size();}						//get # of values in enum	
 	@Override
     public String toString() { return ""+this.name()+":"+_typeExplanation[value]; }	
