@@ -469,21 +469,15 @@ public abstract class DES_Simulator {
 			exec.dispOutput("DES_Simulator", "setTaskParentChild","All " + _tasks.length + " tasks connected to parent and children transitlanes.");
 		}
 	}//setTaskParentChild	
-	
-	//initialize DES Simulation- set up all resources - re call this every time new sim is being set up
-	//@Override
+
 	protected abstract void initSimPriv();
 	protected abstract boolean[] getIsGroupAra();//determine which tasks are group tasks - sim dependent
-	
-	//called on ever simulation reset - remakes entire sim, even on huge map is still very fast
-	//public void initSim() {initSim(true);}
+
 	/**
 	 * called on ever simulation reset - remakes entire sim, even on huge map is still very fast
 	 * @param showMsg
 	 */
-	public void initSim(boolean showMsg) {
-		//setup arrays of values that are used to build map
-		//initSimPriv();
+	public void createSimAndLayout(boolean showMsg) {
 		//reset world variables	
 		//init arrays used to manage task parent and task child transit lane idx's
 		//each task has 1 or more parents and 1 or more children - first task has no parents, last task has no children (special cases)

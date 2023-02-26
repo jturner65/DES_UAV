@@ -25,24 +25,29 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	
 	protected DES_Simulator[] sims;
 	protected DES_Simulator currSim;
+	
+	public static final int maxSimLayouts = 5;
 	//motion
 	///////////
 	//ui vals
 
 	public final static int
-		gIDX_FrameTimeScale 		= 0,
-		gIDX_UAVTeamSize			= 1, 
-		gIDX_ExpLength				= 2,			//length of time for experiment, in minutes
-		gIDX_NumExpTrials			= 3; 
+		gIDX_LayoutToUse			= 0, 
+		gIDX_FrameTimeScale 		= 1,
+		gIDX_UAVTeamSize			= 2, 
+		gIDX_ExpLength				= 3,			//length of time for experiment, in minutes
+		gIDX_NumExpTrials			= 4;
 		
 	/**
 	 * Number of gui objects defined in base window. Subsequent IDXs in child class should start here
 	 */
-	protected static final int numBaseGUIObjs = 4;		
+	protected static final int numBaseGUIObjs = 5;		
 	/////////
 	//custom debug/function ui button names -empty will do nothing
 	
-	//private child-class flags - window specific
+	/**
+	 * private child-class flags - window specific
+	 */
 	public static final int 
 			//debugAnimIDX 		= 0,						//debug
 			resetSimIDX			= 1,						//whether or not to reset sim	
@@ -71,6 +76,11 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	 * list of values for dropdown list of team size
 	 */
 	protected final String[] uavTeamSizeList = new String[] {"2","3","4","5","6","7","8","9"};
+	
+	/**
+	 * List of layout idxs available
+	 */
+	protected final String[] simLayoutToUseList = new String[] {"0","1","2","3","4"};
 	
 	public Base_DESWindow(IRenderInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
 		super(_p, _AppMgr, _winIdx);
@@ -121,20 +131,14 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	 */
 	protected abstract void resetDesFlags_Indiv();
 		
-	protected void setSimToUse(int _type) {
+	protected void createAndSetSimLayout(int _type) {
 		if(sims[_type] == null) {sims[_type] = buildSimOfType(_type);}
-		currSim = sims[_type];
-		initAllSimVals(isSimpleSim());
+		setSimToUse(_type);
 	}//setSimToUse
-
-	protected abstract DES_Simulator buildSimOfType(int _type);
 	
-	protected abstract boolean isSimpleSim();
-	/**
-	 * 
-	 * @param _isSimpleSim
-	 */
-	protected final void initAllSimVals(boolean _isSimpleSim) {
+	public final void setSimToUse(int _type) {
+		currSim = sims[_type];
+		boolean _isSimpleSim = isSimpleSim();
 		currSim.setUavTeamSize(uavTeamSize);
 		simExec.initSimWorld(currSim, true);
 		boolean showVis = (ri != null);
@@ -146,8 +150,13 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 		privFlags.setFlag(dispTaskLblsIDX, showVis && _isSimpleSim);	
 		privFlags.setFlag(dispTLnsLblsIDX, showVis && _isSimpleSim);	
 		privFlags.setFlag(dispUAVLblsIDX, showVis && _isSimpleSim);	
-		resetDesFlags();		
+		resetDesFlags();
+		AppMgr.setSimIsRunning(false);
 	}
+
+	protected abstract DES_Simulator buildSimOfType(int _type);
+	
+	protected abstract boolean isSimpleSim();
 	
 	/**
 	 * Initialize any UI control flags appropriate for all boids window application
@@ -166,11 +175,12 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 		//initialize sim exec to simple world sim
 		simExec = new DES_SimExec(ri, msgObj);
 		
-		sims = new DES_Simulator[5];
+		sims = new DES_Simulator[maxSimLayouts];
+		for (int i=0; i<maxSimLayouts; ++i) {
+			createAndSetSimLayout(i); 
+		}
 		//Instance class specifics
 		initMe_Indiv();
-		//Start with 0th sim
-		setSimToUse(0);
 		
 		custMenuOffset = uiClkCoords[3];	//495	
 	}//initMe	
@@ -280,11 +290,14 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	 */
 	@Override
 	protected final void setupGUIObjsAras(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals) {
+		tmpListObjVals.put(gIDX_LayoutToUse, simLayoutToUseList);	
 		tmpListObjVals.put(gIDX_UAVTeamSize, uavTeamSizeList);	
+		
 		double initTeamSizeIDX = 1.0*uavTeamSize - Integer.parseInt(uavTeamSizeList[0]);
 		
+		tmpUIObjArray.put(gIDX_LayoutToUse, new Object[] { new double[]{0,simLayoutToUseList.length-1, 1.0f}, 0.0, "Sim Layout To Use", GUIObj_Type.ListVal, new boolean[]{true}});          				
 		tmpUIObjArray.put(gIDX_FrameTimeScale, new Object[] { new double[]{1.0f,10000.0f,1.0f}, 1.0*DES_SimExec.frameTimeScale, "Sim Speed Multiplier", GUIObj_Type.FloatVal, new boolean[]{true}});  
-		tmpUIObjArray.put(gIDX_UAVTeamSize, new Object[] { new double[]{0,tmpListObjVals.get(gIDX_UAVTeamSize).length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size", GUIObj_Type.ListVal, new boolean[]{true}});          
+		tmpUIObjArray.put(gIDX_UAVTeamSize, new Object[] { new double[]{0,uavTeamSizeList.length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size", GUIObj_Type.ListVal, new boolean[]{true}});          
 		tmpUIObjArray.put(gIDX_ExpLength, new Object[] { new double[]{1.0f, 1440, 1.0f}, 720.0, "Experiment Duration", GUIObj_Type.IntVal, new boolean[]{true}});    
 		tmpUIObjArray.put(gIDX_NumExpTrials, new Object[] { new double[]{1.0f, 100, 1.0f}, 1.0, "# Experimental Trials", GUIObj_Type.IntVal, new boolean[]{true}});  
 		
@@ -304,6 +317,9 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	@Override
 	protected final void setUI_IntValsCustom(int UIidx, int ival, int oldVal) {
 		switch(UIidx){		
+			case gIDX_LayoutToUse : {
+				setSimToUse(ival);
+				break;}
 			case gIDX_UAVTeamSize : {
 				uavTeamSize = ival + Integer.parseInt(uavTeamSizeList[0]);//add idx 0 as min size
 				msgObj.dispDebugMessage("DESSimWindow", "setUIWinVals", "UAV team size desired is : " + uavTeamSize);
@@ -443,28 +459,12 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 				resetButtonState();
 				switch (btn) {
 					case 0: {	
-						setSimToUse(btn);
-						AppMgr.setSimIsRunning(false);
 						break;
 					}
 					case 1: {
-						setSimToUse(btn);
-						AppMgr.setSimIsRunning(false);
 						break;
 					}
 					case 2: {
-						setSimToUse(btn);
-						AppMgr.setSimIsRunning(false);
-						break;
-					}
-					case 3: {
-						setSimToUse(btn);
-						AppMgr.setSimIsRunning(false);
-						break;
-					}
-					case 4: {
-						setSimToUse(btn);
-						AppMgr.setSimIsRunning(false);
 						break;
 					}
 					default: {

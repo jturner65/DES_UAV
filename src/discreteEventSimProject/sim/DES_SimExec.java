@@ -115,7 +115,7 @@ public class DES_SimExec {
 		//rebuild FEL
 		FEL = new myMinQueue<DES_Event>(50);
 		//rebuild simulation environment
-		des.initSim(showMsg);
+		des.createSimAndLayout(showMsg);
 		//reset Now to be 0
 		nowTime = 0;		
 	}//initSim
@@ -140,13 +140,17 @@ public class DES_SimExec {
 		setExecFlags(condSweepExpIDX, !_useSetTeamSize);		
 	}//initializeExperiment	
 
-	//entry point for experiments, either window based or command line
+	/**
+	 * entry point for experiments, either window based or command line
+	 */
 	private void startExperiment() {
 		//set/reset anything that needs to be addressed when starting a new trial
 		initSimExec(false); 		
 	}//conductExp	
 	
-	//end current experiment, if one is running. 
+	/**
+	 * end current experiment, if one is running. 
+	 */
 	private void endExperiment() {		
 		des.endExperiment(curTrial, numTrials, expDurMSec);	
 	}//endExperiment

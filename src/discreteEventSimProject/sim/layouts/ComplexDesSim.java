@@ -12,11 +12,11 @@ import discreteEventSimProject.sim.base.DES_Simulator;
  */
 public class ComplexDesSim extends DES_Simulator{
 	
-	protected float simGridDims = 1000.0f;
+	protected float simGridDims = 600.0f;
 	/**
 	 * # of tasks per side of cube
 	 */
-	protected int numPerSide = 7;
+	protected int numPerSide = 4;
 	
 	public ComplexDesSim(DES_SimExec _exec, int _maxNumUAVs, int _simLayoutToUse) {
 		super(_exec, _maxNumUAVs, _simLayoutToUse);
@@ -31,7 +31,8 @@ public class ComplexDesSim extends DES_Simulator{
 	protected void initSimPriv() {
 		
 		// use simLayoutToUse value to determine which sim to build
-		
+		numPerSide += simLayoutToUse;
+		simGridDims += (simLayoutToUse * 100.0f);
 		//set tasks in a dense 3d grid DAG
 		
 		//predefine array of location point idxs that will be used to build the dense grid DAG

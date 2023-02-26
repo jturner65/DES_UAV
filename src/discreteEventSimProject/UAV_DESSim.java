@@ -138,7 +138,7 @@ public class UAV_DESSim extends GUI_AppManager {
 		String[] menuBtnTitles = new String[]{"Sim Layouts","Functions 1","Functions 2","Verifications"};
 		String[][] menuBtnNames = new String[][] { // each must have literals for every button defined in side bar
 			// menu, or ignored
-			{ "Layout 0","Layout 1","Layout 2","Layout 3","Layout 4"}, // row 1
+			{ "Layout 0","Layout 1","Layout 2"}, // row 1
 			{ "---", "---", "---", "---" }, // row 2
 			{ "---", "---", "---", "---" }, // row 3
 			{"Verify PQ", "Verify FEL", "Show Sim", "Test Tasks"}
