@@ -60,7 +60,7 @@ public class UAV_DESSimConsole extends Console_AppManager {
 		
 		//instance sim exec and run loop
 		DES_SimExec simExec = new DES_SimExec(dummy, msgObj); 
-		DES_Simulator des = new SimpleDesSim(simExec, 0, 100);
+		DES_Simulator des = new SimpleDesSim(simExec, 100, 0);
 		des.setUavTeamSize(uavTeamSize);
 		simExec.initSimWorld(des, true);
 		

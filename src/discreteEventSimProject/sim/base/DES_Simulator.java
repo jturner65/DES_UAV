@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import base_Render_Interface.IRenderInterface;
+import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.my_procApplet;
@@ -134,10 +135,10 @@ public abstract class DES_Simulator {
 	/**
 	 * This was taken from boids project
 	 */
-	public String[] UAVTeamNames = new String[]{"Privateers", "Pirates", "Corsairs", "Marauders", "Freebooters"};
-	public PImage[] UAVBoatSails;						//image sigils for sails	
-	public String[] UAVTypeNames = new String[]{"Boats"};
-	public final int NumUniqueTeams = UAVTeamNames.length, numBoidTeams = UAVTypeNames.length;			
+	private String[] UAVTeamNames = new String[]{"Privateers", "Pirates", "Corsairs", "Marauders", "Freebooters"};
+	private PImage[] UAVBoatSails;						//image sigils for sails	
+	private String[] UAVTypeNames = new String[]{"Boats"};
+	public final int NumUniqueTeams = UAVTeamNames.length;			
 	//array of template objects to render
 	//need individual array for each type of object, sphere (simplified) render object
 	protected Base_RenderObj[] rndrTmpl,//set depending on UI choice for complex rndr obj 
@@ -151,7 +152,7 @@ public abstract class DES_Simulator {
 	private static final int
 		sphereClrIDX = 0,
 		boatClrIDX = 1;
-	private static final int numBoidTypes = 2;
+	private static final int numTeamTypes = 2;
 	private static final int[][] specClr = new int[][]{
 		{255,255,255,255},		//sphere
 		{255,255,255,255}};		//boat
@@ -207,8 +208,8 @@ public abstract class DES_Simulator {
 		//set up render object templates for different UAV Teams
 		if(exec.ri != null) {	
 			IRenderInterface ri = exec.ri;
-			RenderObj_ClrPalette[] palettes = new RenderObj_ClrPalette[numBoidTypes];
-			for (int i=0;i<numBoidTypes;++i) {palettes[i] = buildRenderObjPalette(ri, i);}			
+			RenderObj_ClrPalette[] palettes = new RenderObj_ClrPalette[numTeamTypes];
+			for (int i=0;i<palettes.length;++i) {palettes[i] = buildRenderObjPalette(ri, i);}			
 			sphrRndrTmpl = new Sphere_RenderObj[NumUniqueTeams];
 			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new Sphere_RenderObj(exec.ri, i, palettes[sphereClrIDX]);	}	
 			cmplxRndrTmpls = new ConcurrentSkipListMap<String, Base_RenderObj[]> (); 
@@ -542,7 +543,7 @@ public abstract class DES_Simulator {
 	 * @return
 	 */
 	public final DES_Event buildInitialEvent(float nowTime) {
-		long longNowTime = (long)Math.round(nowTime);
+		long longNowTime = (long)MyMathUtils.floor(nowTime);
 		UAV_Team newTeam = addNewTeam(longNowTime);
 		//myEvent(long _ts, String _name, myEntity _c_ent, myEntity _r_ent)
 		DES_Event ev = new DES_Event(longNowTime, DES_EventType.ArriveResource, newTeam, tasks[0], holdingLane);		

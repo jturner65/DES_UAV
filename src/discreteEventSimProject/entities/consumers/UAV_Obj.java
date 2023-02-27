@@ -15,13 +15,18 @@ import base_UI_Objects.GUI_AppManager;
  *
  */
 public class UAV_Obj {
-	public UAV_Team f;
-	public int ID;
+	/**
+	 * Team this object belongs to
+	 */
+	public UAV_Team team;
+	
+	public final int ID;
 	private static int IDcount = 0;
-	//# of animation frames to be used to cycle 1 motion by render objects
-	//graphics and animation controlling variables
-	public static final int numAnimFrames = 90;
-	private myVectorf scaleBt;													//scale of rendered object
+
+	/**
+	 * Scale of rendered object
+	 */
+	private myVectorf scaleBt;													
 	/**
 	 * animation controlling variables
 	 */	
@@ -47,13 +52,12 @@ public class UAV_Obj {
 	public myVectorf velocity;
 	public myVectorf[] orientation;												//Rot matrix - 3x3 orthonormal basis matrix - cols are bases for body frame orientation in world frame
 					
-	public UAV_Obj(UAV_Team _f, myPointf _coords){
-		ID = IDcount++;		
-		//p = _p;		
-		f = _f; 		
+	public UAV_Obj(UAV_Team _f, myPointf _coords, double _animCntrFactor){
+		ID = IDcount++;	
+		team = _f; 		
 		//preCalcAnimSpd = (float) ThreadLocalRandom.current().nextDouble(.5f,2.0);		
 		animPhase = ThreadLocalRandom.current().nextDouble(.25f, .75f ) ;//keep initial phase between .25 and .75 so that cyclic-force UAVs start moving right away
-		animCntr = animPhase * f.getCurrTemplate().getMaxAnimCounter();
+		animCntr = animPhase * _animCntrFactor;
 
 		rotVec = myVectorf.RIGHT.cloneMe(); 			//initial setup
 		orientation = new myVectorf[3];
@@ -152,7 +156,7 @@ public class UAV_Obj {
 	
 	private void drawTmpl(IRenderInterface ri) {
 		ri.pushMatState();
-		f.getCurrTemplate().drawMe(animPhase, ID);
+		team.getCurrTemplate().drawMe(animPhase, ID);
 		ri.popMatState();
 	}
 
@@ -185,7 +189,7 @@ public class UAV_Obj {
 			ri.translate(coords.x,coords.y,coords.z);		//move to location
 			if(debugAnim){drawMyVec(ri,rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);}
 			ri.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
-			f.sphTmpl.drawMe(animPhase, ID);
+			team.sphTmpl.drawMe(animPhase, ID);
 		ri.popMatState();
 		//animIncr();
 	}//drawme 
@@ -200,7 +204,7 @@ public class UAV_Obj {
 	
 	private void animIncr(float vel){
 		animCntr += (baseAnimSpd + vel);//*preCalcAnimSpd;						//set animMod based on velocity -> 1 + mag of velocity	
-		double maxAnimCntr = f.getCurrTemplate().getMaxAnimCounter();
+		double maxAnimCntr = team.getCurrTemplate().getMaxAnimCounter();
 		animCntr %= maxAnimCntr;
 		animPhase = (animCntr/maxAnimCntr);									//phase of animation cycle
 	}//animIncr		

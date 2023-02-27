@@ -16,10 +16,15 @@ import discreteEventSimProject.ui.base.Base_DESWindow;
  * @author john
  *
  */
-public class UAV_Team extends Base_Entity {	
+public class UAV_Team extends Base_Entity {
+	/**
+	 * The group of UAVs making up this team
+	 */
 	public UAV_Obj[] uavTeam;
-	
-	public static final float rad = 5;			//radius of sphere upon which team members will be placed
+	/**
+	 * radius of sphere upon which team members will be placed
+	 */
+	public static final float rad = 5;			
 	
 	public static final float teamSpeed = 1;	//speed of UAV team moving from task to task m/sec (assume constant) :: 5 m/s is ~11 mph
 												//if ever not made final need to update value held in myUAVTransitLane when changed (referenced for precalc)			
@@ -72,7 +77,9 @@ public class UAV_Team extends Base_Entity {
 		//sim.dispOutput("\tUAV_Team : make UAV team of size : "+ _teamSize+ " name : " + name);
 		//2nd idx : 0 is normal, 1 is location
 		myPointf[][] teamLocs = sim.getRegularSphereList(rad, teamSize, 1.0f);
-		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c] =  new UAV_Obj(this,teamLocs[c][1]);}
+		//This is for rendered sim. If not rendered, template will be null so just make this 1.
+		double animFactor = tmpl == null? 1.0 : tmpl.getMaxAnimCounter();
+		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c] =  new UAV_Obj(this,teamLocs[c][1], animFactor);}
 		motionTraj = new myVectorf();
 		uavVelVec = new myVectorf();
 		stLoc = new myPointf(initLoc);
@@ -100,7 +107,11 @@ public class UAV_Team extends Base_Entity {
 		}		
 	}//setEntityFlags
 
-	//set the template of this UAV team
+	/**
+	 * set the template of this UAV team
+	 * @param _tmpl
+	 * @param _sphrTmpl
+	 */
 	public void setTemplate(Base_RenderObj[] _tmpl, Base_RenderObj[] _sphrTmpl){
 		tmpl = _tmpl[curType];
 		sphTmpl = _sphrTmpl[curType];
