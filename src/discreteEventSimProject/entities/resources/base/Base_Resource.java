@@ -55,7 +55,7 @@ public abstract class Base_Resource extends Base_Entity {
 		descr = _descr;
 		//move about 1/2 length of name to left, to center label over center of transit lane
 		labelVals = new float[] {-name.length() * 3.0f, 1.1f*_rad, 0};
-	}//myUAVResource ctor
+	}//Base_Resource ctor
 
 	/**
 	 * called by super at end of super ctor
@@ -176,7 +176,7 @@ public abstract class Base_Resource extends Base_Entity {
 		return res;
 	}
 
-}//myUAVResource
+}//Base_Resource
 
 
 

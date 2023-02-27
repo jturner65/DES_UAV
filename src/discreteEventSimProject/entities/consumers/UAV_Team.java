@@ -26,9 +26,12 @@ public class UAV_Team extends Base_Entity {
 	 */
 	public static final float rad = 5;			
 	
-	public static final float teamSpeed = 1;	//speed of UAV team moving from task to task m/sec (assume constant) :: 5 m/s is ~11 mph
-												//if ever not made final need to update value held in myUAVTransitLane when changed (referenced for precalc)			
-	public Base_RenderObj tmpl, sphTmpl;				//template to render boid; simplified sphere template
+	/**
+	 * speed of UAV team moving from task to task m/sec (assume constant) :: 5 m/s is ~11 mph.
+	 * if ever not made final need to update value held in UAV_TransitLane when changed (referenced for precalc)
+	 */
+	public static final float teamSpeed = 1;				
+	private Base_RenderObj tmpl, sphTmpl;				//template to render boid; simplified sphere template
 	
 	//////////
 	//metrics of team performance
@@ -36,7 +39,7 @@ public class UAV_Team extends Base_Entity {
 	
 	//////////
 	//team movement variables
-	public myPointf stLoc, endLoc, initLoc; 
+	private myPointf stLoc, endLoc, initLoc; 
 	private myVectorf motionTraj, 						//start and end targets for team motion,  and trajectory of motion to follow 
 			uavVelVec;							//uav velocity vector - along motionTraj
 	private long motionDur;						//how long the motion should take to follow the trajectory in milliseconds
@@ -122,13 +125,20 @@ public class UAV_Team extends Base_Entity {
 	 * Set the render template to use for this flock
 	 * @param _tmpl
 	 */
-	public void setCurrTemplate(Base_RenderObj _tmpl) {tmpl = _tmpl;}
+	public final void setCurrTemplate(Base_RenderObj _tmpl) {tmpl = _tmpl;}
 	
 	/**
 	 * Retrieve the current template used for boids
 	 * @return
 	 */
-	public Base_RenderObj getCurrTemplate(){return tmpl;}
+	public final Base_RenderObj getCurrTemplate(){return tmpl;}
+	
+	/**
+	 * Retrieve the un-animated sphere base template
+	 * @return
+	 */
+	public final Base_RenderObj getSphereTemplate(){return sphTmpl;}
+	
 	
 	/**
 	 *

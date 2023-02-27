@@ -159,9 +159,12 @@ public class UAV_Obj {
 		team.getCurrTemplate().drawMe(animPhase, ID);
 		ri.popMatState();
 	}
-
 	
-	//draw this body on mesh
+	/**
+	 * draw this body on mesh
+	 * @param ri
+	 * @param delT
+	 */
 	public void drawMe(IRenderInterface ri, float delT){
 		ri.pushMatState();
 			ri.translate(coords.x,coords.y,coords.z);		//move to location
@@ -170,37 +173,44 @@ public class UAV_Obj {
 			drawTmpl(ri);
 		ri.popMatState();
 		animIncr(velocity.magn*.1f);
-	}//drawme	
+	}//drawMe	
 	
+	/**
+	 * 
+	 * @param AppMgr
+	 * @param ri
+	 * @param delT
+	 */
 	public void drawMeDbgFrame(GUI_AppManager AppMgr, IRenderInterface ri, float delT){
-		ri.pushMatState();
-			ri.translate(coords.x,coords.y,coords.z);		//move to location
-			drawMyVec(ri, rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
-			alignUAV(ri, delT);
-			ri.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
-			drawTmpl(ri);
-		ri.popMatState();
-		animIncr(velocity.magn*.1f);		
-	}
+		drawMyVec(ri, rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
+		drawMe(ri, delT);
+	}//drawMeDbgFrame
 	
-	//draw this UAV as a ball - replace with sphere render obj 
+	/**
+	 * draw this UAV as a ball - replace with sphere render obj 
+	 * @param AppMgr
+	 * @param ri
+	 * @param debugAnim
+	 */
 	public void drawMeBall(GUI_AppManager AppMgr, IRenderInterface ri, boolean debugAnim){
+		if(debugAnim){drawMyVec(ri,rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);}
 		ri.pushMatState();
 			ri.translate(coords.x,coords.y,coords.z);		//move to location
-			if(debugAnim){drawMyVec(ri,rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);}
-			ri.scale(scaleBt.x,scaleBt.y,scaleBt.z);																	//make appropriate size				
-			team.sphTmpl.drawMe(animPhase, ID);
+			ri.scale(scaleBt.x,scaleBt.y,scaleBt.z);
+			ri.pushMatState();
+			team.getSphereTemplate().drawMe(animPhase, ID);
+			ri.popMatState();
 		ri.popMatState();
-		//animIncr();
-	}//drawme 
+	}//drawMeBall 
 	
-	public void drawMyVec(IRenderInterface p, myVectorf v, int clr, float sw){
-		p.pushMatState();
-			p.setColorValStroke(clr, 255);
-			p.setStrokeWt(sw);
-			p.drawLine(0,0,0,v.x, v.y, v.z);
-		p.popMatState();
-	}
+	public void drawMyVec(IRenderInterface ri, myVectorf v, int clr, float sw){
+		ri.pushMatState();
+			ri.translate(coords.x,coords.y,coords.z);		//move to location		
+			ri.setColorValStroke(clr, 255);
+			ri.setStrokeWt(sw);
+			ri.drawLine(0,0,0,v.x, v.y, v.z);
+		ri.popMatState();
+	}//drawMyVec
 	
 	private void animIncr(float vel){
 		animCntr += (baseAnimSpd + vel);//*preCalcAnimSpd;						//set animMod based on velocity -> 1 + mag of velocity	
@@ -213,4 +223,4 @@ public class UAV_Obj {
 		String result = "ID : " + ID;
 		return result;
 	}	
-}//myUAVObj class
+}//UAV_Obj class

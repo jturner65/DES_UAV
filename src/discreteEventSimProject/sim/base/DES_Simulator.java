@@ -560,7 +560,6 @@ public abstract class DES_Simulator {
 		if((nextTeamNum * uavTeamSize) > this.maxNumUAVs){//too many UAVs in play
 			return null;
 		}		
-		//myUAVTeam(IRenderInterface _p, DES_Simulator _sim, String _name, int _uavTeamSize, myPointf _initLoc)
 		String name = "UAVTeam_" + nextTeamNum + "_Sz_"+uavTeamSize;
 		exec.dispOutput("DES_Simulator", "addNewTeam","Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
 		UAV_Team team = new UAV_Team(this, name, uavTeamSize, new myPointf(tasks[0].loc));//always start at initial task's location

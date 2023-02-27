@@ -125,7 +125,7 @@ public class UAV_DESSimConsole extends Console_AppManager {
 		//Number of experimental trials
 		cmdArgs.add(buildIntCommandLineArgDesc('n', "numTrials", "numTrials",
 				"number of experimental trials that should be conducted (min is 1, max is 100)", 
-				1, null, new Integer[] {1, 100}));
+				10, null, new Integer[] {1, 100}));
 		
 		cmdArgs.add(buildBoolCommandLineArgDesc('p', "testPQ", "doPQTest", 
 				"test integrity of priority queue code - all other args are bypassed if this is set", false, null));
