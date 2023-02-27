@@ -81,11 +81,11 @@ public class DES_SimExec {
 	public DES_SimExec(IRenderInterface _pa, MessageObject _msgObj) {
 		msgObj = _msgObj;
 		if(_pa != null) {ri= _pa;}
-		else {dispOutput("mySimExecutive ctor","Null IRenderInterface PApplet, assuming console only");}
+		else {dispOutput("DES_SimExec ctor","Null IRenderInterface PApplet, assuming console only");}
 		Instant now = Instant.now();
 		execBuiltTime = now.toEpochMilli();//milliseconds since 1/1/1970 when this exec was built.
 		initExecFlags();
-	}//mySimExecutive ctor
+	}//DES_SimExec ctor
 	
 	/**
 	 * initialize once - must be called by instancing method before the executive is executed
@@ -302,7 +302,7 @@ public class DES_SimExec {
 	
 	//will display output to console and screen if using graphical simulation
 	private void dispOutput(String callMethod, String str) {
-		dispOutput("mySimExecutive", callMethod, str);
+		dispOutput("DES_SimExec", callMethod, str);
 	}//dispOutput
 	
 	
@@ -486,7 +486,7 @@ public class DES_SimExec {
 		}
 	}//TEST_heapSortAndShowContents
 
-}//class mySimExecutive
+}//class DES_SimExec
 //ENUMS
 
 

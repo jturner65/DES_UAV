@@ -21,7 +21,6 @@ import discreteEventSimProject.ui.DES_UIDataUpdater;
 public abstract class Base_DESWindow extends Base_DispWindow {
 	//simulation executive
 	protected DES_SimExec simExec;
-	protected DES_Simulator smplSim, cmplxSim;
 	
 	protected DES_Simulator[] sims;
 	protected DES_Simulator currSim;

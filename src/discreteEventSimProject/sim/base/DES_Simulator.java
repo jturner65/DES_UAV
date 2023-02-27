@@ -45,7 +45,7 @@ public abstract class DES_Simulator {
 	/**
 	 * variable structure holding collection of uavteams in play in this simulation
 	 */
-	public ArrayList<UAV_Team> teams;		
+	private ArrayList<UAV_Team> teams;		
 	/**
 	 * single transition lane from last task to first task, to provide recycling of teams
 	 */
@@ -190,7 +190,7 @@ public abstract class DES_Simulator {
 	}//ctor
 	
 	/**
-	 * called 1 time for all simulations
+	 * called 1 time for all simulations from constructor
 	 */
 	protected void initSim() {
 		Instant now = Instant.now();
@@ -541,7 +541,7 @@ public abstract class DES_Simulator {
 	 * @param nowTime
 	 * @return
 	 */
-	public DES_Event buildInitialEvent(float nowTime) {
+	public final DES_Event buildInitialEvent(float nowTime) {
 		long longNowTime = (long)Math.round(nowTime);
 		UAV_Team newTeam = addNewTeam(longNowTime);
 		//myEvent(long _ts, String _name, myEntity _c_ent, myEntity _r_ent)
@@ -554,7 +554,7 @@ public abstract class DES_Simulator {
 	 * @param nowTime
 	 * @return
 	 */
-	public UAV_Team addNewTeam(long nowTime) {
+	public final UAV_Team addNewTeam(long nowTime) {
 		int nextTeamNum = teams.size()+1;
 		if((nextTeamNum * uavTeamSize) > this.maxNumUAVs){//too many UAVs in play
 			return null;
@@ -1049,10 +1049,9 @@ public abstract class DES_Simulator {
 	 * @return
 	 */
 	public DES_Event handleEvent(DES_Event _ev) {
-		//dispOutput("\tHandling event : " + _ev.name);
-		//handle event - event has following types : StartTask(0), FinishTask(1), EnterQueue(2), LeaveQueue(3);	
+		//exec.dispOutput("DES_Simulator", "handleEvent","\tHandling event : " + _ev.name);
 		switch (_ev.type) {
-			case ArriveResource : {		return _ev.resource.arriveAtRes(_ev);}
+			case ArriveResource : {	return _ev.resource.arriveAtRes(_ev);}
 			case LeaveResource : { 	return _ev.resource.leaveRes(_ev);	}
 			//events to enter transit lane queues
 			case EnterQueue : {		return ((UAV_TransitLane)_ev.resource).enterQueue(_ev);}

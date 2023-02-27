@@ -69,7 +69,7 @@ public class UAV_Team extends Base_Entity {
 		//base location of UAV team - UAV individual units drawn relative to this location
 		loc = new myPointf(initLoc);
 		uavTeam = new UAV_Obj[teamSize];
-		//sim.dispOutput("\tmyUAVTeam : make UAV team of size : "+ _teamSize+ " name : " + name);
+		//sim.dispOutput("\tUAV_Team : make UAV team of size : "+ _teamSize+ " name : " + name);
 		//2nd idx : 0 is normal, 1 is location
 		myPointf[][] teamLocs = sim.getRegularSphereList(rad, teamSize, 1.0f);
 		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c] =  new UAV_Obj(this,teamLocs[c][1]);}
@@ -156,7 +156,10 @@ public class UAV_Team extends Base_Entity {
 		setEntityFlags(inTransitLane,true);
 	}//setTrajAndDur
 	
-	//move this team some incremental amount toward the destination - call every sim step
+	/**
+	 * move this team some incremental amount toward the destination - call every sim step
+	 * @param deltaT
+	 */
 	public void moveUAVTeam(long deltaT) {
 		if(!getEntityFlags(inTransitLane)) {return;}
 		//only move if in transit lane
@@ -169,8 +172,10 @@ public class UAV_Team extends Base_Entity {
 		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].moveUAV(uavVelVec, delT);}//set orientation
 	}//
 	
-	//call when forcing to move to specific location
-	//clear means to get rid of all trajectory stuff
+	/**
+	 * call when forcing to move to specific location.clear means to get rid of all trajectory stuff
+	 * @param _dest
+	 */
 	public void moveUAVTeamToDest(myPointf _dest) {
 		setEntityFlags(inTransitLane,false);
 		loc.set(_dest);
@@ -178,10 +183,15 @@ public class UAV_Team extends Base_Entity {
 		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].moveUAV(uavVelVec, delT);}	//sets orientations of UAVs	
 	}
 	
-	//distance between UAV teams to be preserved when visualizing in queue
+	/**
+	 * distance between UAV teams to be preserved when visualizing in queue
+	 * @return
+	 */
 	public float getNoflyDist() {return 2.0f * rad;}
 	
-	//put together list of values regarding this UAV team to show on screen
+	/**
+	 * put together list of values regarding this UAV team to show on screen
+	 */
 	protected String[] showStatus() {
 		String[] res = {
 			"Name : " + name ,
@@ -205,18 +215,29 @@ public class UAV_Team extends Base_Entity {
 		curJob = "None";
 	}//finishedProcess
 	
-	//called when task time is computed in task arrival -NOTE this will be done before current task is actually finished
-	//also set task name upon arrival
+	/**
+	 * Called when task time is computed in task arrival -NOTE this will be done before current task is 
+	 * actually finished. Also set task name upon arrival
+	 * @param _name
+	 * @param _t
+	 */
 	public void addTimeInTask(String _name, long _t) {
 		curJob = _name;
 		timeVals[curTimeInProc] += _t;
 		timeVals[ttlTaskTime] += _t;		
 	}//addTimeInTask
 	
-	//increment the complete process counter
+	/**
+	 * increment the complete process counter
+	 */
 	public void addCompletedProcess() {	++timeVals[ttlNumTeamsProc];}
 	
-	//called when travel time is computed in transit lane arrival -NOTE this will be done before current transit is actually finished
+	/**
+	 * called when travel time is computed in transit lane arrival -NOTE this will be done before current transit is actually finished
+	 * @param _name
+	 * @param _t
+	 * @param _enterQueue
+	 */
 	public void addTimeInTransit(String _name, long _t, long _enterQueue) {
 		curJob = _name;
 		timeVals[curTimeInProc] += _t;
@@ -225,8 +246,12 @@ public class UAV_Team extends Base_Entity {
 		timeVals[timeEnterQueue] = _enterQueue;
 	}//addTimeInTransit
 	
-	//called when leaving a queue - pass simulation time at exit, since don't know when that will be until after we leave
-	//returns time in queue this team just experienced
+	/**
+	 * called when leaving a queue - pass simulation time at exit, since don't know when that will be until after we leave.
+	 * returns time in queue this team just experienced
+	 * @param _timeLeavingQ
+	 * @return
+	 */
 	public long leaveQueueAddQTime(long _timeLeavingQ) {
 		long tInQueue = _timeLeavingQ - timeVals[timeEnterQueue];
 		timeVals[curTimeInProc] += tInQueue;
@@ -240,11 +265,13 @@ public class UAV_Team extends Base_Entity {
 	public String toString(){
 		String res = super.toString();
 		res += "\tTeam Size " + uavTeam.length + "\n";
-		res +="cur motion time : " + curMotionTime + " stLoc :  " + stLoc.toStrBrf() + " end loc : " + endLoc.toStrBrf() + " | Motion Dur : " + motionDur + " | motionTraj : " + motionTraj.toString() +"\n";
+		res +="cur motion time : " + curMotionTime + " stLoc :  " + stLoc.toStrBrf() 
+			+ " end loc : " + endLoc.toStrBrf() + " | Motion Dur : " 
+				+ motionDur + " | motionTraj : " + motionTraj.toString() +"\n";
 		for(UAV_Obj bd : uavTeam){			res+="\t     UAV "+bd.toString(); res+="\n";	}
 		return res;
 	}
 
-}//myUAVTeam class
+}//UAV_Team class
 
 
