@@ -20,7 +20,7 @@ public class ComplexDesSim extends DES_Simulator{
 	
 	public ComplexDesSim(DES_SimExec _exec, int _maxNumUAVs, int _simLayoutToUse) {
 		super(_exec, _maxNumUAVs, _simLayoutToUse);
-		initMe();
+		initSim();
 	}
 	
 	/**

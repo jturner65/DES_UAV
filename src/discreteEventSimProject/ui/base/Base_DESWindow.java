@@ -179,6 +179,7 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 		for (int i=0; i<maxSimLayouts; ++i) {
 			createAndSetSimLayout(i); 
 		}
+		setSimToUse(0);
 		//Instance class specifics
 		initMe_Indiv();
 		

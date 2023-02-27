@@ -192,7 +192,7 @@ public abstract class DES_Simulator {
 	/**
 	 * called 1 time for all simulations
 	 */
-	protected void initMe() {
+	protected void initSim() {
 		Instant now = Instant.now();
 		rptDateNowPrfx = "ExpDate_"+now.toString()+"_";
 		rptDateNowPrfx=rptDateNowPrfx.replace(":", "-");
@@ -283,6 +283,7 @@ public abstract class DES_Simulator {
 		int yLast = locIdxs[0].length-1;
 		int zLast = locIdxs[0][0].length-1;
 		// binomial theorem to calculate total # of lanes
+		// connected to up to 7 forward nodes.
 		int numIdxs = 8 + xLast *(3 + xLast *((3* 3) + (xLast * 7)));
 		
 		int[][] tLaneIdxs = new int[numIdxs][];
@@ -296,37 +297,44 @@ public abstract class DES_Simulator {
 		
 		//make links to all +1 coords (7 per node not counting bounds)
 		for(int i=0; i<xLast; ++i) {	
+			int ip1 = i+1;
 			for(int j=0; j<yLast; ++j) {
+				int jp1 = j+1;
 				for(int k=0; k<zLast; ++k) {
-					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i][j][k+1]}; 
-					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i][j+1][k]}; 
-					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i][j+1][k+1]}; 
-					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i+1][j][k]}; 
-					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i+1][j][k+1]}; 
-					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i+1][j+1][k]}; 
-					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i+1][j+1][k+1]}; 
+					int kp1 = k+1;
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i][j][kp1]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i][jp1][k]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[i][jp1][kp1]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[ip1][j][k]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[ip1][j][kp1]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[ip1][jp1][k]}; 
+					tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][k],locIdxs[ip1][jp1][kp1]}; 
 				}
-				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][zLast],locIdxs[i][j+1][zLast]}; 
-				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][zLast],locIdxs[i+1][j][zLast]}; 
-				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][zLast],locIdxs[i+1][j+1][zLast]}; 				
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][zLast],locIdxs[i][jp1][zLast]}; 
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][zLast],locIdxs[ip1][j][zLast]}; 
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][j][zLast],locIdxs[ip1][jp1][zLast]}; 				
 			}	
-			tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][zLast],locIdxs[i+1][yLast][zLast]};			
+			tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][zLast],locIdxs[ip1][yLast][zLast]};			
 		}
 		for(int j=0; j<yLast; ++j) {
+			int jp1 = j+1;
 			for(int k=0; k<zLast; ++k) {
-				tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][k],locIdxs[xLast][j][k+1]};	
-				tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][k],locIdxs[xLast][j+1][k]};	
-				tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][k],locIdxs[xLast][j+1][k+1]};	
+				int kp1 = k+1;
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][k],locIdxs[xLast][j][kp1]};	
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][k],locIdxs[xLast][jp1][k]};	
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][k],locIdxs[xLast][jp1][kp1]};	
 			}
-			tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][zLast],locIdxs[xLast][j+1][zLast]};	
+			tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][j][zLast],locIdxs[xLast][jp1][zLast]};	
 		}
 		for(int k=0; k<zLast; ++k) {
+			int kp1 = k+1;
 			for(int i=0;i<xLast;++i) {
-				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][k],locIdxs[i][yLast][k+1]};				
-				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][k],locIdxs[i+1][yLast][k]};				
-				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][k],locIdxs[i+1][yLast][k+1]};				
+				int ip1 = i+1;
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][k],locIdxs[i][yLast][kp1]};				
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][k],locIdxs[ip1][yLast][k]};				
+				tLaneIdxs[idx_TL++] = new int[] {locIdxs[i][yLast][k],locIdxs[ip1][yLast][kp1]};				
 			}
-			tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][yLast][k],locIdxs[xLast][yLast][k+1]};	
+			tLaneIdxs[idx_TL++] = new int[] {locIdxs[xLast][yLast][k],locIdxs[xLast][yLast][kp1]};	
 		}		
 		
 		//connect last 4 task locs to exit

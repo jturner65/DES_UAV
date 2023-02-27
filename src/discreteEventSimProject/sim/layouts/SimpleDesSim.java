@@ -13,7 +13,7 @@ public class SimpleDesSim extends DES_Simulator{
 	
 	public SimpleDesSim(DES_SimExec _exec, int _numUAVs, int _simLayoutToUse) {
 		super(_exec, _numUAVs, _simLayoutToUse);		
-		initMe();
+		initSim();
 	}
 	
 	/**
