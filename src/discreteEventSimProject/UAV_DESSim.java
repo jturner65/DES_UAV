@@ -130,10 +130,10 @@ public class UAV_DESSim extends GUI_AppManager {
 		//titles and descs, need to be set before sidebar menu is defined
 		String[] _winTitles = new String[]{"","UAV DES Sim 1","UAV DES Sim 2"},
 				_winDescr = new String[] {"","Display UAV Discrete Event Simulator 1","Display UAV Discrete Event Simulator 2"};
-		setWinTitlesAndDescs(_winTitles, _winDescr);
+
 		//instanced window dimensions when open and closed - only showing 1 open at a time
-		float[] _dimOpen  = getDefaultWinDimOpen(), 
-				_dimClosed  = getDefaultWinDimClosed();	
+		float[][] _floatDims  = new float[][] {getDefaultWinDimOpen(), getDefaultWinDimClosed(), getInitCameraValues()};	
+
 		//menu bar init
 		String[] menuBtnTitles = new String[]{"Sim Layouts","Functions 1","Functions 2","Verifications"};
 		String[][] menuBtnNames = new String[][] { // each must have literals for every button defined in side bar
@@ -146,7 +146,7 @@ public class UAV_DESSim extends GUI_AppManager {
 		
 		String[] menuDbgBtnNames = new String[] {};//must have literals for every button or this is ignored
 		//build menu
-		buildSideBarMenu(menuBtnTitles, menuBtnNames, menuDbgBtnNames, true, false);
+		buildSideBarMenu(_winTitles, menuBtnTitles, menuBtnNames, menuDbgBtnNames, true, false);
 
 		//setInitDispWinVals : use this to define the values of a display window
 		//int _winIDX, 
@@ -158,10 +158,17 @@ public class UAV_DESSim extends GUI_AppManager {
 		//int _trajFill, int _trajStrk)			: trajectory fill and stroke colors, if these objects can be drawn in window (used as alt color otherwise)
 
 		int wIdx = dispDES_SimWin_1;
-		setInitDispWinVals(wIdx, _dimOpen, _dimClosed,new boolean[]{false,true,true,true}, new int[]{210,240,250,255},new int[]{255,255,255,255},new int[]{180,180,180,255},new int[]{100,100,100,255}); 
+		setInitDispWinVals(wIdx, _winTitles[wIdx], _winDescr[wIdx], new boolean[]{true,false,true,true}, _floatDims,		
+				new int[][] {new int[]{210,240,250,255},new int[]{255,255,255,255},
+					new int[]{180,180,180,255},new int[]{100,100,100,255},
+					new int[]{0,0,0,200},new int[]{255,255,255,255}});
+
 		dispWinFrames[wIdx] = new StaticDESWindow(ri, this, wIdx);		
 		wIdx = dispDES_SimWin_2;
-		setInitDispWinVals(wIdx, _dimOpen, _dimClosed,new boolean[]{false,true,true,true}, new int[]{240,210,250,255},new int[]{255,255,255,255},new int[]{180,180,180,255},new int[]{100,100,100,255}); 
+		setInitDispWinVals(wIdx, _winTitles[wIdx], _winDescr[wIdx], new boolean[]{true,false,true,true}, _floatDims,		
+				new int[][] {new int[]{240,210,250,255},new int[]{255,255,255,255},
+					new int[]{180,180,180,255},new int[]{100,100,100,255},
+					new int[]{0,0,0,200},new int[]{255,255,255,255}});
 		dispWinFrames[wIdx] = new DynamicDESWindow(ri, this, wIdx);		
 		//specify windows that cannot be shown simultaneously here
 		initXORWins(new int[]{dispDES_SimWin_1, dispDES_SimWin_2},new int[]{dispDES_SimWin_1, dispDES_SimWin_2});

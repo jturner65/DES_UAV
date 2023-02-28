@@ -20,9 +20,14 @@ import discreteEventSimProject.sim.task.DES_TaskDesc;
  *
  */
 public class UAV_Task extends Base_Resource{	
-	//all task related values held in taskDesc object for reporting purposes - any changes to values require this task to be rebuilt
-	public DES_TaskDesc td;
-	//all teams currently being served, if group task
+	/**
+	 * all task related values held in taskDesc object for reporting purposes
+	 * any changes to values require this task to be rebuilt
+	 */
+	public final DES_TaskDesc td;
+	/**
+	 * all teams currently being served, if group task
+	 */
 	protected ConcurrentSkipListMap<String, UAV_Team> teamsBeingServed;
 
 	public UAV_Task(DES_Simulator _sim, DES_TaskDesc _td) {

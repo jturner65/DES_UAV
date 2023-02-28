@@ -80,9 +80,7 @@ public class UAV_Team extends Base_Entity {
 		//sim.dispOutput("\tUAV_Team : make UAV team of size : "+ _teamSize+ " name : " + name);
 		//2nd idx : 0 is normal, 1 is location
 		myPointf[][] teamLocs = sim.getRegularSphereList(rad, teamSize, 1.0f);
-		//This is for rendered sim. If not rendered, template will be null so just make this 1.
-		double animFactor = tmpl == null? 1.0 : tmpl.getMaxAnimCounter();
-		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c] =  new UAV_Obj(this,teamLocs[c][1], animFactor);}
+		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c] =  new UAV_Obj(this,teamLocs[c][1]);}
 		motionTraj = new myVectorf();
 		uavVelVec = new myVectorf();
 		stLoc = new myPointf(initLoc);
@@ -90,6 +88,15 @@ public class UAV_Team extends Base_Entity {
 		curJob = "Waiting";
 		setEntityFlags(inTransitLane, false);
 	}//initTeam - run after each flock has been constructed	
+	
+	/**
+	 * If this is being animated and has a template, return that template's max animation counter, otherwise return 1
+	 * @return
+	 */
+	public double getMaxAnimCounter() {
+		//If not rendered, template will be null so just make this 1.
+		return tmpl == null ? 1.0 : tmpl.getMaxAnimCounter();
+	}
 	
 	//called by super at end of ctor
 	protected void initEntity() {
@@ -152,10 +159,10 @@ public class UAV_Team extends Base_Entity {
 			ri.setStrokeWt(2.0f);
 			if(debugAnim) {ri.drawLine(new myPointf(), motionTraj);}//motion trajectory vector
 			ri.popMatState();
+			if(debugAnim){		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeDbgFrame(Base_DispWindow.AppMgr, ri,delT);}}
 			//individual UAVs are relative to loc
 			if(sim.getDrawBoats()){//broken apart to minimize if checks - only potentially 2 per team per frame instead of thousands
-				if(debugAnim){		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeDbgFrame(Base_DispWindow.AppMgr, ri,delT);}}
-				else {				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMe(ri,delT);}}	  					
+				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMe(ri,delT);}	  					
 			} else {
 				for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].drawMeBall(Base_DispWindow.AppMgr, ri,debugAnim);  }
 			}

@@ -35,8 +35,14 @@ public class UAV_Obj {
 	 * Fraction of animation cycle currently at
 	 */
 	public double animPhase;
-	
-	public static final float maxAnimCntr = 1000.0f, baseAnimSpd = 1.0f;
+	/**
+	 * Current render object type's max anim counter
+	 */
+	private double maxAnimCntr;	
+	/**
+	 * 
+	 */
+	private final double baseAnimSpd = 1.0;
 	
 	//location and orientation variables	
 	public float[] O_axisAngle;															//axis angle orientation of this UAV
@@ -52,12 +58,13 @@ public class UAV_Obj {
 	public myVectorf velocity;
 	public myVectorf[] orientation;												//Rot matrix - 3x3 orthonormal basis matrix - cols are bases for body frame orientation in world frame
 					
-	public UAV_Obj(UAV_Team _f, myPointf _coords, double _animCntrFactor){
+	public UAV_Obj(UAV_Team _team, myPointf _coords){
 		ID = IDcount++;	
-		team = _f; 		
+		team = _team; 		
 		//preCalcAnimSpd = (float) ThreadLocalRandom.current().nextDouble(.5f,2.0);		
 		animPhase = ThreadLocalRandom.current().nextDouble(.25f, .75f ) ;//keep initial phase between .25 and .75 so that cyclic-force UAVs start moving right away
-		animCntr = animPhase * _animCntrFactor;
+		maxAnimCntr = team.getMaxAnimCounter();
+		animCntr = animPhase * maxAnimCntr;
 
 		rotVec = myVectorf.RIGHT.cloneMe(); 			//initial setup
 		orientation = new myVectorf[3];
@@ -182,8 +189,13 @@ public class UAV_Obj {
 	 * @param delT
 	 */
 	public void drawMeDbgFrame(GUI_AppManager AppMgr, IRenderInterface ri, float delT){
-		drawMyVec(ri, rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawAxes(100, 2.0f, new myPoint(0,0,0), orientation, 255);
-		drawMe(ri, delT);
+		ri.pushMatState();
+			ri.translate(coords.x,coords.y,coords.z);		//move to location
+			ri.setColorValStroke(IRenderInterface.gui_Cyan, 255);
+			ri.setStrokeWt(2.0f);
+			ri.drawLine(myPointf.ZEROPT,myPointf._mult(rotVec, 100f));
+			AppMgr.drawAxes(100, 2.0f, myPoint.ZEROPT, orientation, 255);
+		ri.popMatState();
 	}//drawMeDbgFrame
 	
 	/**
@@ -214,7 +226,7 @@ public class UAV_Obj {
 	
 	private void animIncr(float vel){
 		animCntr += (baseAnimSpd + vel);//*preCalcAnimSpd;						//set animMod based on velocity -> 1 + mag of velocity	
-		double maxAnimCntr = team.getCurrTemplate().getMaxAnimCounter();
+		maxAnimCntr = team.getMaxAnimCounter();
 		animCntr %= maxAnimCntr;
 		animPhase = (animCntr/maxAnimCntr);									//phase of animation cycle
 	}//animIncr		
