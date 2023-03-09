@@ -9,7 +9,6 @@ import base_UI_Objects.windowUI.base.Base_DispWindow;
 import discreteEventSimProject.entities.base.EntityType;
 import discreteEventSimProject.entities.base.Base_Entity;
 import discreteEventSimProject.sim.base.DES_Simulator;
-import discreteEventSimProject.ui.base.Base_DESWindow;
 
 /**
  * class holding the graphical and simulation parameters for a UAV team entity of a certain size.  
@@ -63,7 +62,7 @@ public class UAV_Team extends Base_Entity {
 		super(_sim, _name, _initLoc, new EntityType[] {EntityType.Consumer});
 		//set so always remembers where it started
 		teamID = teamIncr++;
-		curType = teamID % sim.NumUniqueTeams;//what type of boat to show
+		curType = teamID % sim.getNumUniqueTeams();//what type of boat to show
 		initLoc = new myPointf(_initLoc);
 		teamSize = _teamSize;
 		labelVals = new float[] {-name.length() * 3.0f, -(2.0f*rad + 70), 0};
@@ -150,10 +149,10 @@ public class UAV_Team extends Base_Entity {
 	/**
 	 *
 	 */
-	public void drawEntity(IRenderInterface ri, Base_DESWindow win, float delT, boolean drawMe){
+	public void drawEntity(IRenderInterface ri, float delT, boolean drawMe){
 		ri.pushMatState();
 			ri.translate(loc);
-			boolean debugAnim = sim.getDebug();
+			boolean debugAnim = sim.getSimDebug();
 			ri.pushMatState();
 			ri.setColorValStroke(IRenderInterface.gui_Black, 255);
 			ri.setStrokeWt(2.0f);

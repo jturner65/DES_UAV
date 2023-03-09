@@ -1,9 +1,9 @@
 package discreteEventSimProject.entities.base;
 
 import base_Render_Interface.IRenderInterface;
+import base_UI_Objects.windowUI.base.Base_DispWindow;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import discreteEventSimProject.sim.base.DES_Simulator;
-import discreteEventSimProject.ui.base.Base_DESWindow;
 
 /**
  * base class for all entities
@@ -66,7 +66,7 @@ public abstract class Base_Entity {
 	 * @param ri
 	 * @param win
 	 */
-	public final void dispEntityLabel(IRenderInterface ri, Base_DESWindow win) {
+	public final void dispEntityLabel(IRenderInterface ri, Base_DispWindow win) {
 		ri.pushMatState();
 			ri.translate(loc);
 			win.unSetCamOrient();
@@ -96,11 +96,8 @@ public abstract class Base_Entity {
 	 * @param delT
 	 * @param drawMe
 	 */
-	public abstract void drawEntity(IRenderInterface pa, Base_DESWindow win, float delT, boolean drawMe);
-	
-	
-	
-	
+	public abstract void drawEntity(IRenderInterface pa, float delT, boolean drawMe);
+
 	public String toString() {
 		String res = "Entity ID : " + ID + " | Name : " + name + "\n";
 		if(types.length == 1) { res += "Entity Type : " + types[0];}

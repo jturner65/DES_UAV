@@ -2,8 +2,8 @@ package discreteEventSimProject.sim.layouts;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import discreteEventSimProject.sim.DES_SimExec;
 import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.simExec.base.DES_SimExec;
 
 /**
  * randomly generate a simulation that is very complex
@@ -18,8 +18,8 @@ public class ComplexDesSim extends DES_Simulator{
 	 */
 	protected int numPerSide = 4;
 	
-	public ComplexDesSim(DES_SimExec _exec, int _maxNumUAVs, int _simLayoutToUse) {
-		super(_exec, _maxNumUAVs, _simLayoutToUse);
+	public ComplexDesSim(DES_SimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
+		super(_exec, _name, _maxNumUAVs, _simLayoutToUse);
 		initSim();
 	}
 	
@@ -28,7 +28,7 @@ public class ComplexDesSim extends DES_Simulator{
 	 * TTC in mins initialize sizes and locations of tasks and transit lanes
 	 */
 	@Override
-	protected void initSimPriv() {
+	protected void initSim_Concrete() {
 		
 		// use simLayoutToUse value to determine which sim to build
 		numPerSide += simLayoutToUse;
@@ -89,4 +89,7 @@ public class ComplexDesSim extends DES_Simulator{
 		return isGrp;
 	}
 
+	@Override
+	protected boolean handlePrivSimFlags_Indiv(int idx, boolean val, boolean oldVal) {	return false;}
+	
 }//complexDesSim

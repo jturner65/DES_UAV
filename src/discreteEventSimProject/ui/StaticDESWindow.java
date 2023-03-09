@@ -5,8 +5,8 @@ import java.util.TreeMap;
 
 import base_Render_Interface.IRenderInterface;
 import base_UI_Objects.GUI_AppManager;
-import discreteEventSimProject.sim.base.DES_Simulator;
-import discreteEventSimProject.sim.layouts.SimpleDesSim;
+import base_UI_Objects.windowUI.simulation.simExec.Base_UISimExec;
+import discreteEventSimProject.simExec.DES_SimpleSimExec;
 import discreteEventSimProject.ui.base.Base_DESWindow;
 
 /**
@@ -36,9 +36,6 @@ public class StaticDESWindow extends Base_DESWindow {
 	protected final int initAllPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray) {
 		return numStaticPrivFlags;
 	}
-
-	
-
 	/**
 	 * Static sims will be simple due to the limited number of tasks and lanes
 	 */
@@ -49,11 +46,9 @@ public class StaticDESWindow extends Base_DESWindow {
 	 * Instance-specific initialization
 	 */
 	@Override
-	protected final void initMe_Indiv() {
-		
+	protected final void initMe_Indiv() {		
 	}
-	
-	
+		
 	/**
 	 * Instance-specific boolean flags to handle.  Returns false if it does not handle passed index 
 	 * @param idx
@@ -73,26 +68,17 @@ public class StaticDESWindow extends Base_DESWindow {
 
 	@Override
 	protected final void setupGUIObjsAras_Indiv(TreeMap<Integer, Object[]> tmpUIObjArray,
-			TreeMap<Integer, String[]> tmpListObjVals) {
-		// TODO Auto-generated method stub
-		
-	}
+			TreeMap<Integer, String[]> tmpListObjVals) {}
 
 	@Override
-	protected final boolean setUI_IntDESValsCustom(int UIidx, int ival, int oldVal) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	protected final boolean setUI_IntDESValsCustom(int UIidx, int ival, int oldVal) {return false;}
 
 	@Override
-	protected boolean setUI_FloatDESValsCustom(int UIidx, float val, float oldVal) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	protected boolean setUI_FloatDESValsCustom(int UIidx, float val, float oldVal) {return false;}
 
 	@Override
-	protected DES_Simulator buildSimOfType(int _type) {
-		return new SimpleDesSim(simExec, 100, _type);
+	protected Base_UISimExec buildSimulationExecutive(String _name, int _numSimulations) {
+		return new DES_SimpleSimExec(this, _name, _numSimulations);
 	}
 
 	

@@ -8,7 +8,6 @@ import discreteEventSimProject.entities.base.Base_Entity;
 import discreteEventSimProject.entities.base.EntityType;
 import discreteEventSimProject.events.DES_Event;
 import discreteEventSimProject.sim.base.DES_Simulator;
-import discreteEventSimProject.ui.base.Base_DESWindow;
 
 /**
  * class containing functionality shared by all resources in UAV DES sim
@@ -128,7 +127,7 @@ public abstract class Base_Resource extends Base_Entity {
 	public abstract DES_Event leaveRes(DES_Event ev);
 	
 	@Override
-	public void drawEntity(IRenderInterface ri, Base_DESWindow win, float delT, boolean drawMe) {
+	public void drawEntity(IRenderInterface ri, float delT, boolean drawMe) {
 		ri.pushMatState();
 		//draw resource-based instance-specific stuff
 		drawEntityPriv(ri, drawMe);		

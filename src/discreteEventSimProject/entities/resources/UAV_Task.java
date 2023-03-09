@@ -151,10 +151,10 @@ public class UAV_Task extends Base_Resource{
 	public DES_Event consumerReady(DES_Event ev) {
 		long timeProc = ev.getTimestamp();
 		if(getEntityFlags(taskIsFullIDX)) {//this is full, return a null event - when this task is done it will generate a "ready for input" event
-			sim.exec.dispOutput("UAV_Task","consumerReady","\t" + name +" : consumerReady : " + timeProc + " | Not Ready for Consumer : Wait."); 
+			sim.dispOutput("UAV_Task","consumerReady","\t" + name +" : consumerReady : " + timeProc + " | Not Ready for Consumer : Wait."); 
 			return null;
 		} else {//task is ready, generate immediate LeaveResource event for right now
-			sim.exec.dispOutput("UAV_Task","consumerReady","\t" + name +" : consumerReady : " + timeProc + " | Ready for Consumer : Generating Leave Queue event."); 
+			sim.dispOutput("UAV_Task","consumerReady","\t" + name +" : consumerReady : " + timeProc + " | Ready for Consumer : Generating Leave Queue event."); 
 			//find parent with lowest arrival time team and generate a "LeaveResource" event targeting it to pull the next object from it
 			return getFirstParentUAV(timeProc);
 		}		
@@ -173,16 +173,16 @@ public class UAV_Task extends Base_Resource{
 		float _draw = ThreadLocalRandom.current().nextFloat();
 		//get biggest key less than or equal to _draw - with only 1 entry, will always return same entry
 		Entry<Float, Base_Resource> nextResource = childResources.floorEntry(_draw);
-		if(null == nextResource) {sim.exec.dispOutput("UAV_Task","_leaveResEnd","ERROR : _leaveResEnd : null entry as next resource (transit lane) "+ name); return null;}	
+		if(null == nextResource) {sim.dispOutput("UAV_Task","_leaveResEnd","ERROR : _leaveResEnd : null entry as next resource (transit lane) "+ name); return null;}	
 		
 		//generate event that this task is available for to deque any teams in parent queue
-		if(parentResources.firstEntry().getValue().name.equals(sim.holdingLane.name)) {
+		if(sim.resourceIsHoldingLane(parentResources.firstEntry().getValue().name)) {
 			team.addCompletedProcess();
-			if (((UAV_TransitLane)sim.holdingLane).queueIsEmpty()) {//holding lane is empty and we're in first task
+			//holding lane is empty and we're in first task
+			if (sim.holdingLaneQueueIsEmpty()) {
 				UAV_Team t = sim.addNewTeam(timeAhead);
-				if(t != null) {//if null then no more UAVs available for teams
-					sim.addEvent(new DES_Event(timeAhead,DES_EventType.ArriveResource, t, sim.holdingLane, this));
-				}
+				//if null then no more UAVs available for teams, otherwise build arrival event for holding lane
+				if(t != null) {sim.addArriveHoldingLaneEvent(timeAhead, t, this);}
 			} else {
 				sim.addEvent(getFirstParentUAV(ev.getTimestamp()));				
 			}
@@ -211,7 +211,7 @@ public class UAV_Task extends Base_Resource{
 		} else {
 			//as of now, consumer is leaving, task is unoccupied - verify teams are the same	
 			UAV_Team _team = teamsBeingServed.remove(team.name);
-			if(null == _team) {	sim.exec.dispOutput("UAV_Task","leaveRes","ERROR : leaveRes : attempting to remove team not present in Group Resource Task "+ name); return null;}		
+			if(null == _team) {	sim.dispOutput("UAV_Task","leaveRes","ERROR : leaveRes : attempting to remove team not present in Group Resource Task "+ name); return null;}		
 			if(teamsBeingServed.size() == 0) {setTaskIsEmpty();}
 		}		
 		//time to disengage this task		

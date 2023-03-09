@@ -3,13 +3,10 @@ package discreteEventSimProject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import base_Render_Interface.IRenderInterface;
 import base_Utils_Objects.appManager.Console_AppManager;
 import base_Utils_Objects.appManager.argParse.cmdLineArgs.base.Base_CmdLineArg;
 import base_Utils_Objects.io.messaging.MsgCodes;
-import discreteEventSimProject.sim.DES_SimExec;
-import discreteEventSimProject.sim.base.DES_Simulator;
-import discreteEventSimProject.sim.layouts.SimpleDesSim;
+import discreteEventSimProject.simExec.DES_SimpleSimExec;
 
 /**
  * console version of Discrete Event Simulator with UAV teams performing tasks
@@ -30,12 +27,12 @@ public class UAV_DESSimConsole extends Console_AppManager {
 	//testType == 0 is regular fixed length experiment
 	//testType == 1 is FEL test
 	//testType == 2 is test of priority queue functionality
-	public static void simLoop(DES_SimExec simExec, int testType) {
+	public static void simLoop(DES_SimpleSimExec simExec, int testType) {
 		//modAmtMillis is delta T between each "frame" in graphical simulation
 		float modAmtMillis = 33.0f;//33 milliseconds
 		boolean doneExp = false;//done with experiment?
 		while  (!doneExp) {
-			doneExp = simExec.simMe(modAmtMillis);
+			doneExp = simExec.stepSimulation(modAmtMillis);
 		}				
 		switch(testType) {
 			case 0 :{				
@@ -53,16 +50,17 @@ public class UAV_DESSimConsole extends Console_AppManager {
 
 	protected void initExec() {
 		HashMap<String, Object> argsMap = getArgsMap();
-		
-		IRenderInterface dummy = null;
+
 		int uavTeamSize = (int)argsMap.get("numUAVPerTeam");
-		DES_SimExec.frameTimeScale = (Float) argsMap.get("frameTimeScale");
+		DES_SimpleSimExec.frameTimeScale = (Float) argsMap.get("frameTimeScale");
 		
 		//instance sim exec and run loop
-		DES_SimExec simExec = new DES_SimExec(dummy, msgObj); 
-		DES_Simulator des = new SimpleDesSim(simExec, 100, 0);
-		des.setUavTeamSize(uavTeamSize);
-		simExec.initSimWorld(des, true);
+		DES_SimpleSimExec simExec = new DES_SimpleSimExec(null, "UAV_DESSimConsole_SimExec", 1);
+		simExec.createAllSims();
+		simExec.setSimUAVTeamSize(uavTeamSize);
+//		DES_Simulator des = new SimpleDesSim(simExec, 100, 0);
+//		des.setUavTeamSize(uavTeamSize);
+		simExec.setSimAndInit(0, true);
 		
 		int runType = 0;
 		if((boolean) argsMap.get("doFELTest")){//test future event list after running loop for a few iterations			

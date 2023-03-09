@@ -1,8 +1,8 @@
 package discreteEventSimProject.sim.layouts;
 
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import discreteEventSimProject.sim.DES_SimExec;
 import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.simExec.base.DES_SimExec;
 
 /**
  * DES sim specified in report
@@ -11,8 +11,8 @@ import discreteEventSimProject.sim.base.DES_Simulator;
  */
 public class SimpleDesSim extends DES_Simulator{
 	
-	public SimpleDesSim(DES_SimExec _exec, int _numUAVs, int _simLayoutToUse) {
-		super(_exec, _numUAVs, _simLayoutToUse);		
+	public SimpleDesSim(DES_SimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
+		super(_exec, _name, _maxNumUAVs, _simLayoutToUse);		
 		initSim();
 	}
 	
@@ -20,7 +20,7 @@ public class SimpleDesSim extends DES_Simulator{
 	 * initialize DES Simulation- set up all resources - re call this every time new sim is being set up
 	 */
 	@Override
-	protected void initSimPriv() {//
+	protected void initSim_Concrete() {//
 		
 		// use simLayoutToUse value to determine which sim to build
 		//locations of tasks - uses this to specify how large task array is
@@ -57,6 +57,9 @@ public class SimpleDesSim extends DES_Simulator{
 		isGrp[isGrp.length-1] = true;
 		return isGrp;
 	}
+
+	@Override
+	protected boolean handlePrivSimFlags_Indiv(int idx, boolean val, boolean oldVal) {	return false;}
 	
 	
 }//SimpleDesSim

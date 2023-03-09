@@ -2,3 +2,6 @@
 *.class
 /bin/
 /experiments/
+
+src/base_Utils_Objects/
+src/base_UI_Objects/

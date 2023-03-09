@@ -5,8 +5,8 @@ import java.util.TreeMap;
 
 import base_Render_Interface.IRenderInterface;
 import base_UI_Objects.GUI_AppManager;
-import discreteEventSimProject.sim.base.DES_Simulator;
-import discreteEventSimProject.sim.layouts.ComplexDesSim;
+import base_UI_Objects.windowUI.simulation.simExec.Base_UISimExec;
+import discreteEventSimProject.simExec.DES_ComplexSimExec;
 import discreteEventSimProject.ui.base.Base_DESWindow;
 
 public class DynamicDESWindow extends Base_DESWindow {
@@ -26,17 +26,7 @@ public class DynamicDESWindow extends Base_DESWindow {
 	}
 
 	@Override
-	protected void resetDesFlags_Indiv() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected DES_Simulator buildSimOfType(int _type) {
-		// TODO Auto-generated method stub
-		return new ComplexDesSim(simExec, 5000, _type);
-	}
-
+	protected void resetDesFlags_Indiv() {}
 
 	/**
 	 * Dynamic sims are not simple, since their layouts are generated and can be very large
@@ -72,6 +62,12 @@ public class DynamicDESWindow extends Base_DESWindow {
 	protected boolean setUI_FloatDESValsCustom(int UIidx, float val, float oldVal) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	protected Base_UISimExec buildSimulationExecutive(String _name, int _maxSimLayouts) {
+		// TODO Auto-generated method stub
+		return new DES_ComplexSimExec(this, _name, _maxSimLayouts);
 	}
 
 }

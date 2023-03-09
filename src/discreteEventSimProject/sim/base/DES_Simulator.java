@@ -9,50 +9,43 @@ import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
-import base_UI_Objects.my_procApplet;
-import base_UI_Objects.renderedObjs.Boat_RenderObj;
-import base_UI_Objects.renderedObjs.Sphere_RenderObj;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
-import base_UI_Objects.renderedObjs.base.RenderObj_ClrPalette;
+import base_UI_Objects.windowUI.base.Base_DispWindow;
+import base_UI_Objects.windowUI.simulation.sim.Base_UISimulator;
 import discreteEventSimProject.entities.base.Base_Entity;
 import discreteEventSimProject.entities.consumers.UAV_Team;
 import discreteEventSimProject.entities.resources.UAV_Task;
 import discreteEventSimProject.entities.resources.UAV_TransitLane;
 import discreteEventSimProject.events.DES_EventType;
 import discreteEventSimProject.events.DES_Event;
-import discreteEventSimProject.sim.DES_SimExec;
 import discreteEventSimProject.sim.task.DES_TaskDesc;
-import discreteEventSimProject.ui.base.Base_DESWindow;
-import processing.core.*;
+import discreteEventSimProject.simExec.base.DES_SimExec;
 
 /**
  * base class to manage specific simulation environment and event handling for DES simulation - owned by and called from sim executive
  * Specifics of descrete event simulation specified in child class
  * @author john
  */
-public abstract class DES_Simulator {
-	/**
-	 * owning executor
-	 */
-	public DES_SimExec exec;
+public abstract class DES_Simulator extends Base_UISimulator {
 	/**
 	 * fixed structure holding task resources in this simulation
 	 */
-	public UAV_Task[] tasks;	
+	protected UAV_Task[] tasks;	
 	/**
 	 * fixed structure holding transit lane resource queues in this simulation
 	 */
-	public UAV_TransitLane[] transitLanes;
+	protected UAV_TransitLane[] transitLanes;
 	/**
 	 * variable structure holding collection of uavteams in play in this simulation
 	 */
-	private ArrayList<UAV_Team> teams;		
+	protected ArrayList<UAV_Team> teams;		
 	/**
 	 * single transition lane from last task to first task, to provide recycling of teams
 	 */
-	public UAV_TransitLane holdingLane;
+	protected UAV_TransitLane holdingLane;
 	/**
-	 * maximum # of UAV units available - can't put more than this many into play - can specify in constructor
+	 * maximum # of UAV units available - can't put more than this many into play.
+	 * must specify in constructor. Need to rebuild simulator if this changes
 	 */
 	protected final int maxNumUAVs;
 	/**
@@ -86,9 +79,8 @@ public abstract class DES_Simulator {
 	/**
 	 * flags relevant to simulator executive execution
 	 */
-	protected int[] simFlags;	
 	public static final int
-					debugSimIDX 		= 0,
+					//debug is idx 0
 					buildVisObjsIDX		= 1,						//TODO whether or not to build visualization objects - turn off to bypass unnecessary stuff when using console only
 					drawVisIDX			= 2,						//draw visualization - if false should ignore all processing/papplet stuff
 					drawBoatsIDX 		= 3,						//either draw boats or draw spheres for consumer UAV team members
@@ -129,101 +121,32 @@ public abstract class DES_Simulator {
 	 */
 	private long[][][] taskRes,tlRes;
 	
-	
-	/////////////////////////
-	// rendering stuff
-	/**
-	 * This was taken from boids project
-	 */
-	private String[] UAVTeamNames = new String[]{"Privateers", "Pirates", "Corsairs", "Marauders", "Freebooters"};
-	private PImage[] UAVBoatSails;						//image sigils for sails	
-	private String[] UAVTypeNames = new String[]{"Boats"};
-	public final int NumUniqueTeams = UAVTeamNames.length;			
-	//array of template objects to render
-	//need individual array for each type of object, sphere (simplified) render object
-	protected Base_RenderObj[] rndrTmpl,//set depending on UI choice for complex rndr obj 
-		boatRndrTmpl,
-		sphrRndrTmpl;//simplified rndr obj (sphere)	
-	protected ConcurrentSkipListMap<String, Base_RenderObj[]> cmplxRndrTmpls;	
-	
-	
-	// colors for render objects
-	//divisors for stroke color from fill color
-	private static final int
-		sphereClrIDX = 0,
-		boatClrIDX = 1;
-	private static final int numTeamTypes = 2;
-	private static final int[][] specClr = new int[][]{
-		{255,255,255,255},		//sphere
-		{255,255,255,255}};		//boat
-	//Divide fill color for each type by these values for stroke
-	private static final float[][] strokeScaleFact = new float[][]{
-		{1.25f,0.42f,1.33f,0.95f,3.3f},    			//sphere    
-		{1.25f,0.42f,1.33f,0.95f,3.3f}};   			//boat
-		
-	//scale all fill colors by this value for emissive value
-	private static final float[] emitScaleFact = new float[] {0.7f, 0.9f};
-	//stroke weight for sphere, boat
-	private static final float[] strkWt = new float[] {1.0f, 1.0f};
-	//shininess for sphere, boat
-	private static final float[] shn = new float[] {5.0f,5.0f};
-	
-	//per type, per flock fill colors
-	private static final int[][][] objFillColors = new int[][][]{
-		{{110, 65, 30,255},	{30, 30, 30,255}, {130, 22, 10,255}, {22, 188, 110,255},	{22, 10, 130,255}},		//sphere
-		{{110, 65, 30,255}, {20, 20, 20,255}, {130, 22, 10,255}, {22, 128, 50,255}, {22, 10, 150,255}}				//boats
-	};	
-	
-	/**
-	 * # of animation frames per animation cycle for animating objects
-	 */	
-	protected final int numAnimFramesPerType = 90;
-	
 	/**
 	 * 
 	 * @param _exec
 	 * @param _maxNumUAVs
 	 */
-	public DES_Simulator(DES_SimExec _exec, int _maxNumUAVs, int _simLayoutToUse) {
-		exec=_exec;
+	public DES_Simulator(DES_SimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
+		super(_exec, _name);
 		maxNumUAVs = _maxNumUAVs;
 		simLayoutToUse = _simLayoutToUse;
 	}//ctor
 	
 	/**
-	 * called 1 time for all simulations from constructor
+	 * called 1 time for all simulations from concrete class constructor
 	 */
-	protected void initSim() {
+	protected final void initSim_Indiv() {
 		Instant now = Instant.now();
 		rptDateNowPrfx = "ExpDate_"+now.toString()+"_";
 		rptDateNowPrfx=rptDateNowPrfx.replace(":", "-");
 		rptDateNowPrfx=rptDateNowPrfx.replace(".", "-");
+		rptDateNowPrfx += name+"_";
 		//root directory to put experimental results = add to all derived exp res directories
-		baseDirStr = exec.getCWD() + File.separatorChar + "experiments";
-		@SuppressWarnings("unused")
-		boolean baseDirMade = exec.createRptDir(baseDirStr);
+		String initBaseDir = setAndCreateRptExpDir(exec.getCWD(),"experiments");		
+		baseDirStr = setAndCreateRptExpDir(initBaseDir, "Base_experiments_"+name);
 		
-		//setup flag array
-		initSimFlags();
-		//set up render object templates for different UAV Teams
-		if(exec.ri != null) {	
-			IRenderInterface ri = exec.ri;
-			RenderObj_ClrPalette[] palettes = new RenderObj_ClrPalette[numTeamTypes];
-			for (int i=0;i<palettes.length;++i) {palettes[i] = buildRenderObjPalette(ri, i);}			
-			sphrRndrTmpl = new Sphere_RenderObj[NumUniqueTeams];
-			for(int i=0; i<NumUniqueTeams; ++i){		sphrRndrTmpl[i] = new Sphere_RenderObj(exec.ri, i, palettes[sphereClrIDX]);	}	
-			cmplxRndrTmpls = new ConcurrentSkipListMap<String, Base_RenderObj[]> (); 
-			UAVBoatSails = new PImage[NumUniqueTeams];
-			boatRndrTmpl = new Boat_RenderObj[NumUniqueTeams];
-			for(int i=0; i<NumUniqueTeams; ++i){	
-				UAVBoatSails[i] = ((my_procApplet)ri).loadImage(UAVTeamNames[i]+".jpg");
-				//build boat render object for each individual flock type
-				boatRndrTmpl[i] = new Boat_RenderObj(ri, i, numAnimFramesPerType, palettes[boatClrIDX]);		
-			}		
-			cmplxRndrTmpls.put(UAVTypeNames[0], boatRndrTmpl);
-			rndrTmpl = cmplxRndrTmpls.get(UAVTypeNames[0]);//start by rendering boats
-		}
-		initSimPriv();
+		
+		initSim_Concrete();
 		isGrpTask = getIsGroupAra();
 	}//initOnce
 	
@@ -245,7 +168,7 @@ public abstract class DES_Simulator {
 		//start location and end location are outside the cube, at opposite corners
 		myPointf stLoc = new myPointf(-locDim, -locDim, -locDim);
 		myPointf endLoc = new myPointf(locDim, locDim, locDim);
-		System.out.println("Size : "+ size+ " St loc : "+stLoc.toStrBrf());
+		msgObj.dispInfoMessage("DES_Simulator", "buildDenseGridTaskLocs", "Size : "+ size+ " St loc : "+stLoc.toStrBrf());
 		
 		ArrayList<myPointf> tmpListLocs = new ArrayList<myPointf>();
 		int idx = 1;
@@ -289,7 +212,6 @@ public abstract class DES_Simulator {
 		
 		int[][] tLaneIdxs = new int[numIdxs][];
 		int idx_TL = 0;
-		System.out.println("\n\n\n\n# idxs = "+numIdxs+"\n\n\n\n");
 		//connectstart to first 4
 		tLaneIdxs[idx_TL++] = new int[] {0,locIdxs[0][0][0]};					
 		tLaneIdxs[idx_TL++] = new int[] {0,locIdxs[1][0][0]};					
@@ -346,35 +268,16 @@ public abstract class DES_Simulator {
 		
 		return tLaneIdxs;
 	}
-	
-	
+
 	/**
-	 * Build render object color palette for passed type of flock
-	 * @param _type
-	 * @return
+	 * Consume the newly set data values from the UI by way of the sim exec.
 	 */
-	private final RenderObj_ClrPalette buildRenderObjPalette(IRenderInterface pa, int _type) {
-		RenderObj_ClrPalette palette = new RenderObj_ClrPalette(pa, NumUniqueTeams);
-		//set main color
-		palette.setColor(-1, objFillColors[_type][0], objFillColors[_type][0], objFillColors[_type][0], specClr[_type], new int[]{0,0,0,0}, strkWt[_type], shn[_type]);
-		//scale stroke color from fill color
-		palette.scaleMainStrokeColor(strokeScaleFact[_type][0]);
-		//set alpha after scaling
-		palette.setMainStrokeColorAlpha(objFillColors[_type][0][3]);
-		//set per-flock colors
-		for(int i=0; i<NumUniqueTeams; ++i){	
-			palette.setColor(i, objFillColors[_type][i], objFillColors[_type][i], objFillColors[_type][i], specClr[_type], new int[]{0,0,0,0}, strkWt[_type], shn[_type]);
-			//scale stroke colors
-			palette.scaleInstanceStrokeColor(i, strokeScaleFact[_type][i]);
-			//set alpha after scaling
-			palette.setInstanceStrokeColorAlpha(i, objFillColors[_type][i][3]);
-		}
-		//scale all emissive values - scaled from fill color
-		palette.scaleAllEmissiveColors(emitScaleFact[_type]);
-		//disable ambient
-		palette.disableAmbient();
-		return palette;
+	@Override
+	protected final void useDataUpdateVals_Indiv() {
+		
+		
 	}
+
 	/**
 	 * 
 	 * @param _tasks
@@ -407,7 +310,7 @@ public abstract class DES_Simulator {
 		//first build tasks 
 		for(int i=0;i<_ts.length;++i) {	_ts[i]=new UAV_Task(this, tDesc[i]);}
 		if(showMsg) {
-			exec.dispOutput("DES_Simulator", "buildTasks", "All " + _ts.length + " Tasks initialized.");	
+			msgObj.dispInfoMessage("DES_Simulator", "buildTasks", "All " + _ts.length + " Tasks initialized.");	
 		}
 		return _ts;
 	}//buildTasks
@@ -434,10 +337,33 @@ public abstract class DES_Simulator {
 		//holding lane is lane from final task to initial task - in all simulations
 		holdingLane = buildTransitLane(_tasks, _tasks.length-1, 0, 10.0f, showMsg);
 		if(showMsg) {
-			exec.dispOutput("DES_Simulator", "buildTransitLanes","All " + _tl.length + " transitLanes initialized and connected to parents and children, along with holding lane.");
+			msgObj.dispInfoMessage("DES_Simulator", "buildTransitLanes","All " + _tl.length + " transitLanes initialized and connected to parents and children, along with holding lane.");
 		}
 		return _tl;
-	}//buildTransitLanes	
+	}//buildTransitLanes
+	
+	/**
+	 * Check if the passed resource name equals the holding lane's name
+	 * @param _name
+	 * @return
+	 */
+	public boolean resourceIsHoldingLane(String _name) {return _name.equals(holdingLane.name);}
+	
+	/**
+	 * Check whether the holding lane's queue is empty
+	 * @return
+	 */
+	public boolean holdingLaneQueueIsEmpty() {return holdingLane.queueIsEmpty();}
+	
+	/**
+	 * Add an ArriveResource event for the passed team to the holding lane
+	 * @param timeAhead
+	 * @param team
+	 * @param task
+	 */
+	public void addArriveHoldingLaneEvent(long timeAhead, UAV_Team team, UAV_Task task) {
+		addEvent(new DES_Event(timeAhead,DES_EventType.ArriveResource, team, holdingLane, task));
+	}
 	
 	/**
 	 * these task descriptions will drive the task construction and consumption
@@ -457,7 +383,14 @@ public abstract class DES_Simulator {
 		return tDesc;
 	}//buildTaskDesc
 	
-	//set parent and child transit lanes for each task
+	/**
+	 * Set parent and child transit lanes for each task
+	 * @param _tasks
+	 * @param _tl
+	 * @param _taskParentIDXs
+	 * @param _taskChildIDXs
+	 * @param showMsg
+	 */
 	protected void setTaskParentChild(UAV_Task[] _tasks, UAV_TransitLane[] _tl, ArrayList<Integer>[] _taskParentIDXs, ArrayList<Integer>[] _taskChildIDXs, boolean showMsg) {
 		//set parent and child Transit lanes for each task - some tasks have multiple parents or children.  if multiple children, need to send probability structure for 
 		//cumulative prob dist
@@ -475,11 +408,11 @@ public abstract class DES_Simulator {
 		_tasks[0].addParent(0.0f, holdingLane);
 		_tasks[_tasks.length-1].addChild(0.0f, holdingLane);
 		if(showMsg) {
-			exec.dispOutput("DES_Simulator", "setTaskParentChild","All " + _tasks.length + " tasks connected to parent and children transitlanes.");
+			msgObj.dispInfoMessage("DES_Simulator", "setTaskParentChild","All " + _tasks.length + " tasks connected to parent and children transitlanes.");
 		}
 	}//setTaskParentChild	
 
-	protected abstract void initSimPriv();
+	protected abstract void initSim_Concrete();
 	protected abstract boolean[] getIsGroupAra();//determine which tasks are group tasks - sim dependent
 
 	/**
@@ -490,7 +423,9 @@ public abstract class DES_Simulator {
 		//reset world variables	
 		//init arrays used to manage task parent and task child transit lane idx's
 		//each task has 1 or more parents and 1 or more children - first task has no parents, last task has no children (special cases)
-		long stTime = exec.getCurTime();
+		//start named timer
+		String timerName = this.name+"_createSimAndLayout";
+		exec.setNamedTimerStartNow(timerName);
 		@SuppressWarnings("unchecked")
 		ArrayList<Integer>[] taskParentIDXs = new ArrayList[taskLocs.length];
 		@SuppressWarnings("unchecked")
@@ -508,22 +443,29 @@ public abstract class DES_Simulator {
 		//set parent and child Transit lanes for each task - some tasks have multiple parents or children.  if multiple children, need to send probability structure for 
 		//cumulative prob dist
 		setTaskParentChild(tasks, transitLanes, taskParentIDXs, taskChildIDXs, showMsg);
-		exec.showTimeMsgNow("DES_Simulator","initSim","Millis to build map", stTime);		
+		exec.showTimeMsgNow("DES_Simulator","initSim","Millis to build map", timerName);		
 		
 		//teams is dynamic - depends on how large team size is specified to be and how many UAVs exist to draw from
 		teams = new ArrayList<UAV_Team>();		
 	}//initSim
 		
-	//boolean flag handling
-	protected void initSimFlags(){simFlags = new int[1 + numSimFlags/32]; for(int i = 0; i<numSimFlags; ++i){setSimFlags(i,false);}}
-	public boolean getSimFlags(int idx){int bitLoc = 1<<(idx%32);return (simFlags[idx/32] & bitLoc) == bitLoc;}	
-	public void setSimFlags(int idx, boolean val) {
-		boolean curVal = getSimFlags(idx);
-		if(val == curVal) {return;}
-		int flIDX = idx/32, mask = 1<<(idx%32);
-		simFlags[flIDX] = (val ?  simFlags[flIDX] | mask : simFlags[flIDX] & ~mask);
+	/**
+	 * Get number of simulation flags defined for this sim
+	 */
+	@Override
+	protected final int getNumSimFlags() { return numSimFlags;}
+	
+	@Override
+	protected void handlePrivFlagsDebugMode_Indiv(boolean val) {
+		msgObj.dispDebugMessage("DES_Simulator", "handlePrivFlagsDebugMode_Indiv", "Start DES_Simulator Debug, called from App-specific Debug flags with value "+ val +".");
+		
+		msgObj.dispDebugMessage("DES_Simulator",  "handlePrivFlagsDebugMode_Indiv", "End DES_Simulator Debug, called from App-specific Debug flags with value "+ val +".");
+	}//handlePrivFlagsDebugMode_Indiv
+
+	@Override
+	protected void handlePrivFlags_Indiv(int idx, boolean val, boolean oldVal) {
 		switch(idx){
-			case debugSimIDX 			: {break;}		
+			//case debugSimIDX 			: {break;}		//idx 0 is debug already anyway		
 			case drawVisIDX				: {break;}		//draw visualization - if false should ignore all processing/papplet stuff				
 			case drawBoatsIDX			: {break;}		//either draw boats or draw spheres for consumer UAV team members				
 			case drawUAVTeamsIDX		: {break;}		//draw UAV teams				
@@ -532,9 +474,23 @@ public abstract class DES_Simulator {
 			case dispTaskLblsIDX		: {break;}
 			case dispTLnsLblsIDX		: {break;}
 			case dispUAVLblsIDX			: {break;}			
-			default :{}			
+			default :{
+				if(!handlePrivSimFlags_Indiv(idx, val, oldVal)) {
+					msgObj.dispErrorMessage("DES_Simulator", "handlePrivFlags_Indiv", "Unknown/unhandled simulation flag idx :"+idx+" attempting to be set to "+val+" from "+oldVal+". Aborting.");
+				}
+			}			
 		}			
-	}//setExecFlags
+	}//handlePrivFlags_Indiv
+
+	protected abstract boolean handlePrivSimFlags_Indiv(int idx, boolean val, boolean oldVal);
+	
+	
+	/**
+	 * Set this simulator to draw or not draw visualization.
+	 * @param val
+	 */
+	@Override
+	public final void setSimDrawVis(boolean val) {setSimFlag(drawVisIDX, val);}
 	
 	
 	/**
@@ -561,18 +517,18 @@ public abstract class DES_Simulator {
 			return null;
 		}		
 		String name = "UAVTeam_" + nextTeamNum + "_Sz_"+uavTeamSize;
-		exec.dispOutput("DES_Simulator", "addNewTeam","Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
+		msgObj.dispInfoMessage("DES_Simulator", "addNewTeam","Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
 		UAV_Team team = new UAV_Team(this, name, uavTeamSize, new myPointf(tasks[0].loc));//always start at initial task's location
-		if(exec.ri != null) {
-			team.setTemplate(rndrTmpl, sphrRndrTmpl);
+		if(exec.hasRenderInterface()) {			
+			Base_RenderObj[][] rndrTmplAra = ((DES_SimExec) exec).getRenderTemplates();			
+			team.setTemplate(rndrTmplAra[0], rndrTmplAra[1]);
 		}
 		team.initTeam();
 		teams.add(team);
 		return team;
 	}//addNewTeam()
 	
-	public boolean getDrawBoats() {return getSimFlags(drawBoatsIDX);}
-	public boolean getDebug() {return getSimFlags(debugSimIDX);}
+	public boolean getDrawBoats() {return getSimFlag(drawBoatsIDX);}
 	
 	/**
 	 * @return the uavTeamSize
@@ -588,8 +544,9 @@ public abstract class DES_Simulator {
 	 * called in exec.simMe - evolve visualization deltaT should be in milliseconds, change
 	 * @param deltaT
 	 */
-	public void visSimMe(long deltaT) {
-		if(!getSimFlags(drawVisIDX)) {			return;}
+	@Override
+	public final void simStepVisualization(long deltaT) {
+		if(!getSimFlag(drawVisIDX)) {			return;}
 		for(UAV_Team team : teams) {
 			team.moveUAVTeam(deltaT);
 		}		
@@ -601,24 +558,25 @@ public abstract class DES_Simulator {
 	 * @param animTimeMod
 	 * @param win
 	 */
-	public void drawMe(IRenderInterface pa, float animTimeMod, Base_DESWindow win) {
+	@Override
+	public final void drawMe(IRenderInterface ri, float animTimeMod, Base_DispWindow win) {
 		//draw all transit lanes
-		boolean drawLanes = getSimFlags(drawTLanesIDX);
-		for(UAV_TransitLane tl : transitLanes) {						tl.drawEntity(pa, win, animTimeMod, drawLanes);}
-		holdingLane.drawEntity(pa, win, animTimeMod, drawLanes);
-		if(getSimFlags(dispTLnsLblsIDX)) {
-			for(UAV_TransitLane tl : transitLanes) {					tl.dispEntityLabel(pa, win);}
-			holdingLane.dispEntityLabel(pa, win);
+		boolean drawLanes = getSimFlag(drawTLanesIDX);
+		for(UAV_TransitLane tl : transitLanes) {						tl.drawEntity(ri, animTimeMod, drawLanes);}
+		holdingLane.drawEntity(ri, animTimeMod, drawLanes);
+		if(getSimFlag(dispTLnsLblsIDX)) {
+			for(UAV_TransitLane tl : transitLanes) {					tl.dispEntityLabel(ri, win);}
+			holdingLane.dispEntityLabel(ri, win);
 		}
 		//draw all tasks
-		boolean drawTasks = getSimFlags(drawTaskLocsIDX);
-		for(UAV_Task task : tasks) {									task.drawEntity(pa, win, animTimeMod, drawTasks);}
-		if (getSimFlags(dispTaskLblsIDX)){for(UAV_Task task : tasks) {	task.dispEntityLabel(pa, win);}}
+		boolean drawTasks = getSimFlag(drawTaskLocsIDX);
+		for(UAV_Task task : tasks) {									task.drawEntity(ri, animTimeMod, drawTasks);}
+		if (getSimFlag(dispTaskLblsIDX)){for(UAV_Task task : tasks) {	task.dispEntityLabel(ri, win);}}
 		
 		//draw all UAV teams
 		float delT = Math.min(animTimeMod, 1.0f);
-		if(getSimFlags(drawUAVTeamsIDX)) {	for(UAV_Team team : teams) {team.drawEntity(pa, win, delT, true);}}	
-		if(getSimFlags(dispUAVLblsIDX)) {	for(UAV_Team team : teams) {team.dispEntityLabel(pa, win);}}	
+		if(getSimFlag(drawUAVTeamsIDX)) {	for(UAV_Team team : teams) {team.drawEntity(ri, delT, true);}}	
+		if(getSimFlag(dispUAVLblsIDX)) {	for(UAV_Team team : teams) {team.dispEntityLabel(ri, win);}}	
 		
 	}//drawMe
 	
@@ -642,7 +600,8 @@ public abstract class DES_Simulator {
 	 * @param ri
 	 * @param yOff
 	 */
-	public void drawResultBar(IRenderInterface ri, float yOff) {
+	@Override
+	public final void drawResultBar(IRenderInterface ri, float yOff) {
 		yOff-=4;
 		float sbrMult = 1.2f, lbrMult = 1.5f;//offsets multiplier for barriers between contextual ui elements
 		ri.pushMatState();
@@ -701,8 +660,13 @@ public abstract class DES_Simulator {
 		ri.popMatState();	
 	}//drawResultBar	
 	
-	//add an event to the FEL queue
-	public void addEvent(DES_Event resEv) {exec.addEvent(resEv);}
+	/**
+	 * add an event to the FEL queue
+	 * @param resEv
+	 */
+	public void addEvent(DES_Event resEv) {((DES_SimExec) exec).addEvent(resEv);}
+	
+	public int getNumUniqueTeams() {return ((DES_SimExec) exec).numUniqueTeams;}
 	
 	/////////////////////
 	// experimenting and reporting functions
@@ -714,10 +678,10 @@ public abstract class DES_Simulator {
 	 */
 	public String testTaskTimeVals() {
 		//build report base dir, in case it doesn't exist yet
-		rptExpDir = baseDirStr + File.separatorChar + rptDateNowPrfx + "dir";
-		exec.createRptDir(rptExpDir);		
+		rptExpDir = setAndCreateRptExpDir(baseDirStr, rptDateNowPrfx + "dir");	
+		
 		String taskResDir = rptExpDir + File.separatorChar + "Task_DistTest_Results";
-		exec.createRptDir(taskResDir);
+		((DES_SimExec) exec).createRptDir(taskResDir);
 		int minSz = 2, maxSz = 9;
 		double minP = .2, maxP=2.0, pwrIncr=.2;
 		//build set of task descs, each will have 2,4,6 or 8 opt uav team size
@@ -732,12 +696,25 @@ public abstract class DES_Simulator {
 			String finalResFNme = taskResDir + File.separatorChar + "Task_OptSz_"+tmpTasks[i].optUAVTeamSize+"_pwr_"+String.format("%2.2f", minP)+"_to_"+String.format("%2.2f", maxP)+"_dimRtnsTest";
 			finalResFNme=finalResFNme.replace(".", "-");
 			finalResFNme+=".csv";
-			System.out.println("final res FNAME : " + finalResFNme);
+			msgObj.dispInfoMessage("DES_Simulator","testTaskTimeVals","final res FNAME : " + finalResFNme);
 			//getTaskPerfForNDataCSV returns string array with header
-			exec.saveReport(finalResFNme, tmpTasks[i].getTaskPerfForNDataCSV(minSz,maxSz, minP, maxP, pwrIncr));	
+			((DES_SimExec) exec).saveReport(finalResFNme, tmpTasks[i].getTaskPerfForNDataCSV(minSz,maxSz, minP, maxP, pwrIncr));	
 		}			
 		return taskResDir;
 	}//testTaskTimeVals		
+	
+	/**
+	 * Create the passed directory as a subdirectory within the given base directory, and return the new directory's full name
+	 * @param _baseDirStr directory to create within
+	 * @param _newDirName subdir to create
+	 * @return fully qualified new directory or error message if failed
+	 */
+	protected final String setAndCreateRptExpDir(String _baseDirStr, String _newDirName) {
+		String newDir = _baseDirStr + File.separatorChar + _newDirName;
+		boolean success = ((DES_SimExec) exec).createRptDir(newDir);
+		if (success) {return newDir;}
+		return "::::Unable to create directory!::::";
+	}
 	
 	/**
 	 * functions for experimental trials
@@ -749,8 +726,7 @@ public abstract class DES_Simulator {
 		taskRes = new long[numTrials][][];
 	
 		//build experimental output directory
-		rptExpDir = baseDirStr + File.separatorChar + rptDateNowPrfx + "dir";
-		exec.createRptDir(rptExpDir);		
+		rptExpDir = setAndCreateRptExpDir(baseDirStr, rptDateNowPrfx + "dir");		
 	}//initTrials
 	
 	/**
@@ -774,9 +750,9 @@ public abstract class DES_Simulator {
 		tlRes[idx] = buildTLDataVals();		
 		taskRes[idx] = buildTaskDataVals();
 		
-		exec.saveReport(bseFileName + "_UAVReport.csv", uavResStrs);
-		exec.saveReport(bseFileName + "_TransitLaneReport.csv", tlResStrs);
-		exec.saveReport(bseFileName + "_TasksReport.csv", taskResStrs);	
+		((DES_SimExec) exec).saveReport(bseFileName + "_UAVReport.csv", uavResStrs);
+		((DES_SimExec) exec).saveReport(bseFileName + "_TransitLaneReport.csv", tlResStrs);
+		((DES_SimExec) exec).saveReport(bseFileName + "_TasksReport.csv", taskResStrs);	
 	}//endExperiment
 	
 	/**
@@ -788,15 +764,14 @@ public abstract class DES_Simulator {
 	public void endTrials(int curTrial, int numTrials, long expDurMSec) {
 		endExperiment(curTrial,numTrials,expDurMSec);		
 		//aggregate results and save to special files/directories
-		String finalResDir = rptExpDir + File.separatorChar + "Exp_Final_Results";
-		exec.createRptDir(finalResDir);
+		String finalResDir = setAndCreateRptExpDir(rptExpDir,"Final_Exp_Final_Results");
 		
 		//process aggregate aras of aras of data and build 
 		String finalResFNmeBase = finalResDir + File.separatorChar + "FinalRes_Trls_"+numTrials+"_dur_"+expDurMSec+"_Sz_"+uavTeamSize ;
 
-		exec.saveReport(finalResFNmeBase + "_UAVReport.csv", buildFinalResUAV());
-		exec.saveReport(finalResFNmeBase + "_TransitLaneReport.csv", buildFinalResTL());
-		exec.saveReport(finalResFNmeBase + "_TasksReport.csv", buildFinalResTask());	
+		((DES_SimExec) exec).saveReport(finalResFNmeBase + "_UAVReport.csv", buildFinalResUAV());
+		((DES_SimExec) exec).saveReport(finalResFNmeBase + "_TransitLaneReport.csv", buildFinalResTL());
+		((DES_SimExec) exec).saveReport(finalResFNmeBase + "_TasksReport.csv", buildFinalResTask());	
 		
 		uavRes = new long[numTrials][];
 		tlRes = new long[numTrials][][];
@@ -1009,18 +984,17 @@ public abstract class DES_Simulator {
 	/**
 	 * builds a list of N regularly placed vertices and normals for a sphere of radius rad centered at ctr
 	 */	
-	private static final double twoPi = 2.0*Math.PI;
 	public myVectorf[][] getRegularSphereList(float rad, int N, float scaleZ) {
 		ArrayList<myVectorf[]> res = new ArrayList<myVectorf[]>();
 		//choose 1 point per dArea, where dArea is area of sphere parsed into N equal portions
 		double lclA = 4*Math.PI/N, lclD = Math.sqrt(lclA);
 		int Mthet = (int) Math.round(Math.PI/lclD), Mphi;
-		double dThet = Math.PI/Mthet, dPhi = lclA/dThet, thet, phi, twoPiOvDPhi = twoPi/dPhi;
+		double dThet = MyMathUtils.PI/Mthet, dPhi = lclA/dThet, thet, phi, twoPiOvDPhi = MyMathUtils.TWO_PI/dPhi;
 		for(int i=0;i<Mthet;++i) {
 			thet = dThet * (i + 0.5f);
 			Mphi = (int) Math.round(twoPiOvDPhi * Math.sin(thet));
 			for (int j=0;j<Mphi; ++j) { 
-				phi = (twoPi*j)/Mphi;		
+				phi = (MyMathUtils.TWO_PI*j)/Mphi;		
 				res.add(getXYZFromRThetPhi(rad, thet, phi, scaleZ));
 			}
 		}
@@ -1035,7 +1009,7 @@ public abstract class DES_Simulator {
 		do{
 			double u = ThreadLocalRandom.current().nextDouble(0,1), r = rad * Math.pow(u, lcl_third),
 					cosTheta = ThreadLocalRandom.current().nextDouble(-1,1), sinTheta =  Math.sin(Math.acos(cosTheta)),
-					phi = ThreadLocalRandom.current().nextDouble(0,PConstants.TWO_PI);
+					phi = ThreadLocalRandom.current().nextDouble(0,MyMathUtils.TWO_PI);
 			pos.set(sinTheta * Math.cos(phi), sinTheta * Math.sin(phi),cosTheta);
 			pos._mult(r);
 			pos._add(ctr);
@@ -1061,11 +1035,22 @@ public abstract class DES_Simulator {
 			case ConsumerWaiting : {return ((UAV_Task)_ev.resource).consumerReady(_ev);}
 			
 			default : {
-				exec.dispOutput("DES_Simulator", "handleEvent","\tmyDESSimulator::handleEvent : Unknown/unhandled event type :  " + _ev.type);
+				msgObj.dispErrorMessage("DES_Simulator", "handleEvent","\tmyDESSimulator::handleEvent : Unknown/unhandled event type :  " + _ev.type);
 				return null;
 			}
 		}
 	}//handleEvent
+	
+	
+	/**
+	 * Display output to console and screen if using graphical simulation
+	 * @param className
+	 * @param callMethod
+	 * @param dataStr
+	 */
+	public void dispOutput(String className, String callMethod, String dataStr) {
+		msgObj.dispInfoMessage(className, callMethod, dataStr);
+	}
 	
 	public String toString() {
 		String res = "\nDES Simulator :\n";
