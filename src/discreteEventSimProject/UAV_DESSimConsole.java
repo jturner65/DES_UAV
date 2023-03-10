@@ -50,14 +50,12 @@ public class UAV_DESSimConsole extends Console_AppManager {
 
 	protected void initExec() {
 		HashMap<String, Object> argsMap = getArgsMap();
-
-		int uavTeamSize = (int)argsMap.get("numUAVPerTeam");
-		DES_SimpleSimExec.frameTimeScale = (Float) argsMap.get("frameTimeScale");
 		
 		//instance sim exec and run loop
 		DES_SimpleSimExec simExec = new DES_SimpleSimExec(null, "UAV_DESSimConsole_SimExec", 1);
+		simExec.setTimeScale((Float)argsMap.get("frameTimeScale"));
 		simExec.createAllSims();
-		simExec.setSimUAVTeamSize(uavTeamSize);
+		simExec.setSimUAVTeamSize((int)argsMap.get("numUAVPerTeam"));
 //		DES_Simulator des = new SimpleDesSim(simExec, 100, 0);
 //		des.setUavTeamSize(uavTeamSize);
 		simExec.setSimAndInit(0, true);

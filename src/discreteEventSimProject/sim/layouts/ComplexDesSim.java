@@ -3,7 +3,7 @@ package discreteEventSimProject.sim.layouts;
 import java.util.concurrent.ThreadLocalRandom;
 
 import discreteEventSimProject.sim.base.DES_Simulator;
-import discreteEventSimProject.simExec.base.DES_SimExec;
+import discreteEventSimProject.simExec.base.Base_DESSimExec;
 
 /**
  * randomly generate a simulation that is very complex
@@ -18,7 +18,7 @@ public class ComplexDesSim extends DES_Simulator{
 	 */
 	protected int numPerSide = 4;
 	
-	public ComplexDesSim(DES_SimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
+	public ComplexDesSim(Base_DESSimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
 		super(_exec, _name, _maxNumUAVs, _simLayoutToUse);
 		initSim();
 	}

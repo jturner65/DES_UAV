@@ -2,7 +2,7 @@ package discreteEventSimProject.sim.layouts;
 
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import discreteEventSimProject.sim.base.DES_Simulator;
-import discreteEventSimProject.simExec.base.DES_SimExec;
+import discreteEventSimProject.simExec.base.Base_DESSimExec;
 
 /**
  * DES sim specified in report
@@ -11,7 +11,7 @@ import discreteEventSimProject.simExec.base.DES_SimExec;
  */
 public class SimpleDesSim extends DES_Simulator{
 	
-	public SimpleDesSim(DES_SimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
+	public SimpleDesSim(Base_DESSimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
 		super(_exec, _name, _maxNumUAVs, _simLayoutToUse);		
 		initSim();
 	}

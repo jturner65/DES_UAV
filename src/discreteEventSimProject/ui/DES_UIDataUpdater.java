@@ -5,7 +5,7 @@ import java.util.Map;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
 import base_UI_Objects.windowUI.uiData.UIDataUpdater;
 /**
- * 
+ * Discrete event sim data updater/adapter
  * @author John Turner
  *
  */

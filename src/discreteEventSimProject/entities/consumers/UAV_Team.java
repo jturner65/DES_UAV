@@ -41,8 +41,8 @@ public class UAV_Team extends Base_Entity {
 	private myPointf stLoc, endLoc, initLoc; 
 	private myVectorf motionTraj, 						//start and end targets for team motion,  and trajectory of motion to follow 
 			uavVelVec;							//uav velocity vector - along motionTraj
-	private long motionDur;						//how long the motion should take to follow the trajectory in milliseconds
-	private float curMotionTime;				//current time elapsed since motion began in milliseconds
+	private double motionDur;						//how long the motion should take to follow the trajectory in milliseconds
+	private double curMotionTime;				//current time elapsed since motion began in milliseconds
 	
 	/////////
 	//entity flags structure idxs
@@ -168,11 +168,15 @@ public class UAV_Team extends Base_Entity {
 		ri.popMatState();
 	}//drawTeam
 	
-	//public void leaveTransitLane() {setEntityFlags(inTransitLane, false);}
-	//set the destination, trajectory and duration of the motion this team should follow - called upon entry into transit lane
-	//ending location will be _stLoc + _traj
-	//TODO _dur should be a factor of speed of team, so should be superfluous
-	//call this initially when entering transit lane
+	/**
+	 * set the destination, trajectory and duration of the motion this team should follow - called upon entry into transit lane. 
+	 * Ending location will be _stLoc + _traj.
+	 * TODO _dur should be a factor of speed of team, so should be superfluous.
+	 * Call this initially when entering transit lane.
+	 * @param _stLoc
+	 * @param _endLoc
+	 * @param _dur
+	 */
 	public void setTrajAndDur( myPointf _stLoc, myPointf _endLoc, Long _dur) {
 		stLoc.set(_stLoc);endLoc.set(_endLoc);
 		motionTraj.set(new myVectorf (stLoc, endLoc));
@@ -187,11 +191,11 @@ public class UAV_Team extends Base_Entity {
 	 * move this team some incremental amount toward the destination - call every sim step
 	 * @param deltaT
 	 */
-	public void moveUAVTeam(long deltaT) {
+	public void moveUAVTeam(float scaledMillisSinceLastFrame) {
 		if(!getEntityFlags(inTransitLane)) {return;}
 		//only move if in transit lane
-		curMotionTime += deltaT;
-		float interp = curMotionTime/(1.0f*motionDur); 
+		curMotionTime += scaledMillisSinceLastFrame;
+		float interp = (float) (curMotionTime/(1.0f*motionDur)); 
 		if(interp > 1.0f) {interp = 1.0f;}
 		loc.set(myPointf._add(stLoc, interp, motionTraj));
 		//moveUAV

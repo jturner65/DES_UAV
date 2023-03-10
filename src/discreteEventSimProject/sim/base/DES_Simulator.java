@@ -19,7 +19,7 @@ import discreteEventSimProject.entities.resources.UAV_TransitLane;
 import discreteEventSimProject.events.DES_EventType;
 import discreteEventSimProject.events.DES_Event;
 import discreteEventSimProject.sim.task.DES_TaskDesc;
-import discreteEventSimProject.simExec.base.DES_SimExec;
+import discreteEventSimProject.simExec.base.Base_DESSimExec;
 
 /**
  * base class to manage specific simulation environment and event handling for DES simulation - owned by and called from sim executive
@@ -76,22 +76,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	 * size of UAV teams - modified by UI or command-line entry
 	 */
 	protected int uavTeamSize = 4;	
-	/**
-	 * flags relevant to simulator executive execution
-	 */
-	public static final int
-					//debug is idx 0
-					buildVisObjsIDX		= 1,						//TODO whether or not to build visualization objects - turn off to bypass unnecessary stuff when using console only
-					drawVisIDX			= 2,						//draw visualization - if false should ignore all processing/papplet stuff
-					drawBoatsIDX 		= 3,						//either draw boats or draw spheres for consumer UAV team members
-					drawUAVTeamsIDX		= 4,						//yes/no draw UAV teams
-					drawTaskLocsIDX		= 5,						//yes/no draw task spheres
-					drawTLanesIDX		= 6,						//yes/no draw transit lanes and queues
-					dispTaskLblsIDX		= 7,						//show labels over tasks
-					dispTLnsLblsIDX		= 8,
-					dispUAVLblsIDX		= 9;
 	
-	protected static final int numSimFlags = 10;
 	////////////////////////
 	// reporting stuff
 	/**
@@ -126,7 +111,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	 * @param _exec
 	 * @param _maxNumUAVs
 	 */
-	public DES_Simulator(DES_SimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
+	public DES_Simulator(Base_DESSimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
 		super(_exec, _name);
 		maxNumUAVs = _maxNumUAVs;
 		simLayoutToUse = _simLayoutToUse;
@@ -273,9 +258,8 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	 * Consume the newly set data values from the UI by way of the sim exec.
 	 */
 	@Override
-	protected final void useDataUpdateVals_Indiv() {
-		
-		
+	protected final void useUIDataUpdateVals() {
+		//update local values from dataUpdate adapter		
 	}
 
 	/**
@@ -448,13 +432,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		//teams is dynamic - depends on how large team size is specified to be and how many UAVs exist to draw from
 		teams = new ArrayList<UAV_Team>();		
 	}//initSim
-		
-	/**
-	 * Get number of simulation flags defined for this sim
-	 */
-	@Override
-	protected final int getNumSimFlags() { return numSimFlags;}
-	
+
 	@Override
 	protected void handlePrivFlagsDebugMode_Indiv(boolean val) {
 		msgObj.dispDebugMessage("DES_Simulator", "handlePrivFlagsDebugMode_Indiv", "Start DES_Simulator Debug, called from App-specific Debug flags with value "+ val +".");
@@ -462,18 +440,19 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		msgObj.dispDebugMessage("DES_Simulator",  "handlePrivFlagsDebugMode_Indiv", "End DES_Simulator Debug, called from App-specific Debug flags with value "+ val +".");
 	}//handlePrivFlagsDebugMode_Indiv
 
+
 	@Override
 	protected void handlePrivFlags_Indiv(int idx, boolean val, boolean oldVal) {
 		switch(idx){
 			//case debugSimIDX 			: {break;}		//idx 0 is debug already anyway		
-			case drawVisIDX				: {break;}		//draw visualization - if false should ignore all processing/papplet stuff				
-			case drawBoatsIDX			: {break;}		//either draw boats or draw spheres for consumer UAV team members				
-			case drawUAVTeamsIDX		: {break;}		//draw UAV teams				
-			case drawTaskLocsIDX		: {break;}		//draw task locations at end of task lanes
-			case drawTLanesIDX			: {break;}		//draw task lanes between task locations								
-			case dispTaskLblsIDX		: {break;}
-			case dispTLnsLblsIDX		: {break;}
-			case dispUAVLblsIDX			: {break;}			
+			case Base_DESSimExec.drawVisIDX				: {break;}		//draw visualization - if false should ignore all processing/papplet stuff				
+			case Base_DESSimExec.drawBoatsIDX			: {break;}		//either draw boats or draw spheres for consumer UAV team members				
+			case Base_DESSimExec.drawUAVTeamsIDX		: {break;}		//draw UAV teams				
+			case Base_DESSimExec.drawTaskLocsIDX		: {break;}		//draw task locations at end of task lanes
+			case Base_DESSimExec.drawTLanesIDX			: {break;}		//draw task lanes between task locations								
+			case Base_DESSimExec.dispTaskLblsIDX		: {break;}
+			case Base_DESSimExec.dispTLnsLblsIDX		: {break;}
+			case Base_DESSimExec.dispUAVLblsIDX			: {break;}			
 			default :{
 				if(!handlePrivSimFlags_Indiv(idx, val, oldVal)) {
 					msgObj.dispErrorMessage("DES_Simulator", "handlePrivFlags_Indiv", "Unknown/unhandled simulation flag idx :"+idx+" attempting to be set to "+val+" from "+oldVal+". Aborting.");
@@ -490,7 +469,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	 * @param val
 	 */
 	@Override
-	public final void setSimDrawVis(boolean val) {setSimFlag(drawVisIDX, val);}
+	public final void setSimDrawVis(boolean val) {setSimFlag(Base_DESSimExec.drawVisIDX, val);}
 	
 	
 	/**
@@ -498,7 +477,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	 * @param nowTime
 	 * @return
 	 */
-	public final DES_Event buildInitialEvent(float nowTime) {
+	public final DES_Event buildInitialEvent(double nowTime) {
 		long longNowTime = (long)MyMathUtils.floor(nowTime);
 		UAV_Team newTeam = addNewTeam(longNowTime);
 		//myEvent(long _ts, String _name, myEntity _c_ent, myEntity _r_ent)
@@ -520,7 +499,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		msgObj.dispInfoMessage("DES_Simulator", "addNewTeam","Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
 		UAV_Team team = new UAV_Team(this, name, uavTeamSize, new myPointf(tasks[0].loc));//always start at initial task's location
 		if(exec.hasRenderInterface()) {			
-			Base_RenderObj[][] rndrTmplAra = ((DES_SimExec) exec).getRenderTemplates();			
+			Base_RenderObj[][] rndrTmplAra = ((Base_DESSimExec) exec).getRenderTemplates();			
 			team.setTemplate(rndrTmplAra[0], rndrTmplAra[1]);
 		}
 		team.initTeam();
@@ -528,7 +507,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		return team;
 	}//addNewTeam()
 	
-	public boolean getDrawBoats() {return getSimFlag(drawBoatsIDX);}
+	public boolean getDrawBoats() {return getSimFlag(Base_DESSimExec.drawBoatsIDX);}
 	
 	/**
 	 * @return the uavTeamSize
@@ -542,13 +521,15 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	
 	/**
 	 * called in exec.simMe - evolve visualization deltaT should be in milliseconds, change
-	 * @param deltaT
+	 * @param scaledMillisSinceLastFrame
 	 */
 	@Override
-	public final void simStepVisualization(long deltaT) {
-		if(!getSimFlag(drawVisIDX)) {			return;}
+	public final void simStepVisualization(float scaledMillisSinceLastFrame) {
+		if(!getSimFlag(Base_DESSimExec.drawVisIDX)) {			
+			msgObj.dispConsoleWarningMessage("DES_Simulator", "simStepVisualization", "Not stepping sim.");
+			return;}
 		for(UAV_Team team : teams) {
-			team.moveUAVTeam(deltaT);
+			team.moveUAVTeam(scaledMillisSinceLastFrame);
 		}		
 	}//visSimMe
 		
@@ -561,22 +542,22 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	@Override
 	public final void drawMe(IRenderInterface ri, float animTimeMod, Base_DispWindow win) {
 		//draw all transit lanes
-		boolean drawLanes = getSimFlag(drawTLanesIDX);
+		boolean drawLanes = getSimFlag(Base_DESSimExec.drawTLanesIDX);
 		for(UAV_TransitLane tl : transitLanes) {						tl.drawEntity(ri, animTimeMod, drawLanes);}
 		holdingLane.drawEntity(ri, animTimeMod, drawLanes);
-		if(getSimFlag(dispTLnsLblsIDX)) {
+		if(getSimFlag(Base_DESSimExec.dispTLnsLblsIDX)) {
 			for(UAV_TransitLane tl : transitLanes) {					tl.dispEntityLabel(ri, win);}
 			holdingLane.dispEntityLabel(ri, win);
 		}
 		//draw all tasks
-		boolean drawTasks = getSimFlag(drawTaskLocsIDX);
+		boolean drawTasks = getSimFlag(Base_DESSimExec.drawTaskLocsIDX);
 		for(UAV_Task task : tasks) {									task.drawEntity(ri, animTimeMod, drawTasks);}
-		if (getSimFlag(dispTaskLblsIDX)){for(UAV_Task task : tasks) {	task.dispEntityLabel(ri, win);}}
+		if (getSimFlag(Base_DESSimExec.dispTaskLblsIDX)){for(UAV_Task task : tasks) {	task.dispEntityLabel(ri, win);}}
 		
 		//draw all UAV teams
 		float delT = Math.min(animTimeMod, 1.0f);
-		if(getSimFlag(drawUAVTeamsIDX)) {	for(UAV_Team team : teams) {team.drawEntity(ri, delT, true);}}	
-		if(getSimFlag(dispUAVLblsIDX)) {	for(UAV_Team team : teams) {team.dispEntityLabel(ri, win);}}	
+		if(getSimFlag(Base_DESSimExec.drawUAVTeamsIDX)) {	for(UAV_Team team : teams) {team.drawEntity(ri, delT, true);}}	
+		if(getSimFlag(Base_DESSimExec.dispUAVLblsIDX)) {	for(UAV_Team team : teams) {team.dispEntityLabel(ri, win);}}	
 		
 	}//drawMe
 	
@@ -605,7 +586,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		yOff-=4;
 		float sbrMult = 1.2f, lbrMult = 1.5f;//offsets multiplier for barriers between contextual ui elements
 		ri.pushMatState();
-			int curTime = (Math.round(exec.getNowTime()/1000.0f));
+			long curTime = (Math.round(exec.getNowTime()/1000.0f));
 			float yVal = 0;
 			ri.setFill(255,255,0,255);	
 			ri.showText("SIMULATION OUTPUT", 0, yVal);yVal += sbrMult * yOff;
@@ -664,9 +645,9 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	 * add an event to the FEL queue
 	 * @param resEv
 	 */
-	public void addEvent(DES_Event resEv) {((DES_SimExec) exec).addEvent(resEv);}
+	public void addEvent(DES_Event resEv) {((Base_DESSimExec) exec).addEvent(resEv);}
 	
-	public int getNumUniqueTeams() {return ((DES_SimExec) exec).numUniqueTeams;}
+	public int getNumUniqueTeams() {return ((Base_DESSimExec) exec).numUniqueTeams;}
 	
 	/////////////////////
 	// experimenting and reporting functions
@@ -681,7 +662,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		rptExpDir = setAndCreateRptExpDir(baseDirStr, rptDateNowPrfx + "dir");	
 		
 		String taskResDir = rptExpDir + File.separatorChar + "Task_DistTest_Results";
-		((DES_SimExec) exec).createRptDir(taskResDir);
+		((Base_DESSimExec) exec).createRptDir(taskResDir);
 		int minSz = 2, maxSz = 9;
 		double minP = .2, maxP=2.0, pwrIncr=.2;
 		//build set of task descs, each will have 2,4,6 or 8 opt uav team size
@@ -698,7 +679,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 			finalResFNme+=".csv";
 			msgObj.dispInfoMessage("DES_Simulator","testTaskTimeVals","final res FNAME : " + finalResFNme);
 			//getTaskPerfForNDataCSV returns string array with header
-			((DES_SimExec) exec).saveReport(finalResFNme, tmpTasks[i].getTaskPerfForNDataCSV(minSz,maxSz, minP, maxP, pwrIncr));	
+			((Base_DESSimExec) exec).saveReport(finalResFNme, tmpTasks[i].getTaskPerfForNDataCSV(minSz,maxSz, minP, maxP, pwrIncr));	
 		}			
 		return taskResDir;
 	}//testTaskTimeVals		
@@ -711,7 +692,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	 */
 	protected final String setAndCreateRptExpDir(String _baseDirStr, String _newDirName) {
 		String newDir = _baseDirStr + File.separatorChar + _newDirName;
-		boolean success = ((DES_SimExec) exec).createRptDir(newDir);
+		boolean success = ((Base_DESSimExec) exec).createRptDir(newDir);
 		if (success) {return newDir;}
 		return "::::Unable to create directory!::::";
 	}
@@ -750,9 +731,9 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		tlRes[idx] = buildTLDataVals();		
 		taskRes[idx] = buildTaskDataVals();
 		
-		((DES_SimExec) exec).saveReport(bseFileName + "_UAVReport.csv", uavResStrs);
-		((DES_SimExec) exec).saveReport(bseFileName + "_TransitLaneReport.csv", tlResStrs);
-		((DES_SimExec) exec).saveReport(bseFileName + "_TasksReport.csv", taskResStrs);	
+		((Base_DESSimExec) exec).saveReport(bseFileName + "_UAVReport.csv", uavResStrs);
+		((Base_DESSimExec) exec).saveReport(bseFileName + "_TransitLaneReport.csv", tlResStrs);
+		((Base_DESSimExec) exec).saveReport(bseFileName + "_TasksReport.csv", taskResStrs);	
 	}//endExperiment
 	
 	/**
@@ -769,9 +750,9 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		//process aggregate aras of aras of data and build 
 		String finalResFNmeBase = finalResDir + File.separatorChar + "FinalRes_Trls_"+numTrials+"_dur_"+expDurMSec+"_Sz_"+uavTeamSize ;
 
-		((DES_SimExec) exec).saveReport(finalResFNmeBase + "_UAVReport.csv", buildFinalResUAV());
-		((DES_SimExec) exec).saveReport(finalResFNmeBase + "_TransitLaneReport.csv", buildFinalResTL());
-		((DES_SimExec) exec).saveReport(finalResFNmeBase + "_TasksReport.csv", buildFinalResTask());	
+		((Base_DESSimExec) exec).saveReport(finalResFNmeBase + "_UAVReport.csv", buildFinalResUAV());
+		((Base_DESSimExec) exec).saveReport(finalResFNmeBase + "_TransitLaneReport.csv", buildFinalResTL());
+		((Base_DESSimExec) exec).saveReport(finalResFNmeBase + "_TasksReport.csv", buildFinalResTask());	
 		
 		uavRes = new long[numTrials][];
 		tlRes = new long[numTrials][][];

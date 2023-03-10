@@ -11,8 +11,10 @@ import base_UI_Objects.windowUI.base.Base_DispWindow;
 import base_UI_Objects.windowUI.simulation.simExec.Base_UISimExec;
 import base_Utils_Objects.priorityQueue.myMinQueue;
 import base_Utils_Objects.priorityQueue.base.myPriorityQueue;
+import base_Utils_Objects.sim.Base_SimDataAdapter;
 import discreteEventSimProject.events.DES_EventType;
 import discreteEventSimProject.events.DES_Event;
+import discreteEventSimProject.sim.base.DES_SimDataUpdater;
 import discreteEventSimProject.sim.base.DES_Simulator;
 
 /**
@@ -20,16 +22,11 @@ import discreteEventSimProject.sim.base.DES_Simulator;
  * @author John Turner
  *
  */
-public abstract class DES_SimExec extends Base_UISimExec{
+public abstract class Base_DESSimExec extends Base_UISimExec{
 	/**
 	 * Priority queue holding future event list
 	 */
-	private myPriorityQueue<DES_Event> FEL;
-
-	/**
-	 * scaling time to speed up simulation == amount to multiply modAmtMillis by
-	 */
-	public static float frameTimeScale = 1000.0f;		
+	private myPriorityQueue<DES_Event> FEL;	
 	
 	//duration of an experiment = if not conducting an experiment, this is ignored, and sim will run forever
 	//in millis
@@ -43,6 +40,23 @@ public abstract class DES_SimExec extends Base_UISimExec{
 	private int dfltTeamSizeTrl;
 	
 	private final int minTrlUAVSz = 2, maxTrlUAVSz = 9;
+	
+	/**
+	 * flags relevant to managed simulator execution - idxs in SimPrivStateFlags
+	 */
+	public static final int
+					//debug is idx 0
+					buildVisObjsIDX		= 1,						//TODO whether or not to build visualization objects - turn off to bypass unnecessary stuff when using console only
+					drawVisIDX			= 2,						//draw visualization - if false should ignore all processing/papplet stuff
+					drawBoatsIDX 		= 3,						//either draw boats or draw spheres for consumer UAV team members
+					drawUAVTeamsIDX		= 4,						//yes/no draw UAV teams
+					drawTaskLocsIDX		= 5,						//yes/no draw task spheres
+					drawTLanesIDX		= 6,						//yes/no draw transit lanes and queues
+					dispTaskLblsIDX		= 7,						//show labels over tasks
+					dispTLnsLblsIDX		= 8,
+					dispUAVLblsIDX		= 9;
+	
+	protected static final int numSimFlags = 10;
 	
 	
 	/////////////////////////
@@ -59,7 +73,6 @@ public abstract class DES_SimExec extends Base_UISimExec{
 		boatRndrTmpl,
 		sphrRndrTmpl;//simplified rndr obj (sphere)	
 	private ConcurrentSkipListMap<String, Base_RenderObj[]> cmplxRndrTmpls;	
-	
 	
 	// colors for render objects
 	//divisors for stroke color from fill color
@@ -99,24 +112,101 @@ public abstract class DES_SimExec extends Base_UISimExec{
 	 * @param _ri
 	 * @param _msgObj
 	 */
-	public DES_SimExec(Base_DispWindow _win, String _name, int _numSims) {
+	public Base_DESSimExec(Base_DispWindow _win, String _name, int _numSims) {
 		super(_win,_name, _numSims);
 		if(ri==null) {msgObj.dispInfoMessage("DES_SimExec","ctor","Null IRenderInterface, assuming console only");}
 	}//DES_SimExec ctor
 	
+	/**
+	 * Implementation-specific ui-based sim exec initialization
+	 */
+	protected final void  initUISimExec_Indiv() {};	
 	
 	/**
-	 * Implementation-specific initialization
+	 * Initialize/build the rendered objects to use for the simulation rendering, if they exist
 	 */
-	protected final void  initSimExec_Indiv(){
-		//Initialize render objects if rendering is available
-		if (hasRenderInterface()) {
-			initRenderObjs();
+	@Override
+	protected final void buildRenderObjs() {		
+		if (hasRenderInterface()) {			
+			//set up render object templates for different UAV Teams
+			RenderObj_ClrPalette[] palettes = new RenderObj_ClrPalette[numTeamTypes];
+			for (int i=0;i<palettes.length;++i) {palettes[i] =  buildRenderObjPalette(i);}			
+			sphrRndrTmpl = new Sphere_RenderObj[numUniqueTeams];
+			for(int i=0; i<numUniqueTeams; ++i){		sphrRndrTmpl[i] = new Sphere_RenderObj(ri, i, palettes[sphereClrIDX]);	}	
+			cmplxRndrTmpls = new ConcurrentSkipListMap<String, Base_RenderObj[]> (); 
+			boatRndrTmpl = new Boat_RenderObj[numUniqueTeams];
+			for(int i=0; i<numUniqueTeams; ++i){	
+				//build boat render object for each individual boat type
+				boatRndrTmpl[i] = new Boat_RenderObj(ri, i, numAnimFramesPerType, palettes[boatClrIDX]);		
+			}		
+			cmplxRndrTmpls.put(UAVTypeNames[0], boatRndrTmpl);
+			rndrTmpl = cmplxRndrTmpls.get(UAVTypeNames[0]);//start by rendering boats
 		} else {
 			rndrTmpl = null;
 			sphrRndrTmpl = null;
 		}
-	}//initSimExec_Indiv
+	}//initRenderObjs
+	
+	/**
+	 * Clear out structures holding rendered objects for simulation, if any exist
+	 */
+	@Override
+	protected final void clearRenderObjs() {
+		rndrTmpl = null;
+		sphrRndrTmpl = null;
+	}
+	
+	/**
+	 * Build render object color palette for passed type of render object
+	 * @param _type index in predefined array of colors for specific render object type
+	 * @return
+	 */
+	protected final RenderObj_ClrPalette buildRenderObjPalette(int _type) {
+		RenderObj_ClrPalette palette = new RenderObj_ClrPalette(ri, numUniqueTeams);
+		//set main color
+		palette.setColor(-1, objFillColors[_type][0], objFillColors[_type][0], objFillColors[_type][0], specClr[_type], new int[]{0,0,0,0}, strkWt[_type], shn[_type]);
+		//scale stroke color from fill color
+		palette.scaleMainStrokeColor(strokeScaleFact[_type][0]);
+		//set alpha after scaling
+		palette.setMainStrokeColorAlpha(objFillColors[_type][0][3]);
+		//set per-flock colors
+		for(int i=0; i<numUniqueTeams; ++i){	
+			palette.setColor(i, objFillColors[_type][i], objFillColors[_type][i], objFillColors[_type][i], specClr[_type], new int[]{0,0,0,0}, strkWt[_type], shn[_type]);
+			//scale stroke colors
+			palette.scaleInstanceStrokeColor(i, strokeScaleFact[_type][i]);
+			//set alpha after scaling
+			palette.setInstanceStrokeColorAlpha(i, objFillColors[_type][i][3]);
+		}
+		//scale all emissive values - scaled from fill color
+		palette.scaleAllEmissiveColors(emitScaleFact[_type]);
+		//disable ambient
+		palette.disableAmbient();
+		return palette;
+	}//buildRenderObjPalette	
+	
+	/**
+	 * Build appropriate simulation updater for simulation types that this sim exec manages
+	 * TODO: move to implementation sim execs if different execs have different data layouts
+	 * @return
+	 */
+	@Override
+	public final Base_SimDataAdapter buildSimDataUpdater() {
+		return new DES_SimDataUpdater(this);
+	}
+	
+	/**
+	 * Update any appropriate owning UI or interface components owning this simulation executive with values
+	 * from # masterDataUpdate.
+	 */
+	@Override
+	protected final void updateOwnerWithSimVals() {
+		if(win==null) {return;}
+		//TODO copy current state of masterDataUpdate to win.uiUpdateData, 
+		//appropriately mapping the fields so that the UI can change to reflect simulation values changing
+		
+		
+		
+	}//updateOwnerWithSimVals
 	
 	
 	
@@ -129,7 +219,7 @@ public abstract class DES_SimExec extends Base_UISimExec{
 	 */
 	protected final void initSimWorld_Indiv() {
 		//dfltTeamSizeTrl = ((DES_Simulator) currSim).getUavTeamSize();
-		//set team size back to original value before it would ahve been changed by sweeping trials
+		//set team size back to original value before it would have been changed by sweeping trials
 		((DES_Simulator) currSim).setUavTeamSize(dfltTeamSizeTrl);
 		//reset all experiment values when sim world is changed - default behavior is sim will go forever, until stopped
 		expDurMSec = Long.MAX_VALUE;
@@ -236,17 +326,12 @@ public abstract class DES_SimExec extends Base_UISimExec{
 	//advance current sim time by modAmtMillis * multiplier (for speed of simulation increase or decrease relative to realtime)
 	//modAmtMillis is milliseconds elapsed since last frame  * multiplier (for speed of simulation increase or decrease relative to realtime)	
 	/**
-	 * advance current sim time by modAmtMillis * multiplier (for speed of simulation increase or decrease relative to realtime)
+	 * Advance current simulation
 	 * @param modAmtMillis is milliseconds elapsed since last frame
 	 * @return whether sim is complete or not
 	 */
 	@Override
-	public final boolean stepSimulation(float modAmtMillis) {
-		float scaledModAmtMillis = modAmtMillis * frameTimeScale;// * _fixedScale;	//use _fixedScale to change to milliminutes?		
-		nowTime += scaledModAmtMillis;
-		//move objects in visualization - ignored if not using vis (checked in des)
-		currSim.simStepVisualization((long)(Math.round(scaledModAmtMillis)));		
-
+	protected final boolean stepUISimulation_Indiv(float modAmtMillis, float scaledMillisSinceLastFrame) {
 		boolean expDoneNow = false;
 		if(execFlags.getConductExp() && (nowTime >= expDurMSec)){//conducting experiments			
 			//make sure to cover last run, up to expDurMSec
@@ -257,10 +342,10 @@ public abstract class DES_SimExec extends Base_UISimExec{
 		if(ev == null) {//no event waiting to process - start a UAV team in the process
 			ev = ((DES_Simulator) currSim).buildInitialEvent(nowTime);
 			addEvent(ev);
-		}		
-		//eventsProcced++;
+		}
+		//pop simulation events from event list that have timestep less than now
 		while ((ev != null) && (ev.getTimestamp() <= nowTime)) {	//"now" has evolved to be later than most recent event, so pop off events from PQ in order
-			msgObj.dispInfoMessage("DES_SimExec","simMe","Frame Time : "+String.format("%08d", (int)nowTime)+" Frame Size : " +  ((int)frameTimeScale) + " | NowTime : Current Event TS : " + ev.getTimestamp() + "| Ev Name : " + ev.name);
+			msgObj.dispInfoMessage("DES_SimExec","simMe","Frame Time : "+String.format("%08d", (int)nowTime)+" Frame Size : " +  ((int)frameTimeScale) + " | Current Event TS : " + ev.getTimestamp() + "| Ev Name : " + ev.name);
 			//ev == null means no events on FEL
 			ev = FEL.removeFirst();
 			//eventsProcced++;
@@ -300,55 +385,6 @@ public abstract class DES_SimExec extends Base_UISimExec{
 	}//stepSimulation
 	
 	/**
-	 * Initialize the render objects to use for the simulation rendering
-	 */
-	private final void initRenderObjs() {		
-		//set up render object templates for different UAV Teams
-		RenderObj_ClrPalette[] palettes = new RenderObj_ClrPalette[numTeamTypes];
-		for (int i=0;i<palettes.length;++i) {palettes[i] =  buildRenderObjPalette(i);}			
-		sphrRndrTmpl = new Sphere_RenderObj[numUniqueTeams];
-		for(int i=0; i<numUniqueTeams; ++i){		sphrRndrTmpl[i] = new Sphere_RenderObj(ri, i, palettes[sphereClrIDX]);	}	
-		cmplxRndrTmpls = new ConcurrentSkipListMap<String, Base_RenderObj[]> (); 
-		boatRndrTmpl = new Boat_RenderObj[numUniqueTeams];
-		for(int i=0; i<numUniqueTeams; ++i){	
-			//build boat render object for each individual boat type
-			boatRndrTmpl[i] = new Boat_RenderObj(ri, i, numAnimFramesPerType, palettes[boatClrIDX]);		
-		}		
-		cmplxRndrTmpls.put(UAVTypeNames[0], boatRndrTmpl);
-		rndrTmpl = cmplxRndrTmpls.get(UAVTypeNames[0]);//start by rendering boats
-	}//initRenderObjs
-	
-	
-	
-	/**
-	 * Build render object color palette for passed type of team
-	 * @param _type
-	 * @return
-	 */
-	private final RenderObj_ClrPalette buildRenderObjPalette(int _type) {
-		RenderObj_ClrPalette palette = new RenderObj_ClrPalette(ri, numUniqueTeams);
-		//set main color
-		palette.setColor(-1, objFillColors[_type][0], objFillColors[_type][0], objFillColors[_type][0], specClr[_type], new int[]{0,0,0,0}, strkWt[_type], shn[_type]);
-		//scale stroke color from fill color
-		palette.scaleMainStrokeColor(strokeScaleFact[_type][0]);
-		//set alpha after scaling
-		palette.setMainStrokeColorAlpha(objFillColors[_type][0][3]);
-		//set per-flock colors
-		for(int i=0; i<numUniqueTeams; ++i){	
-			palette.setColor(i, objFillColors[_type][i], objFillColors[_type][i], objFillColors[_type][i], specClr[_type], new int[]{0,0,0,0}, strkWt[_type], shn[_type]);
-			//scale stroke colors
-			palette.scaleInstanceStrokeColor(i, strokeScaleFact[_type][i]);
-			//set alpha after scaling
-			palette.setInstanceStrokeColorAlpha(i, objFillColors[_type][i][3]);
-		}
-		//scale all emissive values - scaled from fill color
-		palette.scaleAllEmissiveColors(emitScaleFact[_type]);
-		//disable ambient
-		palette.disableAmbient();
-		return palette;
-	}//buildRenderObjPalette
-	
-	/**
 	 * Get current render templates (idx 0) and sphere render templates (idx 1)
 	 * @return
 	 */
@@ -361,23 +397,20 @@ public abstract class DES_SimExec extends Base_UISimExec{
 	 */
 	@Override
 	public final void drawMe(float animTimeMod) {
-		if(!getDrawVisualizations()) {return;}//not drawing, return
+		if(!getDoDrawViz()) {return;}//not drawing, return
 		//call simulator to render sim world
 		((DES_Simulator) currSim).drawMe(ri,animTimeMod* frameTimeScale, win);
 	}//drawMe	
 	
 	/**
 	 * Draw the right side info bar for the currently executing simulator
-	 * @param ri
 	 * @param txtHeightOff
 	 * @param modAmtMillis
 	 */
+	@Override
 	public final void drawRightSideInfoBar(float txtHeightOff, float modAmtMillis) {
 		if(ri != null) {((DES_Simulator) currSim).drawResultBar(ri, txtHeightOff);}
 	}
-	
-	public void setTimeScale(float _ts) {		frameTimeScale = _ts;	}
-	public float getTimeScale() {		return frameTimeScale;}	
 	
 	/**
 	 * split up newline-parsed strings into an array of strings, for display on screen
@@ -385,6 +418,12 @@ public abstract class DES_SimExec extends Base_UISimExec{
 	 * @return
 	 */
 	protected String[] getInfoStrAra(String str){return str.split("\n",-1);}
+	
+	/**
+	 * Get number of simulation flags defined for the sims managed by this sim exec
+	 */
+	@Override
+	public final int getNumSimFlags() { return numSimFlags;}
 
 	
 	///////////////////
