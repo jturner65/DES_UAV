@@ -153,7 +153,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		//start location and end location are outside the cube, at opposite corners
 		myPointf stLoc = new myPointf(-locDim, -locDim, -locDim);
 		myPointf endLoc = new myPointf(locDim, locDim, locDim);
-		msgObj.dispInfoMessage("DES_Simulator", "buildDenseGridTaskLocs", "Size : "+ size+ " St loc : "+stLoc.toStrBrf());
+		msgObj.dispInfoMessage("DES_Simulator("+name+")", "buildDenseGridTaskLocs", "Size : "+ size+ " St loc : "+stLoc.toStrBrf());
 		
 		ArrayList<myPointf> tmpListLocs = new ArrayList<myPointf>();
 		int idx = 1;
@@ -294,7 +294,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		//first build tasks 
 		for(int i=0;i<_ts.length;++i) {	_ts[i]=new UAV_Task(this, tDesc[i]);}
 		if(showMsg) {
-			msgObj.dispInfoMessage("DES_Simulator", "buildTasks", "All " + _ts.length + " Tasks initialized.");	
+			msgObj.dispInfoMessage("DES_Simulator("+name+")", "buildTasks", "All " + _ts.length + " Tasks initialized.");	
 		}
 		return _ts;
 	}//buildTasks
@@ -321,7 +321,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		//holding lane is lane from final task to initial task - in all simulations
 		holdingLane = buildTransitLane(_tasks, _tasks.length-1, 0, 10.0f, showMsg);
 		if(showMsg) {
-			msgObj.dispInfoMessage("DES_Simulator", "buildTransitLanes","All " + _tl.length + " transitLanes initialized and connected to parents and children, along with holding lane.");
+			msgObj.dispInfoMessage("DES_Simulator("+name+")", "buildTransitLanes","All " + _tl.length + " transitLanes initialized and connected to parents and children, along with holding lane.");
 		}
 		return _tl;
 	}//buildTransitLanes
@@ -392,7 +392,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 		_tasks[0].addParent(0.0f, holdingLane);
 		_tasks[_tasks.length-1].addChild(0.0f, holdingLane);
 		if(showMsg) {
-			msgObj.dispInfoMessage("DES_Simulator", "setTaskParentChild","All " + _tasks.length + " tasks connected to parent and children transitlanes.");
+			msgObj.dispInfoMessage("DES_Simulator("+name+")", "setTaskParentChild","All " + _tasks.length + " tasks connected to parent and children transitlanes.");
 		}
 	}//setTaskParentChild	
 
@@ -435,9 +435,9 @@ public abstract class DES_Simulator extends Base_UISimulator {
 
 	@Override
 	protected void handlePrivFlagsDebugMode_Indiv(boolean val) {
-		msgObj.dispDebugMessage("DES_Simulator", "handlePrivFlagsDebugMode_Indiv", "Start DES_Simulator Debug, called from App-specific Debug flags with value "+ val +".");
+		msgObj.dispDebugMessage("DES_Simulator("+name+")", "handlePrivFlagsDebugMode_Indiv", "Start DES_Simulator Debug, called from App-specific Debug flags with value "+ val +".");
 		
-		msgObj.dispDebugMessage("DES_Simulator",  "handlePrivFlagsDebugMode_Indiv", "End DES_Simulator Debug, called from App-specific Debug flags with value "+ val +".");
+		msgObj.dispDebugMessage("DES_Simulator("+name+")",  "handlePrivFlagsDebugMode_Indiv", "End DES_Simulator Debug, called from App-specific Debug flags with value "+ val +".");
 	}//handlePrivFlagsDebugMode_Indiv
 
 
@@ -455,7 +455,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 			case Base_DESSimExec.dispUAVLblsIDX			: {break;}			
 			default :{
 				if(!handlePrivSimFlags_Indiv(idx, val, oldVal)) {
-					msgObj.dispErrorMessage("DES_Simulator", "handlePrivFlags_Indiv", "Unknown/unhandled simulation flag idx :"+idx+" attempting to be set to "+val+" from "+oldVal+". Aborting.");
+					msgObj.dispErrorMessage("DES_Simulator("+name+")", "handlePrivFlags_Indiv", "Unknown/unhandled simulation flag idx :"+idx+" attempting to be set to "+val+" from "+oldVal+". Aborting.");
 				}
 			}			
 		}			
@@ -496,7 +496,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 			return null;
 		}		
 		String name = "UAVTeam_" + nextTeamNum + "_Sz_"+uavTeamSize;
-		msgObj.dispInfoMessage("DES_Simulator", "addNewTeam","Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
+		msgObj.dispInfoMessage("DES_Simulator("+name+")", "addNewTeam","Adding Team @TS : "+String.format("%08d", (int)nowTime)+" | Name of UAV Team : " + name + " Size of UAV Team "+uavTeamSize);
 		UAV_Team team = new UAV_Team(this, name, uavTeamSize, new myPointf(tasks[0].loc));//always start at initial task's location
 		if(exec.hasRenderInterface()) {			
 			Base_RenderObj[][] rndrTmplAra = ((Base_DESSimExec) exec).getRenderTemplates();			
@@ -526,7 +526,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	@Override
 	public final void simStepVisualization(float scaledMillisSinceLastFrame) {
 		if(!getSimFlag(Base_DESSimExec.drawVisIDX)) {			
-			msgObj.dispConsoleWarningMessage("DES_Simulator", "simStepVisualization", "Not stepping sim.");
+			msgObj.dispConsoleWarningMessage("DES_Simulator("+name+")", "simStepVisualization", "Not stepping sim.");
 			return;}
 		for(UAV_Team team : teams) {
 			team.moveUAVTeam(scaledMillisSinceLastFrame);
@@ -677,7 +677,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 			String finalResFNme = taskResDir + File.separatorChar + "Task_OptSz_"+tmpTasks[i].optUAVTeamSize+"_pwr_"+String.format("%2.2f", minP)+"_to_"+String.format("%2.2f", maxP)+"_dimRtnsTest";
 			finalResFNme=finalResFNme.replace(".", "-");
 			finalResFNme+=".csv";
-			msgObj.dispInfoMessage("DES_Simulator","testTaskTimeVals","final res FNAME : " + finalResFNme);
+			msgObj.dispInfoMessage("DES_Simulator("+name+")","testTaskTimeVals","final res FNAME : " + finalResFNme);
 			//getTaskPerfForNDataCSV returns string array with header
 			((Base_DESSimExec) exec).saveReport(finalResFNme, tmpTasks[i].getTaskPerfForNDataCSV(minSz,maxSz, minP, maxP, pwrIncr));	
 		}			
@@ -1016,7 +1016,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 			case ConsumerWaiting : {return ((UAV_Task)_ev.resource).consumerReady(_ev);}
 			
 			default : {
-				msgObj.dispErrorMessage("DES_Simulator", "handleEvent","\tmyDESSimulator::handleEvent : Unknown/unhandled event type :  " + _ev.type);
+				msgObj.dispErrorMessage("DES_Simulator("+name+")", "handleEvent","\tmyDESSimulator::handleEvent : Unknown/unhandled event type :  " + _ev.type);
 				return null;
 			}
 		}
