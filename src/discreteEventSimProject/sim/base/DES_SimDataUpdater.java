@@ -2,10 +2,14 @@ package discreteEventSimProject.sim.base;
 
 import java.util.Map;
 
-import base_Utils_Objects.sim.Base_SimDataAdapter;
+import base_UI_Objects.windowUI.simulation.uiData.Base_UISimDataAdapter;
 import discreteEventSimProject.simExec.base.Base_DESSimExec;
-
-public class DES_SimDataUpdater extends Base_SimDataAdapter {
+/**
+ * DES Simulation data adapter, to communicate simulation values and parameters between sim exec and sim instances
+ * @author John Turner
+ *
+ */
+public class DES_SimDataUpdater extends Base_UISimDataAdapter {
 
 	public DES_SimDataUpdater(Base_DESSimExec _simExec) {
 		super(_simExec);
@@ -19,34 +23,12 @@ public class DES_SimDataUpdater extends Base_SimDataAdapter {
 	public DES_SimDataUpdater(DES_SimDataUpdater _otr) {super(_otr);}
 
 	@Override
-	protected void updateBoolValue_Indiv(int idx, boolean value) {
-		// TODO Auto-generated method stub
-	}
+	protected void updateBoolValue_Indiv(int idx, boolean value) {}
 
 	@Override
-	protected void updateIntValue_Indiv(int idx, Integer value) {
-		// TODO Auto-generated method stub
-	}
+	protected void updateIntValue_Indiv(int idx, Integer value) {}
 
 	@Override
-	protected void updateFloatValue_Indiv(int idx, Float value) {
-		// TODO Auto-generated method stub
-	}
-	
-	/**
-	 * Implementation-specific set draw vis idx to be val
-	 * @param val
-	 */
-	public final boolean checkAndSetSimDrawVis(boolean val) {
-		return checkAndSetBoolValue(Base_DESSimExec.drawVisIDX, val);		
-	}
-	
-	/**
-	 * Implementation-specific get is should draw vis
-	 * @param val
-	 */
-	public final boolean getSimDrawVis() {
-		return getBoolValue(Base_DESSimExec.drawVisIDX);
-	}
+	protected void updateFloatValue_Indiv(int idx, Float value) {}
 	
 }//class DES_SimDataUpdater

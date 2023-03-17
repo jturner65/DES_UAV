@@ -47,7 +47,7 @@ public class UAV_DESSimConsole extends Console_AppManager {
 			}
 		}		
 	}//	
-
+	
 	protected void initExec() {
 		HashMap<String, Object> argsMap = getArgsMap();
 		
@@ -171,5 +171,9 @@ public class UAV_DESSimConsole extends Console_AppManager {
 		UAV_DESSimConsole.invokeMain(mainObj, args);
 		mainObj.initExec();
 	}//main
+
+
+	@Override
+	protected boolean showMachineData() {	return true;}
 
 }//class

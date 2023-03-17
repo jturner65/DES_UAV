@@ -279,7 +279,9 @@ public class UAV_DESSim extends GUI_AppManager {
 	@Override
 	protected void setSmoothing() {ri.setSmoothing(0);		}
 
-	
+	@Override
+	protected boolean showMachineData() {	return true;}
+
 }//papplet class
 
 

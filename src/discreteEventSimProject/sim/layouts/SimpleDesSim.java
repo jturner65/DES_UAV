@@ -1,7 +1,7 @@
 package discreteEventSimProject.sim.layouts;
 
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.sim.base.Base_DESSimulator;
 import discreteEventSimProject.simExec.base.Base_DESSimExec;
 
 /**
@@ -9,7 +9,7 @@ import discreteEventSimProject.simExec.base.Base_DESSimExec;
  * @author John Turner
  *
  */
-public class SimpleDesSim extends DES_Simulator{
+public class SimpleDesSim extends Base_DESSimulator{
 	
 	public SimpleDesSim(Base_DESSimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
 		super(_exec, _name, _maxNumUAVs, _simLayoutToUse);		
@@ -59,7 +59,6 @@ public class SimpleDesSim extends DES_Simulator{
 	}
 
 	@Override
-	protected boolean handlePrivSimFlags_Indiv(int idx, boolean val, boolean oldVal) {	return false;}
-	
+	protected boolean handlePrivDesSimFlags_Indiv(int idx, boolean val, boolean oldVal) {return false;}	
 	
 }//SimpleDesSim

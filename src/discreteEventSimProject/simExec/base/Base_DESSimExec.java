@@ -7,15 +7,15 @@ import base_UI_Objects.renderedObjs.Boat_RenderObj;
 import base_UI_Objects.renderedObjs.Sphere_RenderObj;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
 import base_UI_Objects.renderedObjs.base.RenderObj_ClrPalette;
-import base_UI_Objects.windowUI.base.Base_DispWindow;
 import base_UI_Objects.windowUI.simulation.simExec.Base_UISimExec;
+import base_UI_Objects.windowUI.simulation.ui.Base_UISimWindow;
 import base_Utils_Objects.priorityQueue.myMinQueue;
 import base_Utils_Objects.priorityQueue.base.myPriorityQueue;
 import base_Utils_Objects.sim.Base_SimDataAdapter;
 import discreteEventSimProject.events.DES_EventType;
 import discreteEventSimProject.events.DES_Event;
 import discreteEventSimProject.sim.base.DES_SimDataUpdater;
-import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.sim.base.Base_DESSimulator;
 
 /**
  * class to manage the functionality of the simulation executive
@@ -45,18 +45,15 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * flags relevant to managed simulator execution - idxs in SimPrivStateFlags
 	 */
 	public static final int
-					//debug is idx 0
-					buildVisObjsIDX		= 1,						//TODO whether or not to build visualization objects - turn off to bypass unnecessary stuff when using console only
-					drawVisIDX			= 2,						//draw visualization - if false should ignore all processing/papplet stuff
-					drawBoatsIDX 		= 3,						//either draw boats or draw spheres for consumer UAV team members
-					drawUAVTeamsIDX		= 4,						//yes/no draw UAV teams
-					drawTaskLocsIDX		= 5,						//yes/no draw task spheres
-					drawTLanesIDX		= 6,						//yes/no draw transit lanes and queues
-					dispTaskLblsIDX		= 7,						//show labels over tasks
-					dispTLnsLblsIDX		= 8,
-					dispUAVLblsIDX		= 9;
+					drawBoatsIDX 		= numSimFlags,						//either draw boats or draw spheres for consumer UAV team members
+					drawUAVTeamsIDX		= numSimFlags + 1,						//yes/no draw UAV teams
+					drawTaskLocsIDX		= numSimFlags + 2,						//yes/no draw task spheres
+					drawTLanesIDX		= numSimFlags + 3,						//yes/no draw transit lanes and queues
+					dispTaskLblsIDX		= numSimFlags + 4,						//show labels over tasks
+					dispTLnsLblsIDX		= numSimFlags + 5,
+					dispUAVLblsIDX		= numSimFlags + 6;
 	
-	protected static final int numSimFlags = 10;
+	protected static final int numDesSimFlags = numSimFlags + 7;
 	
 	
 	/////////////////////////
@@ -112,7 +109,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * @param _ri
 	 * @param _msgObj
 	 */
-	public Base_DESSimExec(Base_DispWindow _win, String _name, int _numSims) {
+	public Base_DESSimExec(Base_UISimWindow _win, String _name, int _numSims) {
 		super(_win,_name, _numSims);
 		if(ri==null) {msgObj.dispInfoMessage("DES_SimExec","ctor","Null IRenderInterface, assuming console only");}
 	}//DES_SimExec ctor
@@ -161,7 +158,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * @param _type index in predefined array of colors for specific render object type
 	 * @return
 	 */
-	protected final RenderObj_ClrPalette buildRenderObjPalette(int _type) {
+	private RenderObj_ClrPalette buildRenderObjPalette(int _type) {
 		RenderObj_ClrPalette palette = new RenderObj_ClrPalette(ri, numUniqueTeams);
 		//set main color
 		palette.setColor(-1, objFillColors[_type][0], objFillColors[_type][0], objFillColors[_type][0], specClr[_type], new int[]{0,0,0,0}, strkWt[_type], shn[_type]);
@@ -220,7 +217,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	protected final void initSimWorld_Indiv() {
 		//dfltTeamSizeTrl = ((DES_Simulator) currSim).getUavTeamSize();
 		//set team size back to original value before it would have been changed by sweeping trials
-		((DES_Simulator) currSim).setUavTeamSize(dfltTeamSizeTrl);
+		((Base_DESSimulator) currSim).setUavTeamSize(dfltTeamSizeTrl);
 		//reset all experiment values when sim world is changed - default behavior is sim will go forever, until stopped
 		expDurMSec = Long.MAX_VALUE;
 		numTrials = Integer.MAX_VALUE;
@@ -238,7 +235,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		//rebuild FEL
 		FEL = new myMinQueue<DES_Event>(50);
 		//rebuild simulation environment
-		((DES_Simulator) currSim).createSimAndLayout(showMsg);
+		((Base_DESSimulator) currSim).createSimAndLayout(showMsg);
 	
 	}//initSim
 	
@@ -265,12 +262,12 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		curTrial = 1;
 		if(!_useSetTeamSize) {
 			//save current value of team size for when trials are finished
-			dfltTeamSizeTrl = ((DES_Simulator) currSim).getUavTeamSize();
+			dfltTeamSizeTrl = ((Base_DESSimulator) currSim).getUavTeamSize();
 			uavTeamSizeTrial = minTrlUAVSz;
-			((DES_Simulator) currSim).setUavTeamSize(uavTeamSizeTrial);
+			((Base_DESSimulator) currSim).setUavTeamSize(uavTeamSizeTrial);
 		}
 		
-		((DES_Simulator) currSim).initTrials(numTrials);
+		((Base_DESSimulator) currSim).initTrials(numTrials);
 		startExperiment();
 		execFlags.setConductExp(true);
 		execFlags.setConductSweepExps(!_useSetTeamSize);		
@@ -288,14 +285,14 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * end current experiment, if one is running. 
 	 */
 	private void endExperiment() {		
-		((DES_Simulator) currSim).endExperiment(curTrial, numTrials, expDurMSec);	
+		((Base_DESSimulator) currSim).endExperiment(curTrial, numTrials, expDurMSec);	
 	}//endExperiment
 	
 	/**
 	 * call to end final experiment
 	 */
 	private void endAllTrials() {
-		((DES_Simulator) currSim).endTrials(curTrial,numTrials,expDurMSec);	
+		((Base_DESSimulator) currSim).endTrials(curTrial,numTrials,expDurMSec);	
 		//if finished with all trials, reset values
 		initSimWorld(false);
 	}//endTrials	
@@ -304,11 +301,11 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 *  end a set of trials for a specific team size, set to next team size, restart experimenting
 	 */
 	private void endTrialsForTmSz() {
-		((DES_Simulator) currSim).endTrials(curTrial,numTrials,expDurMSec);	
+		((Base_DESSimulator) currSim).endTrials(curTrial,numTrials,expDurMSec);	
 		++uavTeamSizeTrial;
-		((DES_Simulator) currSim).setUavTeamSize(uavTeamSizeTrial);
+		((Base_DESSimulator) currSim).setUavTeamSize(uavTeamSizeTrial);
 		curTrial = 1;
-		((DES_Simulator) currSim).initTrials(numTrials);
+		((Base_DESSimulator) currSim).initTrials(numTrials);
 		startExperiment();
 		
 	}//endTrialsForTmSz
@@ -340,7 +337,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		}		
 		DES_Event ev = FEL.peekFirst();			//peek at first time stamp in FEL
 		if(ev == null) {//no event waiting to process - start a UAV team in the process
-			ev = ((DES_Simulator) currSim).buildInitialEvent(nowTime);
+			ev = ((Base_DESSimulator) currSim).buildInitialEvent(nowTime);
 			addEvent(ev);
 		}
 		//pop simulation events from event list that have timestep less than now
@@ -349,7 +346,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 			//ev == null means no events on FEL
 			ev = FEL.removeFirst();
 			//eventsProcced++;
-			DES_Event resEv = ((DES_Simulator) currSim).handleEvent(ev);
+			DES_Event resEv = ((Base_DESSimulator) currSim).handleEvent(ev);
 			addEvent(resEv);
 			//peek at next event to check if it should be executed now
 			ev = FEL.peekFirst();
@@ -399,7 +396,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	public final void drawMe(float animTimeMod) {
 		if(!getDoDrawViz()) {return;}//not drawing, return
 		//call simulator to render sim world
-		((DES_Simulator) currSim).drawMe(ri,animTimeMod* frameTimeScale, win);
+		((Base_DESSimulator) currSim).drawMe(ri,animTimeMod* frameTimeScale, win);
 	}//drawMe	
 	
 	/**
@@ -409,7 +406,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 */
 	@Override
 	public final void drawRightSideInfoBar(float txtHeightOff, float modAmtMillis) {
-		if(ri != null) {((DES_Simulator) currSim).drawResultBar(ri, txtHeightOff);}
+		if(ri != null) {((Base_DESSimulator) currSim).drawResultBar(ri, txtHeightOff);}
 	}
 	
 	/**
@@ -423,7 +420,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * Get number of simulation flags defined for the sims managed by this sim exec
 	 */
 	@Override
-	public final int getNumSimFlags() { return numSimFlags;}
+	public final int getNumSimFlags() { return numDesSimFlags;}
 
 	
 	///////////////////
@@ -474,7 +471,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 */
 	public void TEST_taskDists() {
 		msgObj.dispInfoMessage("DES_SimExec","TEST_taskDists","\nTesting Task Diminishing returns functions.  Results will be saved to file.");
-		String saveRes = ((DES_Simulator) currSim).testTaskTimeVals();
+		String saveRes = ((Base_DESSimulator) currSim).testTaskTimeVals();
 		msgObj.dispInfoMessage("DES_SimExec","TEST_taskDists","Test of Task Diminishing returns functions Complete.  Results saved to "+ saveRes);
 	}	
 	

@@ -16,9 +16,9 @@ import discreteEventSimProject.ui.base.Base_DESWindow;
  */
 public class StaticDESWindow extends Base_DESWindow {
 	public final static int 
-		gIDX_tmpIDX = numBaseGUIObjs;
+		gIDX_tmpIDX = numBaseDESGUIObjs;
 	
-	public final int numStaticPrivFlags = numPrivFlags;
+	public final int numStaticPrivFlags = numBaseDesPrivFlags;
 	/**
 	 * @param _p
 	 * @param _AppMgr
@@ -33,7 +33,7 @@ public class StaticDESWindow extends Base_DESWindow {
 	 * Instance-specific button instantiation. Should return total number of buttons/booleans
 	 */
 	@Override
-	protected final int initAllPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray) {
+	protected final int initSimPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray) {
 		return numStaticPrivFlags;
 	}
 	/**
@@ -46,7 +46,7 @@ public class StaticDESWindow extends Base_DESWindow {
 	 * Instance-specific initialization
 	 */
 	@Override
-	protected final void initMe_Indiv() {		
+	protected final void initMeSim_Indiv() {		
 	}
 		
 	/**
@@ -80,6 +80,5 @@ public class StaticDESWindow extends Base_DESWindow {
 	protected Base_UISimExec buildSimulationExecutive(String _name, int _numSimulations) {
 		return new DES_SimpleSimExec(this, _name, _numSimulations);
 	}
-
 	
 }//class StaticDESWindow

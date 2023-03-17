@@ -8,7 +8,7 @@ import base_UI_Objects.renderedObjs.base.Base_RenderObj;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
 import discreteEventSimProject.entities.base.EntityType;
 import discreteEventSimProject.entities.base.Base_Entity;
-import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.sim.base.Base_DESSimulator;
 
 /**
  * class holding the graphical and simulation parameters for a UAV team entity of a certain size.  
@@ -58,7 +58,7 @@ public class UAV_Team extends Base_Entity {
 	
 	private int teamSize;
 	
-	public UAV_Team(DES_Simulator _sim, String _name, int _teamSize, myPointf _initLoc){
+	public UAV_Team(Base_DESSimulator _sim, String _name, int _teamSize, myPointf _initLoc){
 		super(_sim, _name, _initLoc, new EntityType[] {EntityType.Consumer});
 		//set so always remembers where it started
 		teamID = teamIncr++;
@@ -191,7 +191,7 @@ public class UAV_Team extends Base_Entity {
 	 * move this team some incremental amount toward the destination - call every sim step
 	 * @param deltaT
 	 */
-	public void moveUAVTeam(float scaledMillisSinceLastFrame) {
+	public void moveUAVTeam(float scaledMillisSinceLastFrame, float delT) {
 		if(!getEntityFlags(inTransitLane)) {return;}
 		//only move if in transit lane
 		curMotionTime += scaledMillisSinceLastFrame;
@@ -199,7 +199,6 @@ public class UAV_Team extends Base_Entity {
 		if(interp > 1.0f) {interp = 1.0f;}
 		loc.set(myPointf._add(stLoc, interp, motionTraj));
 		//moveUAV
-		float delT = 1.0f;//approx 30 fps - don't go too high or boat gets lost
 		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].moveUAV(uavVelVec, delT);}//set orientation
 	}//
 	
@@ -207,10 +206,9 @@ public class UAV_Team extends Base_Entity {
 	 * call when forcing to move to specific location.clear means to get rid of all trajectory stuff
 	 * @param _dest
 	 */
-	public void moveUAVTeamToDest(myPointf _dest) {
+	public void moveUAVTeamToDest(myPointf _dest, float delT) {
 		setEntityFlags(inTransitLane,false);
 		loc.set(_dest);
-		float delT = .033f;//approx 30 fps
 		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c].moveUAV(uavVelVec, delT);}	//sets orientations of UAVs	
 	}
 	

@@ -10,7 +10,7 @@ import discreteEventSimProject.entities.consumers.UAV_Team;
 import discreteEventSimProject.entities.resources.base.Base_Resource;
 import discreteEventSimProject.events.DES_EventType;
 import discreteEventSimProject.events.DES_Event;
-import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.sim.base.Base_DESSimulator;
 
 /**
  * class representing transition from one task to another - acts also as a queue.
@@ -40,7 +40,7 @@ public class UAV_TransitLane extends Base_Resource{
 	 */
 	private float laneVel;
 	
-	public UAV_TransitLane(DES_Simulator _sim, String _name, myPointf _loc, float _rad, float _laneVel) {
+	public UAV_TransitLane(Base_DESSimulator _sim, String _name, myPointf _loc, float _rad, float _laneVel) {
 		super(_sim, _name, _loc, new EntityType[] {EntityType.Resource, EntityType.Queue},_rad, "lane");
 		laneVel = _laneVel;
 		lblColors = new int[] {0,110,20,255};
@@ -167,7 +167,7 @@ public class UAV_TransitLane extends Base_Resource{
 		//increment # of teams this entity has processed
 		++timeVals[ttlNumTeamsProc];
 
-		team.moveUAVTeamToDest(((UAV_Task)childResources.firstEntry().getValue()).getTargetLoc());//childResources.firstEntry().getValue().loc);
+		team.moveUAVTeamToDest(((UAV_Task)childResources.firstEntry().getValue()).getTargetLoc(), sim.getTimeStep());//childResources.firstEntry().getValue().loc);
 		//team leaving queue knows how long it spent in queue
 		long timeInQueue = team.leaveQueueAddQTime(timeProc);	
 		//record how much time was spent in queue
@@ -185,7 +185,7 @@ public class UAV_TransitLane extends Base_Resource{
 			for(Long key : teamQ.keySet()) {
 				t = teamQ.get(key);
 				oldLoc = new myPointf(t.loc);
-				t.moveUAVTeamToDest(newLoc);
+				t.moveUAVTeamToDest(newLoc, sim.getTimeStep());
 				//set next team's new location to this team's old location
 				newLoc.set(oldLoc);			
 			}
@@ -208,7 +208,7 @@ public class UAV_TransitLane extends Base_Resource{
 		//move team to position in queue, based on size - size == position in queue
 		float dist2Go = getDistToGo(team, teamQ.size());
 		myPointf lclEndLoc = getLocOnLane (stLoc, dist2Go);		
-		team.moveUAVTeamToDest(lclEndLoc);
+		team.moveUAVTeamToDest(lclEndLoc, sim.getTimeStep());
 		//verify team not at current arrival time - increment time if any teams already in queue at same time
 		UAV_Team t = teamQ.get(timeArrive);
 		while (t != null) {

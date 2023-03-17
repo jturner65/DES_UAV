@@ -8,43 +8,28 @@ import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.doubles.myVector;
 import base_UI_Objects.GUI_AppManager;
-import base_UI_Objects.windowUI.base.Base_DispWindow;
 import base_UI_Objects.windowUI.drawnTrajectories.DrawnSimpleTraj;
 import base_UI_Objects.windowUI.simulation.simExec.Base_UISimExec;
+import base_UI_Objects.windowUI.simulation.ui.Base_UISimWindow;
 import base_UI_Objects.windowUI.uiData.UIDataUpdater;
 import base_Utils_Objects.io.messaging.MsgCodes;
-import base_Utils_Objects.tools.flags.Base_BoolFlags;
 import discreteEventSimProject.simExec.base.Base_DESSimExec;
 import discreteEventSimProject.ui.DES_UIDataUpdater;
 
-public abstract class Base_DESWindow extends Base_DispWindow {
-	//simulation executive
-	protected Base_DESSimExec simExec;
-	
-	//protected DES_Simulator currSim;
-	
-	public static final int maxSimLayouts = 5;
-	//motion
+public abstract class Base_DESWindow extends Base_UISimWindow {
 	///////////
 	//ui vals
 
 	public final static int
-		gIDX_LayoutToUse			= 0, 
-		gIDX_FrameTimeScale 		= 1,
-		gIDX_UAVTeamSize			= 2, 
-		gIDX_ExpLength				= 3,			//length of time for experiment, in minutes
-		gIDX_NumExpTrials			= 4;
+		gIDX_UAVTeamSize			= numBaseSimGUIObjs, 
+		gIDX_ExpLength				= numBaseSimGUIObjs+1,			//length of time for experiment, in minutes
+		gIDX_NumExpTrials			= numBaseSimGUIObjs+2;
 		
 	/**
 	 * Number of gui objects defined in base window. Subsequent IDXs in child class should start here
 	 */
-	protected static final int numBaseGUIObjs = 5;		
-	
-	/**
-	 * scaling time to speed up simulation == amount to multiply modAmtMillis by
-	 */
-	protected float frameTimeScale = 1000.0f;	
-	
+	protected static final int numBaseDESGUIObjs = numBaseSimGUIObjs+3;		
+
 	/**
 	 * Holds currently specified uavTeamSize for this window
 	 */
@@ -67,23 +52,20 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	 * private child-class flags - window specific
 	 */
 	public static final int 
-			//debugAnimIDX 		= 0,						//debug
-			resetSimIDX			= 1,						//whether or not to reset sim	
-			drawVisIDX 			= 2,						//draw visualization - if false SIM exec and sim should ignore all processing/papplet stuff
-			drawBoatsIDX		= 3,						//whether to draw animated boats or simple spheres for consumer UAVs
-			drawUAVTeamsIDX		= 4,						//yes/no draw UAV teams
-			drawTaskLocsIDX		= 5,						//yes/no draw task spheres
-			drawTLanesIDX		= 6,						//yes/no draw transit lanes and queues
-			dispTaskLblsIDX		= 7,						//show labels over tasks...
-			dispTLnsLblsIDX		= 8,						//over transit lanes...
-			dispUAVLblsIDX		= 9,						//and/or over teams			
-			conductExpIDX		= 10,						//conduct experiment with current settings
-			condUAVSweepExpIDX  = 11;						//sweep through UAV Team Sizes
+			drawBoatsIDX		= numBaseSimPrivFlags,						//whether to draw animated boats or simple spheres for consumer UAVs
+			drawUAVTeamsIDX		= numBaseSimPrivFlags +2,						//yes/no draw UAV teams
+			drawTaskLocsIDX		= numBaseSimPrivFlags +3,						//yes/no draw task spheres
+			drawTLanesIDX		= numBaseSimPrivFlags +4,						//yes/no draw transit lanes and queues
+			dispTaskLblsIDX		= numBaseSimPrivFlags +5,						//show labels over tasks...
+			dispTLnsLblsIDX		= numBaseSimPrivFlags +6,						//over transit lanes...
+			dispUAVLblsIDX		= numBaseSimPrivFlags +7,						//and/or over teams			
+			conductExpIDX		= numBaseSimPrivFlags +8,						//conduct experiment with current settings
+			condUAVSweepExpIDX  = numBaseSimPrivFlags +9;						//sweep through UAV Team Sizes
 
 	/**
 	 * Number of boolean flags defined in base window. Subsequent IDXs of boolean flags in child class should start here
 	 */
-	public static final int numPrivFlags = 12;
+	public static final int numBaseDesPrivFlags = numBaseSimPrivFlags +10;
 	
 	public Base_DESWindow(IRenderInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
 		super(_p, _AppMgr, _winIdx);
@@ -91,12 +73,9 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	
 
 	@Override
-	public final int initAllPrivBtns(ArrayList<Object[]> tmpBtnNamesArray) {
+	public final int initSimPrivBtns(ArrayList<Object[]> tmpBtnNamesArray) {
 		// add an entry for each button, in the order they are wished to be displayed
-		// true tag, false tag, btn IDX
-		tmpBtnNamesArray.add(new Object[] {"Visualization Debug", "Enable Debug", Base_BoolFlags.debugIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Resetting Simulation", "Reset Simulation",   resetSimIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Drawing Vis", "Render Visualization",  drawVisIDX});  
+		// true tag, false tag, btn IDX  
 		tmpBtnNamesArray.add(new Object[] {"Drawing UAV Teams", "Draw UAV Teams",  drawUAVTeamsIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Drawing Task Locs", "Draw Task Locs",  drawTaskLocsIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Drawing Lanes", "Draw Transit Lanes", drawTLanesIDX});  
@@ -106,22 +85,19 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 		tmpBtnNamesArray.add(new Object[] {"Drawing UAV Boats", "Drawing UAV Spheres",   drawBoatsIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Experimenting", "Run Experiment", conductExpIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Team SweepSize Experiment", "Run Team Sweep Experiment", condUAVSweepExpIDX});  
-		return initAllPrivBtns_Indiv(tmpBtnNamesArray);
+		return initSimPrivBtns_Indiv(tmpBtnNamesArray);
 	}//initAllPrivBtns	
 	
-	protected abstract int initAllPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray);
-	
-	//set labels of boolean buttons 
-//	private void setLabel(int idx, String tLbl, String fLbl) {truePrivFlagNames[idx] = tLbl;falsePrivFlagNames[idx] = fLbl;}//	
+	protected abstract int initSimPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray);
 	
 	/**
 	 * Instance specific reset of flag states
 	 */
 	protected abstract void resetDesFlags_Indiv();
-	
+	@Override
 	public final void setSimToUse(int _type) {
 		boolean _isSimpleSim = isSimpleSim();
-		simExec.setSimUAVTeamSize(uavTeamSize);
+		((Base_DESSimExec) simExec).setSimUAVTeamSize(uavTeamSize);
 		simExec.setSimAndInit(_type, true);
 		boolean showVis = (ri != null);
 		privFlags.setFlag(drawVisIDX, showVis);		
@@ -141,6 +117,7 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	/**
 	 * Initialize any UI control flags appropriate for all boids window application
 	 */
+	@Override
 	protected final void initDispFlags() {
 		//this window uses a customizable camera
 		dispFlags.setUseCustCam(true);
@@ -148,35 +125,31 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 		dispFlags.setHasRtSideMenu(true);		
 	}
 	
+	/**
+	 * Initialize the simulation executive during initMe() after simExec was created
+	 * @param showVis whether or not we should render the visualizations for this simulation
+	 */
 	@Override
-	protected void initMe() {//all ui objects set by here
-		//called once
-		//initPrivFlags(numPrivFlags);
-		//initialize sim exec to simple world sim
-		simExec = (Base_DESSimExec) buildSimulationExecutive(name+"_SimExec", maxSimLayouts);
-		//initial flags need to be set here
-		boolean showVis = (ri != null);
+	protected final void initSimExec(boolean showVis) {
 		boolean _isSimpleSim = isSimpleSim();
-		simExec.initMasterDataAdapter(Base_DESSimExec.drawVisIDX, showVis);		
 		simExec.initMasterDataAdapter(Base_DESSimExec.drawUAVTeamsIDX, showVis);	
 		simExec.initMasterDataAdapter(Base_DESSimExec.drawBoatsIDX, showVis);	
 		simExec.initMasterDataAdapter(Base_DESSimExec.drawTaskLocsIDX, showVis);		
 		simExec.initMasterDataAdapter(Base_DESSimExec.drawTLanesIDX, showVis && _isSimpleSim);			
 		simExec.initMasterDataAdapter(Base_DESSimExec.dispTaskLblsIDX, showVis && _isSimpleSim);	
 		simExec.initMasterDataAdapter(Base_DESSimExec.dispTLnsLblsIDX, showVis && _isSimpleSim);	
-		simExec.initMasterDataAdapter(Base_DESSimExec.dispUAVLblsIDX, showVis && _isSimpleSim);			
-		simExec.createAllSims();
-		
-		setSimToUse(0);
+		simExec.initMasterDataAdapter(Base_DESSimExec.dispUAVLblsIDX, showVis && _isSimpleSim);					
+	}//initSimExec
+	
+	@Override
+	protected final void initMeSim() {//all ui objects set by here
 		//Instance class specifics
-		initMe_Indiv();
-		
-		custMenuOffset = uiClkCoords[3];	//495	
+		initMeSim_Indiv();
 	}//initMe	
 	
 	protected abstract Base_UISimExec buildSimulationExecutive(String _name, int _numSimulations);
 	
-	protected abstract void initMe_Indiv();
+	protected abstract void initMeSim_Indiv();
 	
 	/**
 	 * This function would provide an instance of the override class for base_UpdateFromUIData, which would
@@ -197,67 +170,44 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	
 	@Override
 	protected int[] getFlagIDXsToInitToTrue() {return null;}
-	/**
-	 * UI code-level Debug mode functionality. Called only from flags structure
-	 * @param val
-	 */
-	@Override
-	protected final void handleDispFlagsDebugMode_Indiv(boolean val) {}
-	
-	/**
-	 * Application-specific Debug mode functionality (application-specific). Called only from privflags structure
-	 * @param val
-	 */
-	@Override
-	protected final void handlePrivFlagsDebugMode_Indiv(boolean val) {	
-		simExec.setExecDebug(val);		
-	}
 	
 	/**
 	 * Handle application-specific flag setting  TODO use sim uiDataUpdater
 	 */
 	@Override
-	public void handlePrivFlags_Indiv(int idx, boolean val, boolean oldVal){
+	protected final boolean handleSimPrivFlags_Indiv(int idx, boolean val, boolean oldVal){
 		switch(idx){
-			case resetSimIDX			: {
-				if(val) {simExec.resetSimExec(true); addPrivBtnToClear(resetSimIDX);}break;}
-			case drawVisIDX				:{
-				simExec.setDoDrawViz(val);break;}
 			case drawBoatsIDX			:{//set value directly in DES (bypass exec)
-				simExec.setSimFlag(Base_DESSimExec.drawBoatsIDX, val);			break;}
+				simExec.setSimFlag(Base_DESSimExec.drawBoatsIDX, val);			return true;}
 			case drawUAVTeamsIDX			:{//set value directly in DES (bypass exec)
-				simExec.setSimFlag(Base_DESSimExec.drawUAVTeamsIDX, val);		break;}
+				simExec.setSimFlag(Base_DESSimExec.drawUAVTeamsIDX, val);		return true;}
 			case drawTaskLocsIDX			:{//set value directly in DES (bypass exec)
-				simExec.setSimFlag(Base_DESSimExec.drawTaskLocsIDX, val);		break;}
+				simExec.setSimFlag(Base_DESSimExec.drawTaskLocsIDX, val);		return true;}
 			case drawTLanesIDX			:{//set value directly in DES (bypass exec)
-				simExec.setSimFlag(Base_DESSimExec.drawTLanesIDX, val);		break;}
+				simExec.setSimFlag(Base_DESSimExec.drawTLanesIDX, val);		return true;}
 			case dispTaskLblsIDX		: {				
-				simExec.setSimFlag(Base_DESSimExec.dispTaskLblsIDX, val);		break;}
+				simExec.setSimFlag(Base_DESSimExec.dispTaskLblsIDX, val);		return true;}
 			case dispTLnsLblsIDX		: {				
-				simExec.setSimFlag(Base_DESSimExec.dispTLnsLblsIDX, val);		break;}
+				simExec.setSimFlag(Base_DESSimExec.dispTLnsLblsIDX, val);		return true;}
 			case dispUAVLblsIDX			: {				
-				simExec.setSimFlag(Base_DESSimExec.dispUAVLblsIDX, val);		break;}				
+				simExec.setSimFlag(Base_DESSimExec.dispUAVLblsIDX, val);		return true;}				
 			case conductExpIDX			: {
 				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
 				if(val) {
-					simExec.initializeTrials(uiUpdateData.getIntValue(gIDX_ExpLength), uiUpdateData.getIntValue(gIDX_NumExpTrials), true);
+					((Base_DESSimExec) simExec).initializeTrials(uiUpdateData.getIntValue(gIDX_ExpLength), uiUpdateData.getIntValue(gIDX_NumExpTrials), true);
 					AppMgr.setSimIsRunning(true);
 					addPrivBtnToClear(conductExpIDX);
 				} 
-				break;}
+				return true;}
 			case condUAVSweepExpIDX			: {
 				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
 				if(val) {
-					simExec.initializeTrials(uiUpdateData.getIntValue(gIDX_ExpLength), uiUpdateData.getIntValue(gIDX_NumExpTrials), false);
+					((Base_DESSimExec) simExec).initializeTrials(uiUpdateData.getIntValue(gIDX_ExpLength), uiUpdateData.getIntValue(gIDX_NumExpTrials), false);
 					AppMgr.setSimIsRunning(true);
 					addPrivBtnToClear(condUAVSweepExpIDX);
 				} 
-				break;}			
-			default: {
-				if (!handleDesPrivFlags_Indiv(idx, val, oldVal)){
-					msgObj.dispErrorMessage(className, "handlePrivFlags_Indiv", "Unknown/unhandled flag idx :"+idx+" attempting to be set to "+val+" from "+oldVal+". Aborting.");
-				}				
-			}
+				return true;}			
+			default: {return handleDesPrivFlags_Indiv(idx, val, oldVal);}
 		}		
 	}//handlePrivFlags_Indiv
 	
@@ -284,20 +234,23 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	 * @param tmpListObjVals : map of list object possible selection values
 	 */
 	@Override
-	protected final void setupGUIObjsAras(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals) {
-		tmpListObjVals.put(gIDX_LayoutToUse, simLayoutToUseList);	
+	protected final void setupGUIObjsAras_Sim(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals) {
 		tmpListObjVals.put(gIDX_UAVTeamSize, uavTeamSizeList);	
 		
 		double initTeamSizeIDX = 1.0*uavTeamSize - Integer.parseInt(uavTeamSizeList[0]);
 		
-		tmpUIObjArray.put(gIDX_LayoutToUse, uiObjInitAra_List(new double[]{0,simLayoutToUseList.length-1, 1.0f}, 0.0, "Sim Layout To Use", new boolean[]{true}));          				
-		tmpUIObjArray.put(gIDX_FrameTimeScale, uiObjInitAra_Float(new double[]{1.0f,10000.0f,1.0f}, 1.0*frameTimeScale, "Sim Speed Multiplier", new boolean[]{true}));  
 		tmpUIObjArray.put(gIDX_UAVTeamSize, uiObjInitAra_List(new double[]{0,uavTeamSizeList.length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size", new boolean[]{true}));          
 		tmpUIObjArray.put(gIDX_ExpLength, uiObjInitAra_Int(new double[]{1.0f, 1440, 1.0f}, 720.0, "Experiment Duration", new boolean[]{true}));    
 		tmpUIObjArray.put(gIDX_NumExpTrials, uiObjInitAra_Int(new double[]{1.0f, 100, 1.0f}, 1.0, "# Experimental Trials", new boolean[]{true}));  
 		
 		setupGUIObjsAras_Indiv(tmpUIObjArray, tmpListObjVals);
 	}//setupGUIObjsAras
+	/**
+	 * Return the list to use for sim layout
+	 * @return
+	 */
+	protected final String[] getSimLayoutToUseList() {return simLayoutToUseList;}
+	
 	
 	protected abstract void setupGUIObjsAras_Indiv(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals);
 	
@@ -310,27 +263,20 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	 * @param oldVal integer value of old data in UIUpdater
 	 */	
 	@Override
-	protected final void setUI_IntValsCustom(int UIidx, int ival, int oldVal) {
+	protected final boolean setUI_SimIntValsCustom(int UIidx, int ival, int oldVal) {
 		switch(UIidx){		
-			case gIDX_LayoutToUse : {
-				setSimToUse(ival);
-				break;}
 			case gIDX_UAVTeamSize : {
 				uavTeamSize = ival + Integer.parseInt(uavTeamSizeList[0]);//add idx 0 as min size
 				msgObj.dispDebugMessage("DESSimWindow", "setUIWinVals", "UAV team size desired is : " + uavTeamSize);
-				simExec.setSimUAVTeamSize(uavTeamSize);
+				((Base_DESSimExec) simExec).setSimUAVTeamSize(uavTeamSize);
 				//rebuild sim exec and sim environment whenever team size changes
 				simExec.resetSimExec(true);				
-				break;}
-			case gIDX_ExpLength 		: {break;}//determines experiment length				
-			case gIDX_NumExpTrials 		: {break;}//# of trials for experiments
-			default : {
-				if (!setUI_IntDESValsCustom(UIidx, ival, oldVal)) {
-					msgObj.dispWarningMessage(className, "setUI_IntValsCustom", "No int-defined gui object mapped to idx :"+UIidx);
-				}
-			}
+				return true;}
+			case gIDX_ExpLength 		: {return true;}//determines experiment length				
+			case gIDX_NumExpTrials 		: {return true;}//# of trials for experiments
+			default : {	return setUI_IntDESValsCustom(UIidx, ival, oldVal);	}
 		}		
-	}
+	}//setUI_SimIntValsCustom
 	
 	/**
 	 * Handle instance-specific integer ui value setting
@@ -350,17 +296,9 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	 * @param oldVal integer value of old data in UIUpdater
 	 */
 	@Override
-	protected final void setUI_FloatValsCustom(int UIidx, float val, float oldVal) {
+	protected final boolean setUI_SimUIFloatValsCustom(int UIidx, float val, float oldVal) {
 		switch(UIidx){		
-			case gIDX_FrameTimeScale 			:{
-				frameTimeScale = val;
-				simExec.setTimeScale(val);
-				break;}
-
-			default : {
-				if (!setUI_FloatDESValsCustom(UIidx, val, oldVal)) {
-					msgObj.dispWarningMessage(className, "setUI_FloatValsCustom", "No int-defined gui object mapped to idx :"+UIidx);
-				}
+			default : {	return setUI_FloatDESValsCustom(UIidx, val, oldVal);
 			}
 		}		
 	}
@@ -385,40 +323,22 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 	    setCamOrient();	
 	}//setCameraIndiv
 	
-	@Override
 	/**
 	 * modAmtMillis is time passed per frame in milliseconds
 	 */
-	protected boolean simMe(float modAmtMillis) {//run simulation
-		boolean done = simExec.stepSimulation(modAmtMillis);
+	@Override
+	protected boolean simMePostExec_Indiv(float modAmtMillis, boolean done) {//run simulation
 		if(done) {privFlags.setFlag(conductExpIDX, false);}
 		return done;	
-	}//simMe
-	
-	@Override
-	protected final void drawRightSideInfoBarPriv(float modAmtMillis) {
-		ri.pushMatState();
-		//display current simulation variables
-		simExec.drawRightSideInfoBar(modAmtMillis, txtHeightOff);
-		ri.popMatState();		
-	}
+	}//simMe	
 
 	@Override
 	protected final void drawOnScreenStuffPriv(float modAmtMillis) {}
-
-	@Override
-	//animTimeMod is in seconds.
-	protected void drawMe(float animTimeMod) {
-		// draw current sim - TODO move to Base_DispWindow?
-		simExec.drawMe(animTimeMod);
-	}//drawMe	
 		
 	//draw custom 2d constructs below interactive component of menu
 	@Override
-	public void drawCustMenuObjs(float animTimeMod){
-		ri.pushMatState();
-		//all sub menu drawing within push mat call
-		ri.translate(0,custMenuOffset+txtHeightOff);		
+	public void drawSimCustMenuObjs(float animTimeMod){
+		ri.pushMatState();	
 		//draw any custom menu stuff here
 		ri.popMatState();	
 	}//drawCustMenuObjs
@@ -464,7 +384,7 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 					}
 				}
 				break;
-			} // row 0 of menu side bar buttons	
+			} // end row 0 of menu side bar buttons	
 			case 1: {// row 1 of menu side bar buttons
 				switch (btn) {
 					case 0: {resetButtonState();break;}
@@ -478,7 +398,7 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 					}
 				}
 				break;
-			} // row 1 of menu side bar buttons
+			} // end row 1 of menu side bar buttons
 			case 2: {// row 2 of menu side bar buttons
 				switch (btn) {
 					case 0: {resetButtonState();break;}
@@ -486,33 +406,32 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 					case 2: {resetButtonState();break;}
 					case 3: {resetButtonState();break;}
 					default: {
-						msgObj.dispMessage(className, "launchMenuBtnHndlr", "Unknown Functions 3 btn : " + btn,
-								MsgCodes.warning2);
+						msgObj.dispMessage(className, "launchMenuBtnHndlr", "Unknown Functions 3 btn : " + btn,	MsgCodes.warning2);
 						resetButtonState();
 						break;
 					}
 				}
 				break;
-			} // row 2 of menu side bar buttons
+			} // end row 2 of menu side bar buttons
 			case 3: {// row 3 of menu side bar buttons
 				switch (btn) {
 					case 0: {			
-						simExec.TEST_verifyPriorityQueueFunctionality();	
+						((Base_DESSimExec) simExec).TEST_verifyPriorityQueueFunctionality();	
 						resetButtonState();
 						break;
 					}
 					case 1:{//FEL test 
-						simExec.TEST_verifyFEL();		
+						((Base_DESSimExec) simExec).TEST_verifyFEL();		
 						resetButtonState();
 						break;
 					}
 					case 2:{//sim environment tester				
-						simExec.TEST_simulator();	
+						((Base_DESSimExec) simExec).TEST_simulator();	
 						resetButtonState();
 						break;
 					}
 					case 3: {//test tasks
-						simExec.TEST_taskDists();
+						((Base_DESSimExec) simExec).TEST_taskDists();
 						resetButtonState();
 						break;
 					}
@@ -523,7 +442,7 @@ public abstract class Base_DESWindow extends Base_DispWindow {
 					}
 				}
 				break;
-			} // row 3 of menu side bar buttons
+			} // end row 3 of menu side bar buttons
 			default : {
 				msgObj.dispWarningMessage(className,"launchMenuBtnHndlr","Clicked Unknown Btn row : " + funcRow +" | Btn : " + btn);
 				break;

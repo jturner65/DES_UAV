@@ -7,7 +7,7 @@ import base_Math_Objects.vectorObjs.floats.myPointf;
 import discreteEventSimProject.entities.base.Base_Entity;
 import discreteEventSimProject.entities.base.EntityType;
 import discreteEventSimProject.events.DES_Event;
-import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.sim.base.Base_DESSimulator;
 
 /**
  * class containing functionality shared by all resources in UAV DES sim
@@ -48,7 +48,7 @@ public abstract class Base_Resource extends Base_Entity {
 	 */
 	protected final String descr;
 
-	public Base_Resource(DES_Simulator _sim, String _name, myPointf _loc, EntityType[] _types, float _rad, String _descr) {
+	public Base_Resource(Base_DESSimulator _sim, String _name, myPointf _loc, EntityType[] _types, float _rad, String _descr) {
 		super( _sim, _name, _loc, _types);
 		rad=_rad;
 		descr = _descr;

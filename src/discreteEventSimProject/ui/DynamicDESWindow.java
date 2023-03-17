@@ -11,9 +11,9 @@ import discreteEventSimProject.ui.base.Base_DESWindow;
 
 public class DynamicDESWindow extends Base_DESWindow {
 	public final static int 
-		gIDX_tmpIDX = numBaseGUIObjs;
+		gIDX_tmpIDX = numBaseDESGUIObjs;
 	
-	public final int numDynamicPrivFlags = numPrivFlags;
+	public final int numDynamicPrivFlags = numBaseDesPrivFlags;
 	
 	public DynamicDESWindow(IRenderInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
 		super(_p, _AppMgr, _winIdx);
@@ -21,7 +21,7 @@ public class DynamicDESWindow extends Base_DESWindow {
 	}
 
 	@Override
-	protected int initAllPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray) {
+	protected int initSimPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray) {
 		return numDynamicPrivFlags;
 	}
 
@@ -34,7 +34,7 @@ public class DynamicDESWindow extends Base_DESWindow {
 	@Override
 	protected boolean isSimpleSim() {		return false;	}
 	@Override
-	protected void initMe_Indiv() {
+	protected void initMeSim_Indiv() {
 		// TODO Auto-generated method stub
 
 	}

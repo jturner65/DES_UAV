@@ -2,7 +2,7 @@ package discreteEventSimProject.sim.layouts;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.sim.base.Base_DESSimulator;
 import discreteEventSimProject.simExec.base.Base_DESSimExec;
 
 /**
@@ -10,7 +10,7 @@ import discreteEventSimProject.simExec.base.Base_DESSimExec;
  * @author John Turner
  *
  */
-public class ComplexDesSim extends DES_Simulator{
+public class ComplexDesSim extends Base_DESSimulator{
 	
 	protected float simGridDims = 600.0f;
 	/**
@@ -90,6 +90,6 @@ public class ComplexDesSim extends DES_Simulator{
 	}
 
 	@Override
-	protected boolean handlePrivSimFlags_Indiv(int idx, boolean val, boolean oldVal) {	return false;}
+	protected boolean handlePrivDesSimFlags_Indiv(int idx, boolean val, boolean oldVal) {return false;}
 	
 }//complexDesSim

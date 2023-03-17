@@ -3,7 +3,7 @@ package discreteEventSimProject.entities.base;
 import base_Render_Interface.IRenderInterface;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.sim.base.Base_DESSimulator;
 
 /**
  * base class for all entities
@@ -14,7 +14,7 @@ public abstract class Base_Entity {
 	public int ID;//provide unique count-based ID to all entities
 	public static int IDcount = 0;
 	
-	public DES_Simulator sim;
+	public Base_DESSimulator sim;
 	
 	public String name;
 	public myPointf loc;			//initial location of this entity (may change if it moves)
@@ -44,7 +44,7 @@ public abstract class Base_Entity {
 	//types of entity as per Birta ABCMod - is ara because may be compound type
 	public EntityType[] types;		
 	
-	public Base_Entity(DES_Simulator _sim, String _name, myPointf _loc, EntityType[] _types) {
+	public Base_Entity(Base_DESSimulator _sim, String _name, myPointf _loc, EntityType[] _types) {
 		sim=_sim;	name = _name; loc = new myPointf(_loc);types=_types;
 		ID = IDcount++;	
 		timeVals = new long[numTimeVals];

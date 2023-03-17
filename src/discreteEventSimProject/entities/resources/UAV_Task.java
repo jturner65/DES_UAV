@@ -11,7 +11,7 @@ import discreteEventSimProject.entities.consumers.UAV_Team;
 import discreteEventSimProject.entities.resources.base.Base_Resource;
 import discreteEventSimProject.events.DES_EventType;
 import discreteEventSimProject.events.DES_Event;
-import discreteEventSimProject.sim.base.DES_Simulator;
+import discreteEventSimProject.sim.base.Base_DESSimulator;
 import discreteEventSimProject.sim.task.DES_TaskDesc;
 
 /**
@@ -30,7 +30,7 @@ public class UAV_Task extends Base_Resource{
 	 */
 	protected ConcurrentSkipListMap<String, UAV_Team> teamsBeingServed;
 
-	public UAV_Task(DES_Simulator _sim, DES_TaskDesc _td) {
+	public UAV_Task(Base_DESSimulator _sim, DES_TaskDesc _td) {
 		super(_sim, _td.name, _td.taskLoc, (_td.isGroupTask ?  new EntityType[] {EntityType.Resource, EntityType.Group} : new EntityType[] {EntityType.Resource}),_td.rad, "task");
 		td = _td;
 		lblColors = new int[] {150,0,20,255};

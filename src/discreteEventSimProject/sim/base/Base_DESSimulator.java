@@ -26,7 +26,7 @@ import discreteEventSimProject.simExec.base.Base_DESSimExec;
  * Specifics of descrete event simulation specified in child class
  * @author john
  */
-public abstract class DES_Simulator extends Base_UISimulator {
+public abstract class Base_DESSimulator extends Base_UISimulator {
 	/**
 	 * fixed structure holding task resources in this simulation
 	 */
@@ -111,7 +111,7 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	 * @param _exec
 	 * @param _maxNumUAVs
 	 */
-	public DES_Simulator(Base_DESSimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
+	public Base_DESSimulator(Base_DESSimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
 		super(_exec, _name);
 		maxNumUAVs = _maxNumUAVs;
 		simLayoutToUse = _simLayoutToUse;
@@ -442,36 +442,23 @@ public abstract class DES_Simulator extends Base_UISimulator {
 
 
 	@Override
-	protected void handlePrivFlags_Indiv(int idx, boolean val, boolean oldVal) {
+	protected final boolean handlePrivSimFlags_Indiv(int idx, boolean val, boolean oldVal) {
 		switch(idx){
 			//case debugSimIDX 			: {break;}		//idx 0 is debug already anyway		
-			case Base_DESSimExec.drawVisIDX				: {break;}		//draw visualization - if false should ignore all processing/papplet stuff				
-			case Base_DESSimExec.drawBoatsIDX			: {break;}		//either draw boats or draw spheres for consumer UAV team members				
-			case Base_DESSimExec.drawUAVTeamsIDX		: {break;}		//draw UAV teams				
-			case Base_DESSimExec.drawTaskLocsIDX		: {break;}		//draw task locations at end of task lanes
-			case Base_DESSimExec.drawTLanesIDX			: {break;}		//draw task lanes between task locations								
-			case Base_DESSimExec.dispTaskLblsIDX		: {break;}
-			case Base_DESSimExec.dispTLnsLblsIDX		: {break;}
-			case Base_DESSimExec.dispUAVLblsIDX			: {break;}			
-			default :{
-				if(!handlePrivSimFlags_Indiv(idx, val, oldVal)) {
-					msgObj.dispErrorMessage("DES_Simulator("+name+")", "handlePrivFlags_Indiv", "Unknown/unhandled simulation flag idx :"+idx+" attempting to be set to "+val+" from "+oldVal+". Aborting.");
-				}
+			case Base_DESSimExec.drawBoatsIDX			: {return true;}		//either draw boats or draw spheres for consumer UAV team members				
+			case Base_DESSimExec.drawUAVTeamsIDX		: {return true;}		//draw UAV teams				
+			case Base_DESSimExec.drawTaskLocsIDX		: {return true;}		//draw task locations at end of task lanes
+			case Base_DESSimExec.drawTLanesIDX			: {return true;}		//draw task lanes between task locations								
+			case Base_DESSimExec.dispTaskLblsIDX		: {return true;}
+			case Base_DESSimExec.dispTLnsLblsIDX		: {return true;}
+			case Base_DESSimExec.dispUAVLblsIDX			: {return true;}			
+			default :{return handlePrivDesSimFlags_Indiv(idx, val, oldVal);
 			}			
 		}			
 	}//handlePrivFlags_Indiv
 
-	protected abstract boolean handlePrivSimFlags_Indiv(int idx, boolean val, boolean oldVal);
-	
-	
-	/**
-	 * Set this simulator to draw or not draw visualization.
-	 * @param val
-	 */
-	@Override
-	public final void setSimDrawVis(boolean val) {setSimFlag(Base_DESSimExec.drawVisIDX, val);}
-	
-	
+	protected abstract boolean handlePrivDesSimFlags_Indiv(int idx, boolean val, boolean oldVal);
+
 	/**
 	 * Build event to represent initial process - this will be called when FEL is empty
 	 * @param nowTime
@@ -520,16 +507,13 @@ public abstract class DES_Simulator extends Base_UISimulator {
 	public void setUavTeamSize(int _uavTeamSize) { uavTeamSize = _uavTeamSize;}
 	
 	/**
-	 * called in exec.simMe - evolve visualization deltaT should be in milliseconds, change
+	 * called from Base_UiSimulator - evolve visualization
 	 * @param scaledMillisSinceLastFrame
 	 */
 	@Override
-	public final void simStepVisualization(float scaledMillisSinceLastFrame) {
-		if(!getSimFlag(Base_DESSimExec.drawVisIDX)) {			
-			msgObj.dispConsoleWarningMessage("DES_Simulator("+name+")", "simStepVisualization", "Not stepping sim.");
-			return;}
+	protected final void simStepVis_Indiv(float scaledMillisSinceLastFrame) {
 		for(UAV_Team team : teams) {
-			team.moveUAVTeam(scaledMillisSinceLastFrame);
+			team.moveUAVTeam(scaledMillisSinceLastFrame, exec.getTimeStep());
 		}		
 	}//visSimMe
 		
