@@ -507,11 +507,11 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 	public void setUavTeamSize(int _uavTeamSize) { uavTeamSize = _uavTeamSize;}
 	
 	/**
-	 * called from Base_UiSimulator - evolve visualization
+	 * called from Base_UISimExec - evolve visualization
 	 * @param scaledMillisSinceLastFrame
 	 */
 	@Override
-	protected final void simStepVis_Indiv(float scaledMillisSinceLastFrame) {
+	public final void simStepVisualization(float scaledMillisSinceLastFrame) {
 		for(UAV_Team team : teams) {
 			team.moveUAVTeam(scaledMillisSinceLastFrame, exec.getTimeStep());
 		}		

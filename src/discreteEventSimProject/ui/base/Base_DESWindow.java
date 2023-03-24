@@ -96,9 +96,10 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	protected abstract void resetDesFlags_Indiv();
 	@Override
 	public final void setSimToUse(int _type) {
-		boolean _isSimpleSim = isSimpleSim();
 		((Base_DESSimExec) simExec).setSimUAVTeamSize(uavTeamSize);
 		simExec.setSimAndInit(_type, true);
+
+		boolean _isSimpleSim = isSimpleSim();
 		boolean showVis = (ri != null);
 		privFlags.setFlag(drawVisIDX, showVis);		
 		privFlags.setFlag(drawUAVTeamsIDX, showVis);	

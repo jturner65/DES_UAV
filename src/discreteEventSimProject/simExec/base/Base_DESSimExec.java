@@ -28,10 +28,14 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 */
 	private myPriorityQueue<DES_Event> FEL;	
 	
-	//duration of an experiment = if not conducting an experiment, this is ignored, and sim will run forever
-	//in millis
+	/**
+	 * duration of an experiment = if not conducting an experiment, 
+	 * this is ignored, and sim will run forever in millis
+	 */
 	private long expDurMSec;
-	//# of experiments to conduct, to get multiple result sets
+	/**
+	 * # of experiments to conduct, to get multiple result sets
+	 */
 	private int numTrials = 1, curTrial = 1;
 	/**
 	 * size of teams used in trials
@@ -405,7 +409,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * @param modAmtMillis
 	 */
 	@Override
-	public final void drawRightSideInfoBar(float txtHeightOff, float modAmtMillis) {
+	public final void drawRightSideInfoBar(float modAmtMillis, float txtHeightOff) {
 		if(ri != null) {((Base_DESSimulator) currSim).drawResultBar(ri, txtHeightOff);}
 	}
 	
