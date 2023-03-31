@@ -1,5 +1,5 @@
 package discreteEventSimProject.simExec.base;
-import java.io.*;
+
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -7,6 +7,7 @@ import base_UI_Objects.renderedObjs.Boat_RenderObj;
 import base_UI_Objects.renderedObjs.Sphere_RenderObj;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
 import base_UI_Objects.renderedObjs.base.RenderObj_ClrPalette;
+import base_UI_Objects.windowUI.simulation.sim.Base_UISimulator;
 import base_UI_Objects.windowUI.simulation.simExec.Base_UISimExec;
 import base_UI_Objects.windowUI.simulation.ui.Base_UISimWindow;
 import base_Utils_Objects.priorityQueue.myMinQueue;
@@ -27,16 +28,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * Priority queue holding future event list
 	 */
 	private myPriorityQueue<DES_Event> FEL;	
-	
-	/**
-	 * duration of an experiment = if not conducting an experiment, 
-	 * this is ignored, and sim will run forever in millis
-	 */
-	private long expDurMSec;
-	/**
-	 * # of experiments to conduct, to get multiple result sets
-	 */
-	private int numTrials = 1, curTrial = 1;
+
 	/**
 	 * size of teams used in trials
 	 */
@@ -115,7 +107,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 */
 	public Base_DESSimExec(Base_UISimWindow _win, String _name, int _numSims) {
 		super(_win,_name, _numSims);
-		if(ri==null) {msgObj.dispInfoMessage("DES_SimExec","ctor","Null IRenderInterface, assuming console only");}
+		if(ri==null) {msgObj.dispInfoMessage(name,"ctor","Null IRenderInterface, assuming console only");}
 	}//DES_SimExec ctor
 	
 	/**
@@ -218,16 +210,11 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	/**
 	 * initialize the simulation world's important values.
 	 */
+	@Override
 	protected final void initSimWorld_Indiv() {
 		//dfltTeamSizeTrl = ((DES_Simulator) currSim).getUavTeamSize();
 		//set team size back to original value before it would have been changed by sweeping trials
 		((Base_DESSimulator) currSim).setUavTeamSize(dfltTeamSizeTrl);
-		//reset all experiment values when sim world is changed - default behavior is sim will go forever, until stopped
-		expDurMSec = Long.MAX_VALUE;
-		numTrials = Integer.MAX_VALUE;
-		curTrial = 1;
-		execFlags.setConductExp(false);
-		execFlags.setConductSweepExps(false);
 	}//
 	
 	/**
@@ -246,72 +233,41 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	
 	@Override
 	protected void handlePrivFlagsDebugMode_Indiv(boolean val) {
-		msgObj.dispDebugMessage("DES_SimExec", "handlePrivFlagsDebugMode_Indiv", "Start DES_SimExec Debug, called from App-specific Debug flags with value "+ val +".");
+		msgObj.dispDebugMessage(name, "handlePrivFlagsDebugMode_Indiv", "Start DES_SimExec Debug, called from App-specific Debug flags with value "+ val +".");
 		
-		msgObj.dispDebugMessage("DES_SimExec",  "handlePrivFlagsDebugMode_Indiv", "End DES_SimExec Debug, called from App-specific Debug flags with value "+ val +".");
+		msgObj.dispDebugMessage(name,  "handlePrivFlagsDebugMode_Indiv", "End DES_SimExec Debug, called from App-specific Debug flags with value "+ val +".");
 	}//handlePrivFlagsDebugMode_Indiv
 	
-	
-	public void initializeTrials(int _mins, int _numTrials) {initializeTrials(_mins, _numTrials, true);}
 	/**
-	 * set up relevant variables for a set of experimental trials.
+	 * Implementation-specific overrides for trials
 	 * if _useSetTeamSize == false, sweep from teamsize 2 to teamsize 9	
 	 * @param _mins
 	 * @param _numTrials
 	 * @param _useSetTeamSize
 	 */
-	public void initializeTrials(int _mins, int _numTrials, boolean _useSetTeamSize) {
-		expDurMSec = _mins * 60000;
-		numTrials = _numTrials;
-		curTrial = 1;
-		if(!_useSetTeamSize) {
+	@Override
+	protected final void initializeTrials_Indiv(boolean _conductSweepExp) {
+		if(_conductSweepExp) {
 			//save current value of team size for when trials are finished
 			dfltTeamSizeTrl = ((Base_DESSimulator) currSim).getUavTeamSize();
 			uavTeamSizeTrial = minTrlUAVSz;
 			((Base_DESSimulator) currSim).setUavTeamSize(uavTeamSizeTrial);
 		}
-		
-		((Base_DESSimulator) currSim).initTrials(numTrials);
-		startExperiment();
-		execFlags.setConductExp(true);
-		execFlags.setConductSweepExps(!_useSetTeamSize);		
-	}//initializeExperiment	
+	}//initializeExperiment
 	
 	/**
-	 * entry point for experiments, either window based or command line
+	 * Implementation-specific call to end final experimental trial
 	 */
-	private void startExperiment() {
-		//set/reset anything that needs to be addressed when starting a new trial
-		resetSimExec(false); 		
-	}//conductExp	
+	@Override
+	protected final void  endAllTrials_Indiv() {}	
 	
 	/**
-	 * end current experiment, if one is running. 
+	 * Implementation-specific end of trials sweep - evolve sweep variables for next set of trials
 	 */
-	private void endExperiment() {		
-		((Base_DESSimulator) currSim).endExperiment(curTrial, numTrials, expDurMSec);	
-	}//endExperiment
-	
-	/**
-	 * call to end final experiment
-	 */
-	private void endAllTrials() {
-		((Base_DESSimulator) currSim).endTrials(curTrial,numTrials,expDurMSec);	
-		//if finished with all trials, reset values
-		initSimWorld(false);
-	}//endTrials	
-	
-	/**
-	 *  end a set of trials for a specific team size, set to next team size, restart experimenting
-	 */
-	private void endTrialsForTmSz() {
-		((Base_DESSimulator) currSim).endTrials(curTrial,numTrials,expDurMSec);	
+	@Override
+	protected final void endTrialsForSweep_Indiv(){
 		++uavTeamSizeTrial;
-		((Base_DESSimulator) currSim).setUavTeamSize(uavTeamSizeTrial);
-		curTrial = 1;
-		((Base_DESSimulator) currSim).initTrials(numTrials);
-		startExperiment();
-		
+		((Base_DESSimulator) currSim).setUavTeamSize(uavTeamSizeTrial);		
 	}//endTrialsForTmSz
 	
 	/**
@@ -333,12 +289,6 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 */
 	@Override
 	protected final boolean stepUISimulation_Indiv(float modAmtMillis, float scaledMillisSinceLastFrame) {
-		boolean expDoneNow = false;
-		if(execFlags.getConductExp() && (nowTime >= expDurMSec)){//conducting experiments			
-			//make sure to cover last run, up to expDurMSec
-			nowTime = expDurMSec;
-			expDoneNow = true;
-		}		
 		DES_Event ev = FEL.peekFirst();			//peek at first time stamp in FEL
 		if(ev == null) {//no event waiting to process - start a UAV team in the process
 			ev = ((Base_DESSimulator) currSim).buildInitialEvent(nowTime);
@@ -346,7 +296,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		}
 		//pop simulation events from event list that have timestep less than now
 		while ((ev != null) && (ev.getTimestamp() <= nowTime)) {	//"now" has evolved to be later than most recent event, so pop off events from PQ in order
-			msgObj.dispInfoMessage("DES_SimExec","simMe","Frame Time : "+String.format("%08d", (int)nowTime)+" Frame Size : " +  ((int)frameTimeScale) + " | Current Event TS : " + ev.getTimestamp() + "| Ev Name : " + ev.name);
+			msgObj.dispInfoMessage(name,"simMe","Frame Time : "+String.format("%08d", (int)nowTime)+" Frame Size : " +  ((int)frameTimeScale) + " | Current Event TS : " + ev.getTimestamp() + "| Ev Name : " + ev.name);
 			//ev == null means no events on FEL
 			ev = FEL.removeFirst();
 			//eventsProcced++;
@@ -355,35 +305,26 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 			//peek at next event to check if it should be executed now
 			ev = FEL.peekFirst();
 		}	
-		if(expDoneNow) {//we're done
-			String nowDispTime = String.format("%08d", (long)nowTime);
-			long expDurMin= (expDurMSec/60000), expDirHour = expDurMin/60;
-			//either done with all trials or ready to move on to next trial
-			if(curTrial >= numTrials) {//performed enough trials to check if done				
-				if (!execFlags.getConductSweepExps()) {//done with all trials, and not sweeping
-					msgObj.dispInfoMessage("DES_SimExec","simMe","NowTime : "+nowDispTime+ " | Finished with all " +numTrials +" trials of experiments of duration : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
-					endAllTrials();
-					return true;//if done with experimental trials then stop sim
-				} else {//finished with set of trials for current uav team size
-					if(uavTeamSizeTrial >= maxTrlUAVSz) {//team size == max team size, then end and exit
-						msgObj.dispInfoMessage("DES_SimExec","simMe","NowTime : "+nowDispTime+ " | Finished with all " +numTrials +" trials for all team sizes, of experiments of duration : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
-						endAllTrials();
-						return true;//if done with experimental trials then stop sim						
-					} else {//save current trials, increment team size, restart set of trials with new team size
-						msgObj.dispInfoMessage("DES_SimExec","simMe","NowTime : "+nowDispTime+ " | Finished with all " +numTrials +" trials for team size " +uavTeamSizeTrial +", each of duration  : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
-						endTrialsForTmSz();
-						return false;
-					}
-				}
-			}
-			//otherwise move on to next trial - reset environment and go again 
-			msgObj.dispInfoMessage("DES_SimExec","simMe","NowTime : "+nowDispTime+ " | Finished with trial " + curTrial + " of " +numTrials +" total trials of experiments, each of duration  : " + expDurMSec +" ms -> " +expDurMin+ " min -> " + expDirHour + " hours");	
-			endExperiment();			
-			++curTrial;		
-			startExperiment();
-		}	
+		//This simulation will never stop unless stopped or unless experimental conditions are met
 		return false;
 	}//stepSimulation
+	
+	
+	/**
+	 * Variable responsible for sweep experiment is finished
+	 * @return
+	 */
+	protected final boolean sweepVarIsFinished() {
+		return uavTeamSizeTrial >= maxTrlUAVSz;
+	}
+	
+	/**
+	 * Message to display when sweeping experiment has finished all trials for specific sweep variable setting
+	 * @return
+	 */
+	protected final String getSweepExpMessage() {
+		return "team size " +uavTeamSizeTrial;
+	}
 	
 	/**
 	 * Get current render templates (idx 0) and sphere render templates (idx 1)
@@ -400,19 +341,10 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	public final void drawMe(float animTimeMod) {
 		if(!getDoDrawViz()) {return;}//not drawing, return
 		//call simulator to render sim world
-		((Base_DESSimulator) currSim).drawMe(ri,animTimeMod* frameTimeScale, win);
+		((Base_UISimulator) currSim).drawMe(ri,animTimeMod* frameTimeScale, win);
 	}//drawMe	
 	
-	/**
-	 * Draw the right side info bar for the currently executing simulator
-	 * @param txtHeightOff
-	 * @param modAmtMillis
-	 */
-	@Override
-	public final void drawRightSideInfoBar(float modAmtMillis, float txtHeightOff) {
-		if(ri != null) {((Base_DESSimulator) currSim).drawResultBar(ri, txtHeightOff);}
-	}
-	
+
 	/**
 	 * split up newline-parsed strings into an array of strings, for display on screen
 	 * @param str
@@ -426,63 +358,23 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	@Override
 	public final int getNumSimFlags() { return numDesSimFlags;}
 
-	
-	///////////////////
-	/// proc report output
-	
-	/**
-	 * save string array of data to file filename
-	 * @param fileName
-	 * @param data
-	 */
-	public void saveReport(String fileName, String[] data) {
-		//every string in data array needs to have appropriate CRLF appended
-		  BufferedWriter outputWriter = null;
-		  try {
-			  outputWriter = new BufferedWriter(new FileWriter(fileName));
-			  for (int i = 0; i < data.length; i++) {
-			    // Maybe:
-			    outputWriter.write(data[i]);
-			    outputWriter.newLine();
-			  }
-			  outputWriter.flush();  
-			  outputWriter.close(); 		
-		  } catch (Exception e) {
-			  msgObj.dispErrorMessage("DES_SimExec", "saveReport","Error saving report : "+ fileName+":\n"+e.getMessage());			  
-		  } 		
-	}//saveReport
-	
-	public boolean createRptDir(String dName) {
-		File dir = new File(dName);	
-		if (!dir.exists()) {
-			msgObj.dispInfoMessage("DES_SimExec", "createRptDir","Create directory: " + dName);	
-		    try{dir.mkdir();	    	return true;	    } 
-		    catch(SecurityException se){
-		    	 msgObj.dispErrorMessage("DES_SimExec","createRptDir", "Security Exception : Failed to create directory : " + dName+":\n"+se.getMessage());
-		    	return false;	    }  
-		    catch(Exception e){
-		    	 msgObj.dispErrorMessage("DES_SimExec","createRptDir", "Failed to create directory : " + dName+":\n"+e.getMessage());
-		    	return false;	    }  
-		}
-		return true;
-	}//__createDir
-
-
 	///////////////
 	/////DEBUG AND TESTING
 	/**
 	 * test the distributions of the diminishing returns functionality for the task time to complete
 	 */
 	public void TEST_taskDists() {
-		msgObj.dispInfoMessage("DES_SimExec","TEST_taskDists","\nTesting Task Diminishing returns functions.  Results will be saved to file.");
+		msgObj.dispInfoMessage(name,"TEST_taskDists","\nTesting Task Diminishing returns functions.  Results will be saved to file.");
 		String saveRes = ((Base_DESSimulator) currSim).testTaskTimeVals();
-		msgObj.dispInfoMessage("DES_SimExec","TEST_taskDists","Test of Task Diminishing returns functions Complete.  Results saved to "+ saveRes);
+		msgObj.dispInfoMessage(name,"TEST_taskDists","Test of Task Diminishing returns functions Complete.  Results saved to "+ saveRes);
 	}	
-	
+	/**
+	 * 
+	 */
 	public void TEST_simulator() {
 		String res = "\nSimulator Current State : \n";
 		res += currSim.toString();
-		msgObj.dispInfoMessage("DES_SimExec","TEST_simulator", res);
+		msgObj.dispInfoMessage(name,"TEST_simulator", res);
 	}
 	
 	/**
@@ -490,23 +382,26 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 */
 	public void TEST_verifyFEL() {
 		String res = TEST_verifyFELHeap();
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyFEL","\nFEL Test 1 : Verifying FEL integrity and state.");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyFEL","\t"+res);
+		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\nFEL Test 1 : Verifying FEL integrity and state.");
+		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\t"+res);
 		if(null==FEL) {return;}
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyFEL","\nFEL Test 2 : Showing Raw contents of FEL heap : ");
+		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\nFEL Test 2 : Showing Raw contents of FEL heap : ");
 		@SuppressWarnings("rawtypes")
 		Comparable[] heap = FEL.getHeap();
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyFEL","heap idx: 0 elem is always null/unused ");
+		msgObj.dispInfoMessage(name,"TEST_verifyFEL","heap idx: 0 elem is always null/unused ");
 		for(int i=1;i<heap.length;++i) {
-			if(null == heap[i]) {msgObj.dispInfoMessage("DES_SimExec","TEST_verifyFEL","heap idx: " + i +" elem is null/unused ");}
-			else {msgObj.dispInfoMessage("DES_SimExec","TEST_verifyFEL","heap idx: " + i +" elem : " +((DES_Event)heap[i]).toStrBrf());}
+			if(null == heap[i]) {msgObj.dispInfoMessage(name,"TEST_verifyFEL","heap idx: " + i +" elem is null/unused ");}
+			else {msgObj.dispInfoMessage(name,"TEST_verifyFEL","heap idx: " + i +" elem : " +((DES_Event)heap[i]).toStrBrf());}
 		}
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyFEL","\nFEL Test 3 : Verifying FEL Contents and access.");
+		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\nFEL Test 3 : Verifying FEL Contents and access.");
 		TEST_PQShowElemsReAdd(FEL, "FEL");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyFEL","\nFEL Test 4 : Heap Sort of FEL (elements in descending order)."); 	
+		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\nFEL Test 4 : Heap Sort of FEL (elements in descending order)."); 	
 		TEST_heapSortAndShowContents(FEL, "FEL");		
 	}
-	
+	/**
+	 * 
+	 * @return
+	 */
 	private String TEST_verifyFELHeap() {
 		//first determine FEL's current state
 		String res = "";
@@ -532,38 +427,42 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		
 		//build array of test data
 		DES_Event[] tmpAra = TEST_buildTestAra(numTestElems);
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","\nPQ Test 1 : adding random elements, removing first element in order\n");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","\nPQ Test 1 : adding random elements, removing first element in order\n");
 		//add elements in tmpAra to tmpPQ
 		TEST_buildPQWithAra(tmpPQ, tmpAra, "tmpPQ", true);
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","\nNow removing top elements :");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","\nNow removing top elements :");
 		TEST_dequeAndShowElems(tmpPQ,  "\t");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","Test 2 done : After removing elements in order, tmpPQ has : " + tmpPQ.size() + " Elements.\n");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","\nPQ Test 2 : adding random elements, removing element in order of addition (randomly accessed in PQ)\n");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","Now testing remove elements in added order (not dequeing) -- i.e. removing random elements.");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","Test 2 done : After removing elements in order, tmpPQ has : " + tmpPQ.size() + " Elements.\n");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","\nPQ Test 2 : adding random elements, removing element in order of addition (randomly accessed in PQ)\n");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","Now testing remove elements in added order (not dequeing) -- i.e. removing random elements.");
 		TEST_buildPQWithAra(tmpPQ, tmpAra, "tmpPQ", true);
 		//remove requested element, then remove and display remaining elements in top-first order
 		for (int i=0;i<tmpAra.length;++i) {
-			msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","\tRemove Elem "+tmpAra[i]+" in tmpPQ of Size " +tmpPQ.size() + " : returned : " + tmpPQ.removeElem(tmpAra[i])+" : remaining elements :" );
+			msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","\tRemove Elem "+tmpAra[i]+" in tmpPQ of Size " +tmpPQ.size() + " : returned : " + tmpPQ.removeElem(tmpAra[i])+" : remaining elements :" );
 			TEST_dequeAndShowElems(tmpPQ,  "\t\t");
-			msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","");
+			msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","");
 			//re-add into tmpPQ
 			for(int j=(i+1);j<tmpAra.length;++j) {		tmpPQ.insert(tmpAra[j]);	}
 		}
 		
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","Test 2 done : Finished removing random elements.  Heap now has : " + tmpPQ.size() + " elements.\n");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","\nPQ Test 3 : adding random elements, sorting via HeapSort without corrupting pq\n");
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","Rebuilding pq");		
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","Test 2 done : Finished removing random elements.  Heap now has : " + tmpPQ.size() + " elements.\n");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","\nPQ Test 3 : adding random elements, sorting via HeapSort without corrupting pq\n");
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","Rebuilding pq");		
 		TEST_buildPQWithAra(tmpPQ, tmpAra, "tmpPQ",  true);
 		//test retrieving sorted list directly from heap - be sure to maintain heapness
 		TEST_heapSortAndShowContents(tmpPQ, "tmpPQ");		
-		msgObj.dispInfoMessage("DES_SimExec","TEST_verifyPriorityQueueFunctionality","Test 3 done : Finished testing heap sort.  Heap now has : " + tmpPQ.size() + " elements.\n");		
+		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","Test 3 done : Finished testing heap sort.  Heap now has : " + tmpPQ.size() + " elements.\n");		
 		
 	}//verifyQueue
-	//build array of test data
+	/**
+	 * build array of test data
+	 * @param numTestElems
+	 * @return
+	 */
 	private DES_Event[] TEST_buildTestAra(int numTestElems){
 		DES_Event[] tmpAra = new DES_Event[numTestElems];
 		for (int i =0;i<numTestElems;++i) {
@@ -571,45 +470,64 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		}
 		return tmpAra;
 	}
-	//add test data to passed PQ
+	/**
+	 * add test data to passed PQ
+	 * @param tmpPQ
+	 * @param tmpAra
+	 * @param pqName
+	 * @param showMsgs
+	 */
 	private void TEST_buildPQWithAra(myPriorityQueue<DES_Event> tmpPQ, DES_Event[] tmpAra, String pqName, boolean showMsgs) {
-		if(showMsgs) {msgObj.dispInfoMessage("DES_SimExec","TEST_buildPQWithAra","Before loading "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}
+		if(showMsgs) {msgObj.dispInfoMessage(name,"TEST_buildPQWithAra","Before loading "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}
 		for (int i =0;i<tmpAra.length;++i) {
 			tmpPQ.insert(tmpAra[i]);
-			if(showMsgs) {msgObj.dispInfoMessage("DES_SimExec","TEST_buildPQWithAra","\tAdding Elem # " + i + " : "+ tmpAra[i] + " to pq :"+pqName);}
+			if(showMsgs) {msgObj.dispInfoMessage(name,"TEST_buildPQWithAra","\tAdding Elem # " + i + " : "+ tmpAra[i] + " to pq :"+pqName);}
 		}
-		if(showMsgs) {msgObj.dispInfoMessage("DES_SimExec","TEST_buildPQWithAra","\nAfter adding "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}		
+		if(showMsgs) {msgObj.dispInfoMessage(name,"TEST_buildPQWithAra","\nAfter adding "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}		
 	}//TEST_buildPQWithAra
-	
+	/**
+	 * 
+	 * @param tmpPQ
+	 * @param lPfx
+	 */
 	private void TEST_PQShowElemsReAdd(myPriorityQueue<DES_Event> tmpPQ, String lPfx) {
 		DES_Event[] tmpAra = new DES_Event[tmpPQ.get_numElems()];	
 		int idx=0;
 		while (!tmpPQ.isEmpty()){
 			tmpAra[idx] = tmpPQ.removeFirst();
-			msgObj.dispInfoMessage("DES_SimExec","TEST_PQShowElemsReAdd","Elem # "+idx+" in " +lPfx + " of Size " +tmpAra.length + " : " + tmpAra[idx].toStrBrf() );
+			msgObj.dispInfoMessage(name,"TEST_PQShowElemsReAdd","Elem # "+idx+" in " +lPfx + " of Size " +tmpAra.length + " : " + tmpAra[idx].toStrBrf() );
 			idx++;
 		}
 		for (int i=0;i<idx;++i) {
 			tmpPQ.insert(tmpAra[i]);
 		}
 	}//TEST_dequeAndShowElems
-	
+	/**
+	 * 
+	 * @param tmpPQ
+	 * @param lPfx
+	 */
 	private void TEST_dequeAndShowElems(myPriorityQueue<DES_Event> tmpPQ, String lPfx) {
 		int num = tmpPQ.get_numElems();
 		for (int i=0;i<num;++i) {
-			msgObj.dispInfoMessage("DES_SimExec","TEST_dequeAndShowElems",lPfx + "Elem # "+i+" in tmpPQ of Size " +tmpPQ.size() + " : " + tmpPQ.removeFirst() );
+			msgObj.dispInfoMessage(name,"TEST_dequeAndShowElems",lPfx + "Elem # "+i+" in tmpPQ of Size " +tmpPQ.size() + " : " + tmpPQ.removeFirst() );
 		}
 	}//TEST_dequeAndShowElems
+	/**
+	 * 
+	 * @param tmpPQ
+	 * @param pqName
+	 */
 	private void TEST_heapSortAndShowContents(myPriorityQueue<DES_Event> tmpPQ, String pqName) {
 		@SuppressWarnings("rawtypes")
 		Comparable[] tmpSortedAra = tmpPQ.getSortedElems();
 		if(tmpSortedAra.length == 0) {
-			msgObj.dispInfoMessage("DES_SimExec","TEST_heapSortAndShowContents","No Elements in "+pqName+" currently " );
+			msgObj.dispInfoMessage(name,"TEST_heapSortAndShowContents","No Elements in "+pqName+" currently " );
 			return;
 		}
-		msgObj.dispInfoMessage("DES_SimExec","TEST_heapSortAndShowContents","\nNow Displaying elements in "+pqName+" in heap sort order : ");
+		msgObj.dispInfoMessage(name,"TEST_heapSortAndShowContents","\nNow Displaying elements in "+pqName+" in heap sort order : ");
 		for(int i=0;i<tmpSortedAra.length;++i) {
-			msgObj.dispInfoMessage("DES_SimExec","TEST_heapSortAndShowContents","\tElem # " + i + " in sorted results : " + ((DES_Event)tmpSortedAra[i]).toStrBrf() );
+			msgObj.dispInfoMessage(name,"TEST_heapSortAndShowContents","\tElem # " + i + " in sorted results : " + ((DES_Event)tmpSortedAra[i]).toStrBrf() );
 		}
 	}//TEST_heapSortAndShowContents
 

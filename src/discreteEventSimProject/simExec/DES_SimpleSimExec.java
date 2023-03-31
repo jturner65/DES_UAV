@@ -18,8 +18,8 @@ public class DES_SimpleSimExec extends Base_DESSimExec {
 	 * @return
 	 */
 	@Override
-	protected final Base_Simulator buildSimOfType(String name, int _type) {
-		return new SimpleDesSim(this, name, 100, _type);
+	protected final Base_Simulator buildSimOfType(String _simName, int _type) {
+		return new SimpleDesSim(this, _simName, 100, _type);
 	}
 
 }//class DES_SimpleSimExec

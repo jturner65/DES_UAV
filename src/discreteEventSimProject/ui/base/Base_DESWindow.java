@@ -21,14 +21,12 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	//ui vals
 
 	public final static int
-		gIDX_UAVTeamSize			= numBaseSimGUIObjs, 
-		gIDX_ExpLength				= numBaseSimGUIObjs+1,			//length of time for experiment, in minutes
-		gIDX_NumExpTrials			= numBaseSimGUIObjs+2;
+		gIDX_UAVTeamSize			= numBaseSimGUIObjs; 
 		
 	/**
 	 * Number of gui objects defined in base window. Subsequent IDXs in child class should start here
 	 */
-	protected static final int numBaseDESGUIObjs = numBaseSimGUIObjs+3;		
+	protected static final int numBaseDESGUIObjs = numBaseSimGUIObjs+1;		
 
 	/**
 	 * Holds currently specified uavTeamSize for this window
@@ -58,14 +56,12 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 			drawTLanesIDX		= numBaseSimPrivFlags +4,						//yes/no draw transit lanes and queues
 			dispTaskLblsIDX		= numBaseSimPrivFlags +5,						//show labels over tasks...
 			dispTLnsLblsIDX		= numBaseSimPrivFlags +6,						//over transit lanes...
-			dispUAVLblsIDX		= numBaseSimPrivFlags +7,						//and/or over teams			
-			conductExpIDX		= numBaseSimPrivFlags +8,						//conduct experiment with current settings
-			condUAVSweepExpIDX  = numBaseSimPrivFlags +9;						//sweep through UAV Team Sizes
+			dispUAVLblsIDX		= numBaseSimPrivFlags +7;						//and/or over teams			
 
 	/**
 	 * Number of boolean flags defined in base window. Subsequent IDXs of boolean flags in child class should start here
 	 */
-	public static final int numBaseDesPrivFlags = numBaseSimPrivFlags +10;
+	public static final int numBaseDesPrivFlags = numBaseSimPrivFlags +8;
 	
 	public Base_DESWindow(IRenderInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
 		super(_p, _AppMgr, _winIdx);
@@ -83,10 +79,11 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 		tmpBtnNamesArray.add(new Object[] {"Showing TLane Lbls", "Show TLane Lbls", dispTLnsLblsIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Showing Team Lbls", "Show Team Lbls",  dispUAVLblsIDX});  
 		tmpBtnNamesArray.add(new Object[] {"Drawing UAV Boats", "Drawing UAV Spheres",   drawBoatsIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Experimenting", "Run Experiment", conductExpIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Team SweepSize Experiment", "Run Team Sweep Experiment", condUAVSweepExpIDX});  
 		return initSimPrivBtns_Indiv(tmpBtnNamesArray);
 	}//initAllPrivBtns	
+	
+	@Override 
+	protected final String getSweepFieldName() {return "Team Size";}
 	
 	protected abstract int initSimPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray);
 	
@@ -191,23 +188,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 			case dispTLnsLblsIDX		: {				
 				simExec.setSimFlag(Base_DESSimExec.dispTLnsLblsIDX, val);		return true;}
 			case dispUAVLblsIDX			: {				
-				simExec.setSimFlag(Base_DESSimExec.dispUAVLblsIDX, val);		return true;}				
-			case conductExpIDX			: {
-				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
-				if(val) {
-					((Base_DESSimExec) simExec).initializeTrials(uiUpdateData.getIntValue(gIDX_ExpLength), uiUpdateData.getIntValue(gIDX_NumExpTrials), true);
-					AppMgr.setSimIsRunning(true);
-					addPrivBtnToClear(conductExpIDX);
-				} 
-				return true;}
-			case condUAVSweepExpIDX			: {
-				//if wanting to conduct exp need to stop current experimet, reset environment, and then launch experiment
-				if(val) {
-					((Base_DESSimExec) simExec).initializeTrials(uiUpdateData.getIntValue(gIDX_ExpLength), uiUpdateData.getIntValue(gIDX_NumExpTrials), false);
-					AppMgr.setSimIsRunning(true);
-					addPrivBtnToClear(condUAVSweepExpIDX);
-				} 
-				return true;}			
+				simExec.setSimFlag(Base_DESSimExec.dispUAVLblsIDX, val);		return true;}			
 			default: {return handleDesPrivFlags_Indiv(idx, val, oldVal);}
 		}		
 	}//handlePrivFlags_Indiv
@@ -241,8 +222,6 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 		double initTeamSizeIDX = 1.0*uavTeamSize - Integer.parseInt(uavTeamSizeList[0]);
 		
 		tmpUIObjArray.put(gIDX_UAVTeamSize, uiObjInitAra_List(new double[]{0,uavTeamSizeList.length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size", new boolean[]{true}));          
-		tmpUIObjArray.put(gIDX_ExpLength, uiObjInitAra_Int(new double[]{1.0f, 1440, 1.0f}, 720.0, "Experiment Duration", new boolean[]{true}));    
-		tmpUIObjArray.put(gIDX_NumExpTrials, uiObjInitAra_Int(new double[]{1.0f, 100, 1.0f}, 1.0, "# Experimental Trials", new boolean[]{true}));  
 		
 		setupGUIObjsAras_Indiv(tmpUIObjArray, tmpListObjVals);
 	}//setupGUIObjsAras
@@ -273,8 +252,6 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 				//rebuild sim exec and sim environment whenever team size changes
 				simExec.resetSimExec(true);				
 				return true;}
-			case gIDX_ExpLength 		: {return true;}//determines experiment length				
-			case gIDX_NumExpTrials 		: {return true;}//# of trials for experiments
 			default : {	return setUI_IntDESValsCustom(UIidx, ival, oldVal);	}
 		}		
 	}//setUI_SimIntValsCustom
@@ -329,7 +306,6 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	 */
 	@Override
 	protected boolean simMePostExec_Indiv(float modAmtMillis, boolean done) {//run simulation
-		if(done) {privFlags.setFlag(conductExpIDX, false);}
 		return done;	
 	}//simMe	
 

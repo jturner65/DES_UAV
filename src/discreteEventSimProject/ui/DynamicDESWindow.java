@@ -63,11 +63,15 @@ public class DynamicDESWindow extends Base_DESWindow {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	/**
+	 * Build the executive managing the simulations owned by this window
+	 * @param _simName base name of simulation the sim exec manages
+	 * @param _numSimulations
+	 * @return
+	 */
 	@Override
-	protected Base_UISimExec buildSimulationExecutive(String _name, int _maxSimLayouts) {
-		// TODO Auto-generated method stub
-		return new DES_ComplexSimExec(this, _name, _maxSimLayouts);
+	protected Base_UISimExec buildSimulationExecutive(String _simName, int _numSimulations) {
+		return new DES_ComplexSimExec(this, _simName, _numSimulations);
 	}
 
-}
+}//class DynamicDESWindow

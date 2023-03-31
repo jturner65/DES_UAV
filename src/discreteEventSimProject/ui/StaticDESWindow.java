@@ -76,9 +76,15 @@ public class StaticDESWindow extends Base_DESWindow {
 	@Override
 	protected boolean setUI_FloatDESValsCustom(int UIidx, float val, float oldVal) {return false;}
 
+	/**
+	 * Build the executive managing the simulations owned by this window
+	 * @param _simName base name of simulation the sim exec manages
+	 * @param _numSimulations
+	 * @return
+	 */
 	@Override
-	protected Base_UISimExec buildSimulationExecutive(String _name, int _numSimulations) {
-		return new DES_SimpleSimExec(this, _name, _numSimulations);
+	protected Base_UISimExec buildSimulationExecutive(String _simName, int _numSimulations) {
+		return new DES_SimpleSimExec(this, _simName, _numSimulations);
 	}
 	
 }//class StaticDESWindow

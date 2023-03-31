@@ -1,7 +1,6 @@
 package discreteEventSimProject.sim.base;
 
 import java.io.File;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -79,20 +78,7 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 	
 	////////////////////////
 	// reporting stuff
-	/**
-	 * string representation of date for report data
-	 */
-	private String rptDateNowPrfx;
-	private String rptExpDir;
-	/**
-	 * main directory to put experiments
-	 */
-	private String baseDirStr;
-	/**
-	 * Which sim layout to build
-	 */
-	protected int simLayoutToUse = 0;
-	
+
 	/**
 	 * arrays to hold each trial's results for each type of metric.
 	 * At end of experiment, save total results as avgs of specific results in these arrays
@@ -112,25 +98,14 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 	 * @param _maxNumUAVs
 	 */
 	public Base_DESSimulator(Base_DESSimExec _exec, String _name, int _maxNumUAVs, int _simLayoutToUse) {
-		super(_exec, _name);
+		super(_exec, _name, _simLayoutToUse);
 		maxNumUAVs = _maxNumUAVs;
-		simLayoutToUse = _simLayoutToUse;
 	}//ctor
 	
 	/**
 	 * called 1 time for all simulations from concrete class constructor
 	 */
 	protected final void initSim_Indiv() {
-		Instant now = Instant.now();
-		rptDateNowPrfx = "ExpDate_"+now.toString()+"_";
-		rptDateNowPrfx=rptDateNowPrfx.replace(":", "-");
-		rptDateNowPrfx=rptDateNowPrfx.replace(".", "-");
-		rptDateNowPrfx += name+"_";
-		//root directory to put experimental results = add to all derived exp res directories
-		String initBaseDir = setAndCreateRptExpDir(exec.getCWD(),"experiments");		
-		baseDirStr = setAndCreateRptExpDir(initBaseDir, "Base_experiments_"+name);
-		
-		
 		initSim_Concrete();
 		isGrpTask = getIsGroupAra();
 	}//initOnce
@@ -561,31 +536,24 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 		return maxIDX;
 	}
 	/**
-	 * draw result information on right sidebar
+	 * draw sim-specific result information on right sidebar, if gui-based sim
 	 * @param ri
-	 * @param yOff
+	 * @param yVals float array holding : 
+	 * 		idx 0 : start y value for text
+	 * 		idx 1 : per-line y offset for grouped text
+	 * 		idx 2 : per-line y offset for title-to-group text (small space)
+	 * 		idx 3 : per-line y offset for text that is not grouped (slightly larger)
+	 * @return next yValue to draw text at
 	 */
 	@Override
-	public final void drawResultBar(IRenderInterface ri, float yOff) {
-		yOff-=4;
-		float sbrMult = 1.2f, lbrMult = 1.5f;//offsets multiplier for barriers between contextual ui elements
+	protected final float drawResultBar_Indiv(IRenderInterface ri, float[] yVals) {
 		ri.pushMatState();
-			long curTime = (Math.round(exec.getNowTime()/1000.0f));
-			float yVal = 0;
-			ri.setFill(255,255,0,255);	
-			ri.showText("SIMULATION OUTPUT", 0, yVal);yVal += sbrMult * yOff;
-			ri.setFill(255,255,255,255);
-			ri.showText("Sim Time : " + String.format("%08d", curTime) + " secs ", 0, yVal);//yVal += yOff;
-			ri.showText("Sim Clock Time : " + String.format("%04d", curTime/3600) + " : " + String.format("%02d", (curTime/60)%60 )+ " : " + String.format("%02d", (curTime%60)), 150, yVal);
-//			yVal += yOff;
-//			pa.showText("Wall Clock Time : " + String.format("%04d", curTime/3600) + " : " + String.format("%02d", (curTime/60)%60 )+ " : " + String.format("%02d", (curTime%60)), 0, yVal);
-			yVal += lbrMult *yOff;
 			//TEAM RES - summary
 			int tmSize = teams.size();
 			ri.setFill(255,155,20,255);
-			ri.showText("Teams Summary : (for "+ String.format("%2d", tmSize) + " teams = "+String.format("%3d", (tmSize * uavTeamSize)) + " UAVs out of " + maxNumUAVs + " ttl)" , 0, yVal);yVal += yOff;
+			ri.showText("Teams Summary : (for "+ String.format("%2d", tmSize) + " teams = "+String.format("%3d", (tmSize * uavTeamSize)) + " UAVs out of " + maxNumUAVs + " ttl)" , 0, yVals[0]);yVals[0] += yVals[1];
 			ri.setFill(255,255,255,255);
-			ri.showText("Team size : "+uavTeamSize , 0, yVal);yVal += yOff;
+			ri.showText("Team size : "+uavTeamSize , 0, yVals[0]);yVals[0] += yVals[1];
 			//
 			long ttlTask=0, ttlTravel=0, ttlQueue=0, ttlRun=0,ttlProcsDone=0;
 			for(int i=0;i<tmSize;++i) {
@@ -596,33 +564,34 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 				ttlRun += tm.getTTLRunTime()+tm.getCurTimeInProc();
 				ttlProcsDone += tm.getTTLNumTeamsProc();
 			}//	
-			ri.showText("Procs Done : ", 0, yVal);ri.showText(""+String.format("%07d", ttlProcsDone), 90, yVal);yVal += yOff;
-			ri.showText("TTL Work time : ", 0, yVal);ri.showText(""+String.format("%07d", ttlTask/1000) + " sec", 90, yVal);yVal += yOff;
-			ri.showText("TTL Travel time : ", 0, yVal);ri.showText(""+String.format("%07d",ttlTravel/1000) + " sec",90, yVal);yVal += yOff;
-			ri.showText("TTL Queue time : ", 0, yVal);ri.showText(""+String.format("%07d", ttlQueue/1000) + " sec", 90, yVal);yVal += yOff;
-			ri.showText("TTL Uptime : ", 0, yVal);ri.showText(""+String.format("%07d", ttlRun/1000) + " sec", 90, yVal);yVal += lbrMult* yOff;
+			ri.showText("Procs Done : ", 0, yVals[0]);ri.showText(""+String.format("%07d", ttlProcsDone), 90, yVals[0]);yVals[0] += yVals[1];
+			ri.showText("TTL Work time : ", 0, yVals[0]);ri.showText(""+String.format("%07d", ttlTask/1000) + " sec", 90, yVals[0]);yVals[0] += yVals[1];
+			ri.showText("TTL Travel time : ", 0, yVals[0]);ri.showText(""+String.format("%07d",ttlTravel/1000) + " sec",90, yVals[0]);yVals[0] += yVals[1];
+			ri.showText("TTL Queue time : ", 0, yVals[0]);ri.showText(""+String.format("%07d", ttlQueue/1000) + " sec", 90, yVals[0]);yVals[0] += yVals[1];
+			ri.showText("TTL Uptime : ", 0, yVals[0]);ri.showText(""+String.format("%07d", ttlRun/1000) + " sec", 90, yVals[0]);yVals[0] += yVals[3];
 			
 			//task res
 			ri.setFill(255,88,255,255);
-			ri.showText("Task Totals : (" + tasks.length+ " tasks) (red is max time so far)", 0, yVal);yVal +=  sbrMult *yOff;
+			ri.showText("Task Totals : (" + tasks.length+ " tasks) (red is max time so far)", 0, yVals[0]);yVals[0] +=  yVals[2];
 			ri.setFill(255,255,255,255);
 
 			int hLiteIDX = findMaxIDX(tasks,tasks.length-2);
 			for(int i=0;i<tasks.length;++i) {
-				yVal = tasks[i].drawResourceDescr(ri, hLiteIDX, i, 102, yVal, yOff) + sbrMult *yOff;
+				yVals[0] = tasks[i].drawResourceDescr(ri, hLiteIDX, i, 102, yVals[0], yVals[1]) + yVals[2];
 			}//for every task
-			yVal += (lbrMult - sbrMult) *yOff;//offset by same amount as other groupings
+			yVals[0] += (yVals[3] - yVals[2]);//offset by same amount as other groupings
 			
 			//transit lane res
 			ri.setFill(255,150,99,255);
-			ri.showText("Lane Totals : (" + transitLanes.length+ " Lanes) (red is max Q time (bottleneck))", 0, yVal);yVal += sbrMult *yOff;
+			ri.showText("Lane Totals : (" + transitLanes.length+ " Lanes) (red is max Q time (bottleneck))", 0, yVals[0]);yVals[0] += yVals[2];
 			ri.setFill(255,255,255,255);
 			
 			hLiteIDX = findMaxIDX(transitLanes, transitLanes.length);		
 			for(int i=0;i<transitLanes.length;++i) {				
-				yVal = transitLanes[i].drawResourceDescr(ri, hLiteIDX, i, 152, yVal, yOff) + sbrMult *yOff;
+				yVals[0] = transitLanes[i].drawResourceDescr(ri, hLiteIDX, i, 152, yVals[0], yVals[1]) + yVals[2];
 			}//for every tl		
-		ri.popMatState();	
+		ri.popMatState();
+		return yVals[0];
 	}//drawResultBar	
 	
 	/**
@@ -643,10 +612,8 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 	 */
 	public String testTaskTimeVals() {
 		//build report base dir, in case it doesn't exist yet
-		rptExpDir = setAndCreateRptExpDir(baseDirStr, rptDateNowPrfx + "dir");	
-		
-		String taskResDir = rptExpDir + File.separatorChar + "Task_DistTest_Results";
-		((Base_DESSimExec) exec).createRptDir(taskResDir);
+		String taskResDir = buildRptExpDir() + File.separatorChar + "Task_DistTest_Results";
+		exec.createRptDir(taskResDir);
 		int minSz = 2, maxSz = 9;
 		double minP = .2, maxP=2.0, pwrIncr=.2;
 		//build set of task descs, each will have 2,4,6 or 8 opt uav team size
@@ -663,84 +630,66 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 			finalResFNme+=".csv";
 			msgObj.dispInfoMessage("DES_Simulator("+name+")","testTaskTimeVals","final res FNAME : " + finalResFNme);
 			//getTaskPerfForNDataCSV returns string array with header
-			((Base_DESSimExec) exec).saveReport(finalResFNme, tmpTasks[i].getTaskPerfForNDataCSV(minSz,maxSz, minP, maxP, pwrIncr));	
+			exec.saveReport(finalResFNme, tmpTasks[i].getTaskPerfForNDataCSV(minSz,maxSz, minP, maxP, pwrIncr));	
 		}			
 		return taskResDir;
 	}//testTaskTimeVals		
 	
-	/**
-	 * Create the passed directory as a subdirectory within the given base directory, and return the new directory's full name
-	 * @param _baseDirStr directory to create within
-	 * @param _newDirName subdir to create
-	 * @return fully qualified new directory or error message if failed
-	 */
-	protected final String setAndCreateRptExpDir(String _baseDirStr, String _newDirName) {
-		String newDir = _baseDirStr + File.separatorChar + _newDirName;
-		boolean success = ((Base_DESSimExec) exec).createRptDir(newDir);
-		if (success) {return newDir;}
-		return "::::Unable to create directory!::::";
-	}
-	
+
 	/**
 	 * functions for experimental trials
 	 * @param numTrials
 	 */
-	public void initTrials(int numTrials) {
+	@Override
+	protected final void initExperimentalTrials_Indiv(int numTrials) {
+		//Build reporting aggregation data
 		uavRes = new long[numTrials][];
 		tlRes = new long[numTrials][][];
 		taskRes = new long[numTrials][][];
 	
-		//build experimental output directory
-		rptExpDir = setAndCreateRptExpDir(baseDirStr, rptDateNowPrfx + "dir");		
 	}//initTrials
 	
 	/**
 	 * end a round of experiments and save this round's results
+	 * @param bseFileName
 	 * @param curTrial
-	 * @param numTrials
-	 * @param expDurMSec
 	 */
-	public void endExperiment(int curTrial, int numTrials, long expDurMSec) {
+	@Override
+	protected final HashMap<String, String[]> endExperiment_Indiv(String bseFileName, int curTrial) {
 		//finish up individual experiment - save results at they are now, with appropriate timestamp, uav count, and other appropriate values for file name
-		//record results
-		//build base file name
-		String bseFileName = rptExpDir + File.separatorChar + rptDateNowPrfx +"trl_"+curTrial+"_of_"+numTrials+"_dur_"+expDurMSec+"_Sz_"+uavTeamSize ;
+		bseFileName += "_Sz_"+uavTeamSize;
 		int idx = curTrial-1;
-		//individual trial runs
-		String[] uavResStrs = buildCSVUAVData();
-		String[] tlResStrs = buildCSVTLData();
-		String[] taskResStrs = buildCSVTaskData(2,9,0,1.0f);	
 		//save values to use for aggregation arrays of arrays
 		uavRes[idx] = buildUAVDataVals();		
 		tlRes[idx] = buildTLDataVals();		
 		taskRes[idx] = buildTaskDataVals();
 		
-		((Base_DESSimExec) exec).saveReport(bseFileName + "_UAVReport.csv", uavResStrs);
-		((Base_DESSimExec) exec).saveReport(bseFileName + "_TransitLaneReport.csv", tlResStrs);
-		((Base_DESSimExec) exec).saveReport(bseFileName + "_TasksReport.csv", taskResStrs);	
+		HashMap<String, String[]> reportRes = new HashMap<String, String[]>();
+		//individual trial runs		
+		reportRes.put(bseFileName + "_UAVReport.csv", buildCSVUAVData());
+		reportRes.put(bseFileName + "_TransitLaneReport.csv", buildCSVTLData());
+		reportRes.put(bseFileName + "_TasksReport.csv", buildCSVTaskData(2,9,0,1.0f));
+		
+		return reportRes;
 	}//endExperiment
 	
 	/**
-	 * finish entire set of trials, save last trial's data and then calculate and save aggregate/average data
-	 * @param curTrial
+	 * Implementation-specific finish entire set of trials, save last trial's data and then calculate and save aggregate/average data
+	 * @param finalResFNmeBase
 	 * @param numTrials
-	 * @param expDurMSec
 	 */
-	public void endTrials(int curTrial, int numTrials, long expDurMSec) {
-		endExperiment(curTrial,numTrials,expDurMSec);		
-		//aggregate results and save to special files/directories
-		String finalResDir = setAndCreateRptExpDir(rptExpDir,"Final_Exp_Final_Results");
-		
-		//process aggregate aras of aras of data and build 
-		String finalResFNmeBase = finalResDir + File.separatorChar + "FinalRes_Trls_"+numTrials+"_dur_"+expDurMSec+"_Sz_"+uavTeamSize ;
-
-		((Base_DESSimExec) exec).saveReport(finalResFNmeBase + "_UAVReport.csv", buildFinalResUAV());
-		((Base_DESSimExec) exec).saveReport(finalResFNmeBase + "_TransitLaneReport.csv", buildFinalResTL());
-		((Base_DESSimExec) exec).saveReport(finalResFNmeBase + "_TasksReport.csv", buildFinalResTask());	
-		
+	@Override
+	protected final HashMap<String, String[]> endTrials_Indiv(String finalResFNmeBase, int numTrials) {
+		finalResFNmeBase += "_Sz_"+uavTeamSize;
+		HashMap<String, String[]> reportRes = new HashMap<String, String[]>();
+		reportRes.put(finalResFNmeBase + "_UAVReport.csv", buildFinalResUAV());
+		reportRes.put(finalResFNmeBase + "_TransitLaneReport.csv", buildFinalResTL());
+		reportRes.put(finalResFNmeBase + "_TasksReport.csv", buildFinalResTask());	
+		//Reinit arrays of data
 		uavRes = new long[numTrials][];
 		tlRes = new long[numTrials][][];
-		taskRes = new long[numTrials][][];		
+		taskRes = new long[numTrials][][];
+		return reportRes;
 	}//	
 	
 	/**
