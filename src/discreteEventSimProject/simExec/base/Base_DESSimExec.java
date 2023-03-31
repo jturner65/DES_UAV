@@ -288,15 +288,15 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * @return whether sim is complete or not
 	 */
 	@Override
-	protected final boolean stepUISimulation_Indiv(float modAmtMillis, float scaledMillisSinceLastFrame) {
+	protected final boolean stepUISimulation_Indiv(float modAmtMillis) {
 		DES_Event ev = FEL.peekFirst();			//peek at first time stamp in FEL
 		if(ev == null) {//no event waiting to process - start a UAV team in the process
-			ev = ((Base_DESSimulator) currSim).buildInitialEvent(nowTime);
+			ev = ((Base_DESSimulator) currSim).buildInitialEvent();
 			addEvent(ev);
 		}
 		//pop simulation events from event list that have timestep less than now
-		while ((ev != null) && (ev.getTimestamp() <= nowTime)) {	//"now" has evolved to be later than most recent event, so pop off events from PQ in order
-			msgObj.dispInfoMessage(name,"simMe","Frame Time : "+String.format("%08d", (int)nowTime)+" Frame Size : " +  ((int)frameTimeScale) + " | Current Event TS : " + ev.getTimestamp() + "| Ev Name : " + ev.name);
+		while ((ev != null) && (currSim.tsIsBeforeNowTime(ev.getTimestamp()))) {	//"now" has evolved to be later than most recent event, so pop off events from PQ in order
+			msgObj.dispInfoMessage(name,"simMe",currSim.getNowTimeAndFrameScaleStr() + " | Current Event TS : " + ev.getTimestamp() + "| Ev Name : " + ev.name);
 			//ev == null means no events on FEL
 			ev = FEL.removeFirst();
 			//eventsProcced++;
@@ -341,7 +341,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	public final void drawMe(float animTimeMod) {
 		if(!getDoDrawViz()) {return;}//not drawing, return
 		//call simulator to render sim world
-		((Base_UISimulator) currSim).drawMe(ri,animTimeMod* frameTimeScale, win);
+		((Base_UISimulator) currSim).drawMe(ri,animTimeMod, win);
 	}//drawMe	
 	
 

@@ -272,8 +272,9 @@ public class UAV_Task extends Base_Resource{
 	 * @param win
 	 * @param hLiteIDX
 	 */
+	@Override
 	protected final void _drawRsrcsDescrStr_Indiv(IRenderInterface ri, float yVal) {
-		ri.showText(getDispTaskDescStr(),65, yVal);		
+		ri.showText(getDispTaskDescStr(),0, yVal);		
 	}
 	
 	
@@ -283,6 +284,7 @@ public class UAV_Task extends Base_Resource{
 	 * @param yValyOff
 	 * @return
 	 */
+	@Override
 	protected final float _drawRsrcsDescrPost_Indiv(IRenderInterface ri, float xVal, float yValyOff) {return yValyOff;}
 		
 	public String toString(){

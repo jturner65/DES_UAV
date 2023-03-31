@@ -439,7 +439,8 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 	 * @param nowTime
 	 * @return
 	 */
-	public final DES_Event buildInitialEvent(double nowTime) {
+	public final DES_Event buildInitialEvent() {
+		//Use locally maintained nowTime
 		long longNowTime = (long)MyMathUtils.floor(nowTime);
 		UAV_Team newTeam = addNewTeam(longNowTime);
 		//myEvent(long _ts, String _name, myEntity _c_ent, myEntity _r_ent)
@@ -482,39 +483,40 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 	public void setUavTeamSize(int _uavTeamSize) { uavTeamSize = _uavTeamSize;}
 	
 	/**
-	 * called from Base_UISimExec - evolve visualization
-	 * @param scaledMillisSinceLastFrame
+	 * Evolve a simulation visualization; called Base_UISimExec - evolve visualization.
+	 * Use timestep/frameTimeScale set in Base_Simulator 
 	 */
 	@Override
-	public final void simStepVisualization(float scaledMillisSinceLastFrame) {
+	public final void simStepVisualization() {
 		for(UAV_Team team : teams) {
-			team.moveUAVTeam(scaledMillisSinceLastFrame, exec.getTimeStep());
+			team.moveUAVTeam(scaledMillisSinceLastFrame, timeStep);
 		}		
 	}//visSimMe
 		
 	/**
 	 * animTimeMod is in seconds, time that has passed since last draw call
 	 * @param pa
-	 * @param animTimeMod
+	 * @param scaledAnimTimeMod  :animTimeMod* frameTimeScale
 	 * @param win
 	 */
 	@Override
-	public final void drawMe(IRenderInterface ri, float animTimeMod, Base_DispWindow win) {
+	protected final void drawMe_Indiv(IRenderInterface ri, float scaledAnimTimeMod, Base_DispWindow win){
 		//draw all transit lanes
 		boolean drawLanes = getSimFlag(Base_DESSimExec.drawTLanesIDX);
-		for(UAV_TransitLane tl : transitLanes) {						tl.drawEntity(ri, animTimeMod, drawLanes);}
-		holdingLane.drawEntity(ri, animTimeMod, drawLanes);
+		for(UAV_TransitLane tl : transitLanes) {						tl.drawEntity(ri, scaledAnimTimeMod, drawLanes);}
+		holdingLane.drawEntity(ri, scaledAnimTimeMod, drawLanes);
 		if(getSimFlag(Base_DESSimExec.dispTLnsLblsIDX)) {
 			for(UAV_TransitLane tl : transitLanes) {					tl.dispEntityLabel(ri, win);}
 			holdingLane.dispEntityLabel(ri, win);
 		}
 		//draw all tasks
 		boolean drawTasks = getSimFlag(Base_DESSimExec.drawTaskLocsIDX);
-		for(UAV_Task task : tasks) {									task.drawEntity(ri, animTimeMod, drawTasks);}
+		for(UAV_Task task : tasks) {									task.drawEntity(ri, scaledAnimTimeMod, drawTasks);}
 		if (getSimFlag(Base_DESSimExec.dispTaskLblsIDX)){for(UAV_Task task : tasks) {	task.dispEntityLabel(ri, win);}}
 		
 		//draw all UAV teams
-		float delT = Math.min(animTimeMod, 1.0f);
+		//TODO use timeStep for delT
+		float delT = Math.min(scaledAnimTimeMod/1000.0f, 1.0f);
 		if(getSimFlag(Base_DESSimExec.drawUAVTeamsIDX)) {	for(UAV_Team team : teams) {team.drawEntity(ri, delT, true);}}	
 		if(getSimFlag(Base_DESSimExec.dispUAVLblsIDX)) {	for(UAV_Team team : teams) {team.dispEntityLabel(ri, win);}}	
 		
@@ -577,7 +579,7 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 
 			int hLiteIDX = findMaxIDX(tasks,tasks.length-2);
 			for(int i=0;i<tasks.length;++i) {
-				yVals[0] = tasks[i].drawResourceDescr(ri, hLiteIDX, i, 102, yVals[0], yVals[1]) + yVals[2];
+				yVals[0] = tasks[i].drawResourceDescr(ri, hLiteIDX, i, 102, yVals[0], yVals[1])+3;
 			}//for every task
 			yVals[0] += (yVals[3] - yVals[2]);//offset by same amount as other groupings
 			

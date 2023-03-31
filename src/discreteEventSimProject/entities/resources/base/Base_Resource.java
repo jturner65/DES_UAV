@@ -147,7 +147,10 @@ public abstract class Base_Resource extends Base_Entity {
 		ri.setFill(0,255,255,255);
 		ri.showText(""+(idx+1) +" : "+name,0, yVal);
 		ri.setFill(255,255,255,255);
+		ri.pushMatState();
+		ri.translate((name.length()+3)*7, 0);
 		_drawRsrcsDescrStr_Indiv(ri, yVal);
+		ri.popMatState();
 		yVal += yOff; 
 		ri.showText("#Teams Proc: " + String.format("%3d", getTTLNumTeamsProc()), 0, yVal);
 		if(hLiteIDX==idx) {ri.setFill(255,44,80,255);}
