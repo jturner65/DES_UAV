@@ -4,7 +4,7 @@ import discreteEventSimProject.entities.consumers.UAV_Team;
 import discreteEventSimProject.entities.resources.base.Base_Resource;
 
 /**
- * an event/message, sortable on timestamp
+ * an event/message for the discrete event sim, sortable on timestamp
  * @author john
  *
  */
@@ -74,18 +74,13 @@ public class DES_Event implements Comparable<DES_Event> {
 	 * @return
 	 */
 	public String toStrBrf() {
-		String res = "Timestamp : " + timeStamp +  " | Name : " + name + " | Event Type : " + type;
-		return res;
+		return "Timestamp : " + timeStamp +  " | Name : " + name + " | Event Type : " + type;
 	}
 	
 	public String toString() {
-		String res = "Timestamp : " + timeStamp + " | ID : " + ID+  " | Name : " + name;
-		if((consumer == null) || (resource==null)){
-			res += " | Null Consumer | Null Resource ";
-		} else {
-			res += " | Consumer : "+ consumer.name + " | Resource : " + resource.name;
-		}
-		res += " | Event Type : " + type;		
+		String res = toStrBrf()+ " | ID : " + ID;
+		res += (consumer == null) ? " | Null Consumer" : " | Consumer : "+ consumer.name ;
+		res += (resource == null) ? " | Null Resource" : " | Resource : " + resource.name;
 		return res;
 	}
 

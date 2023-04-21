@@ -614,8 +614,7 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 	 */
 	public String testTaskTimeVals() {
 		//build report base dir, in case it doesn't exist yet
-		String taskResDir = buildRptExpDir() + File.separatorChar + "Task_DistTest_Results";
-		exec.createRptDir(taskResDir);
+		String taskResDir = setAndCreateRptExpDir(buildRptExpDir() , "Task_DistTest_Results");
 		int minSz = 2, maxSz = 9;
 		double minP = .2, maxP=2.0, pwrIncr=.2;
 		//build set of task descs, each will have 2,4,6 or 8 opt uav team size

@@ -344,14 +344,6 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		((Base_UISimulator) currSim).drawMe(ri,animTimeMod, win);
 	}//drawMe	
 	
-
-	/**
-	 * split up newline-parsed strings into an array of strings, for display on screen
-	 * @param str
-	 * @return
-	 */
-	protected String[] getInfoStrAra(String str){return str.split("\n",-1);}
-	
 	/**
 	 * Get number of simulation flags defined for the sims managed by this sim exec
 	 */
@@ -368,55 +360,28 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		String saveRes = ((Base_DESSimulator) currSim).testTaskTimeVals();
 		msgObj.dispInfoMessage(name,"TEST_taskDists","Test of Task Diminishing returns functions Complete.  Results saved to "+ saveRes);
 	}	
-	/**
-	 * 
-	 */
-	public void TEST_simulator() {
-		String res = "\nSimulator Current State : \n";
-		res += currSim.toString();
-		msgObj.dispInfoMessage(name,"TEST_simulator", res);
-	}
 	
 	/**
 	 * verify current priority queue's heapness
 	 */
 	public void TEST_verifyFEL() {
-		String res = TEST_verifyFELHeap();
-		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\nFEL Test 1 : Verifying FEL integrity and state.");
+		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\nFEL Test 1 : Verifying FEL heap integrity and state.");
+		if(null==FEL) {msgObj.dispInfoMessage(name,"TEST_verifyFEL","\tFEL is Null");return;}
+		String res = FEL.TEST_verifyHeapState("FEL");
 		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\t"+res);
-		if(null==FEL) {return;}
 		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\nFEL Test 2 : Showing Raw contents of FEL heap : ");
-		@SuppressWarnings("rawtypes")
-		Comparable[] heap = FEL.getHeap();
+		DES_Event[] heap = FEL.getHeapCopy();
 		msgObj.dispInfoMessage(name,"TEST_verifyFEL","heap idx: 0 elem is always null/unused ");
 		for(int i=1;i<heap.length;++i) {
-			if(null == heap[i]) {msgObj.dispInfoMessage(name,"TEST_verifyFEL","heap idx: " + i +" elem is null/unused ");}
-			else {msgObj.dispInfoMessage(name,"TEST_verifyFEL","heap idx: " + i +" elem : " +((DES_Event)heap[i]).toStrBrf());}
+			if(heap[i] == null) {msgObj.dispInfoMessage(name,"TEST_verifyFEL","heap idx: " + i +" elem is null/unused ");}
+			else {msgObj.dispInfoMessage(name,"TEST_verifyFEL","heap idx: " + i +" elem : " + heap[i].toStrBrf());}
 		}
 		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\nFEL Test 3 : Verifying FEL Contents and access.");
 		TEST_PQShowElemsReAdd(FEL, "FEL");
 		msgObj.dispInfoMessage(name,"TEST_verifyFEL","\nFEL Test 4 : Heap Sort of FEL (elements in descending order)."); 	
 		TEST_heapSortAndShowContents(FEL, "FEL");		
 	}
-	/**
-	 * 
-	 * @return
-	 */
-	private String TEST_verifyFELHeap() {
-		//first determine FEL's current state
-		String res = "";
-		if(null==FEL) {
-			res += "FEL is NULL ";
-			return res;
-		} 
-		else if (FEL.isEmpty()) {res += "FEL is Empty ";} 
-		else if (FEL.isFull()) { res += "FEL is Full ";}
-		boolean isHeap = FEL.isHeap();
-		res += " | Heapness of FEL " + (isHeap ? "is currently preserved. " : "IS NOT PRESERVED!!! ");
-		int numElems = FEL.size();
-		res += " | FEL currently has " + numElems + " elements.";
-		return res;
-	}//TEST_verifyFELHeap
+
 	
 	/**
 	 * verify functionality of priority queue
@@ -432,7 +397,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		//add elements in tmpAra to tmpPQ
 		TEST_buildPQWithAra(tmpPQ, tmpAra, "tmpPQ", true);
 		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","\nNow removing top elements :");
-		TEST_dequeAndShowElems(tmpPQ,  "\t");
+		TEST_dequeRemoveAndShowElems(tmpPQ,  "\t");
 		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","");
 		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","Test 2 done : After removing elements in order, tmpPQ has : " + tmpPQ.size() + " Elements.\n");
 		msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","_________________________________________________________________________");
@@ -442,7 +407,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		//remove requested element, then remove and display remaining elements in top-first order
 		for (int i=0;i<tmpAra.length;++i) {
 			msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","\tRemove Elem "+tmpAra[i]+" in tmpPQ of Size " +tmpPQ.size() + " : returned : " + tmpPQ.removeElem(tmpAra[i])+" : remaining elements :" );
-			TEST_dequeAndShowElems(tmpPQ,  "\t\t");
+			TEST_dequeRemoveAndShowElems(tmpPQ,  "\t\t");
 			msgObj.dispInfoMessage(name,"TEST_verifyPriorityQueueFunctionality","");
 			//re-add into tmpPQ
 			for(int j=(i+1);j<tmpAra.length;++j) {		tmpPQ.insert(tmpAra[j]);	}
@@ -478,12 +443,19 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * @param showMsgs
 	 */
 	private void TEST_buildPQWithAra(myPriorityQueue<DES_Event> tmpPQ, DES_Event[] tmpAra, String pqName, boolean showMsgs) {
-		if(showMsgs) {msgObj.dispInfoMessage(name,"TEST_buildPQWithAra","Before loading "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}
+		if(showMsgs) {
+			msgObj.dispInfoMessage(name,"TEST_buildPQWithAra","Before loading "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");
+			for (int i =0;i<tmpAra.length;++i) {
+				tmpPQ.insert(tmpAra[i]);
+				msgObj.dispInfoMessage(name,"TEST_buildPQWithAra","\tAdding Elem # " + i + " : "+ tmpAra[i] + " to pq :"+pqName);
+			}
+			msgObj.dispInfoMessage(name,"TEST_buildPQWithAra","\nAfter adding "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");
+			return;		
+		}
+		//perform test and have error message if fails
 		for (int i =0;i<tmpAra.length;++i) {
 			tmpPQ.insert(tmpAra[i]);
-			if(showMsgs) {msgObj.dispInfoMessage(name,"TEST_buildPQWithAra","\tAdding Elem # " + i + " : "+ tmpAra[i] + " to pq :"+pqName);}
 		}
-		if(showMsgs) {msgObj.dispInfoMessage(name,"TEST_buildPQWithAra","\nAfter adding "+tmpAra.length+" events, "+pqName+" has : " + tmpPQ.size() + " Elements.");}		
 	}//TEST_buildPQWithAra
 	/**
 	 * 
@@ -491,7 +463,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	 * @param lPfx
 	 */
 	private void TEST_PQShowElemsReAdd(myPriorityQueue<DES_Event> tmpPQ, String lPfx) {
-		DES_Event[] tmpAra = new DES_Event[tmpPQ.get_numElems()];	
+		DES_Event[] tmpAra = new DES_Event[tmpPQ.getNumElems()];	
 		int idx=0;
 		while (!tmpPQ.isEmpty()){
 			tmpAra[idx] = tmpPQ.removeFirst();
@@ -501,18 +473,19 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		for (int i=0;i<idx;++i) {
 			tmpPQ.insert(tmpAra[i]);
 		}
-	}//TEST_dequeAndShowElems
+	}//TEST_PQShowElemsReAdd
+	
 	/**
-	 * 
+	 * Test deque functionality and display and remove elements in FIFO order
 	 * @param tmpPQ
-	 * @param lPfx
+	 * @param lPfx display prefix to organize output. 
 	 */
-	private void TEST_dequeAndShowElems(myPriorityQueue<DES_Event> tmpPQ, String lPfx) {
-		int num = tmpPQ.get_numElems();
+	private void TEST_dequeRemoveAndShowElems(myPriorityQueue<DES_Event> tmpPQ, String lPfx) {
+		int num = tmpPQ.getNumElems();
 		for (int i=0;i<num;++i) {
-			msgObj.dispInfoMessage(name,"TEST_dequeAndShowElems",lPfx + "Elem # "+i+" in tmpPQ of Size " +tmpPQ.size() + " : " + tmpPQ.removeFirst() );
+			msgObj.dispInfoMessage(name,"TEST_dequeRemoveAndShowElems",lPfx + "Elem # "+i+" in tmpPQ of Size " +tmpPQ.size() + " : " + tmpPQ.removeFirst() );
 		}
-	}//TEST_dequeAndShowElems
+	}//TEST_dequeRemoveAndShowElems
 	/**
 	 * 
 	 * @param tmpPQ
