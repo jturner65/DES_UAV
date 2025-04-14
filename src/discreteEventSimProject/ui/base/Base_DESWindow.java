@@ -72,13 +72,13 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	public final int initSimPrivBtns(ArrayList<Object[]> tmpBtnNamesArray) {
 		// add an entry for each button, in the order they are wished to be displayed
 		// true tag, false tag, btn IDX  
-		tmpBtnNamesArray.add(new Object[] {"Drawing UAV Teams", "Draw UAV Teams",  drawUAVTeamsIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Drawing Task Locs", "Draw Task Locs",  drawTaskLocsIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Drawing Lanes", "Draw Transit Lanes", drawTLanesIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Showing Task Lbls", "Show Task Lbls",  dispTaskLblsIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Showing TLane Lbls", "Show TLane Lbls", dispTLnsLblsIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Showing Team Lbls", "Show Team Lbls",  dispUAVLblsIDX});  
-		tmpBtnNamesArray.add(new Object[] {"Drawing UAV Boats", "Drawing UAV Spheres",   drawBoatsIDX});  
+		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Drawing UAV Teams", "Draw UAV Teams"},  drawUAVTeamsIDX));  
+		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Drawing Task Locs", "Draw Task Locs"},  drawTaskLocsIDX));  
+		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Drawing Lanes", "Draw Transit Lanes"}, drawTLanesIDX));  
+		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Showing Task Lbls", "Show Task Lbls"},  dispTaskLblsIDX));  
+		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Showing TLane Lbls", "Show TLane Lbls"}, dispTLnsLblsIDX));  
+		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Showing Team Lbls", "Show Team Lbls"},  dispUAVLblsIDX));  
+		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Drawing UAV Boats", "Drawing UAV Spheres"},   drawBoatsIDX));  
 		return initSimPrivBtns_Indiv(tmpBtnNamesArray);
 	}//initAllPrivBtns	
 	
@@ -221,7 +221,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 		
 		double initTeamSizeIDX = 1.0*uavTeamSize - Integer.parseInt(uavTeamSizeList[0]);
 		
-		tmpUIObjArray.put(gIDX_UAVTeamSize, uiObjInitAra_List(new double[]{0,uavTeamSizeList.length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size", new boolean[]{true}));          
+		tmpUIObjArray.put(gIDX_UAVTeamSize, uiObjInitAra_List(new double[]{0,uavTeamSizeList.length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size"));          
 		
 		setupGUIObjsAras_Indiv(tmpUIObjArray, tmpListObjVals);
 	}//setupGUIObjsAras
@@ -291,14 +291,11 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	
 	@Override
 	public void drawTraj3D(float animTimeMod,myPoint trans){}//drawTraj3D	
-	//set camera to either be global or from pov of one of the boids
+
 	@Override
-	protected void setCamera_Indiv(float[] camVals){		
-		//, float rx, float ry, float dz are now member variables of every window
-		ri.setCameraWinVals(camVals);//camera(camVals[0],camVals[1],camVals[2],camVals[3],camVals[4],camVals[5],camVals[6],camVals[7],camVals[8]);      
-		// puts origin of all drawn objects at screen center and moves forward/away by dz
-		ri.translate(camVals[0],camVals[1],(float)dz); 
-	    setCamOrient();	
+	protected void setCamera_Indiv(float[] camVals) {
+		// No custom camera handling
+		setCameraBase(camVals);
 	}//setCameraIndiv
 	
 	/**
@@ -478,11 +475,11 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	@Override
 	protected void hndlMouseRel_Indiv() {	}
 	@Override
-	protected final void endShiftKeyI() {}
+	protected final void endShiftKey_Indiv() {}
 	@Override
-	protected final void endAltKeyI() {}
+	protected final void endAltKey_Indiv() {}
 	@Override
-	protected final void endCntlKeyI() {}
+	protected final void endCntlKey_Indiv() {}
 	
 	///////////////////////
 	// deprecated file io stuff

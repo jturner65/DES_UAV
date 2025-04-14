@@ -132,7 +132,7 @@ public class UAV_DESSim extends GUI_AppManager {
 				_winDescr = new String[] {"","Display UAV Discrete Event Simulator 1","Display UAV Discrete Event Simulator 2"};
 
 		//instanced window dims when open and closed - only showing 1 open at a time - and init cam vals
-		float[][] _floatDims  = new float[][] {getDefaultWinDimOpen(), getDefaultWinDimClosed(), getInitCameraValues()};	
+		float[][] _floatDims  = getDefaultWinAndCameraDims();	
 
 		//menu bar init
 		String[] menuBtnTitles = new String[]{"Sim Layouts","Functions 1","Functions 2","Verifications"};
@@ -178,7 +178,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	@Override
 	protected void initOnce_Indiv() {
 		//which objects to initially show
-		setVisFlag(dispDES_SimWin_1, true);
+		setWinVisFlag(dispDES_SimWin_1, true);
 	}
 	@Override
 	//called multiple times, whenever re-initing
@@ -226,9 +226,6 @@ public class UAV_DESSim extends GUI_AppManager {
 	}
 	
 	
-	@Override
-	//gives multiplier based on whether shift, alt or cntl (or any combo) is pressed
-	public double clickValModMult(){return ((altIsPressed() ? .1 : 1.0) * (shiftIsPressed() ? 10.0 : 1.0));}	
 	//keys/criteria are present that means UI objects are modified by set values based on clicks (as opposed to dragging for variable values)
 	//to facilitate UI interaction non-mouse computers, set these to be single keys
 	@Override
@@ -267,8 +264,8 @@ public class UAV_DESSim extends GUI_AppManager {
 			//val is btn state before transition 
 			boolean bVal = (val == 1?  false : true);
 			//each entry in this array should correspond to a clickable window, not counting menu
-			setVisFlag(winFlagsXOR[btn], bVal);
-			//setVisFlag(btn+1, bVal);
+			setWinVisFlag(winFlagsXOR[btn], bVal);
+			//setWinVisFlag(btn+1, bVal);
 		}
 	}//handleShowWin
 	

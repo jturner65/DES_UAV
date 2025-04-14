@@ -19,7 +19,8 @@ import discreteEventSimProject.sim.base.DES_SimDataUpdater;
 import discreteEventSimProject.sim.base.Base_DESSimulator;
 
 /**
- * class to manage the functionality of the simulation executive
+ * class to manage the functionality of the simulation 
+ * executive specifically for discrete event simulation
  * @author John Turner
  *
  */
@@ -125,12 +126,12 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 			RenderObj_ClrPalette[] palettes = new RenderObj_ClrPalette[numTeamTypes];
 			for (int i=0;i<palettes.length;++i) {palettes[i] =  buildRenderObjPalette(i);}			
 			sphrRndrTmpl = new Sphere_RenderObj[numUniqueTeams];
-			for(int i=0; i<numUniqueTeams; ++i){		sphrRndrTmpl[i] = new Sphere_RenderObj(ri, i, palettes[sphereClrIDX]);	}	
+			for(int i=0; i<numUniqueTeams; ++i){		sphrRndrTmpl[i] = new Sphere_RenderObj(ri, i, numUniqueTeams, palettes[sphereClrIDX]);	}	
 			cmplxRndrTmpls = new ConcurrentSkipListMap<String, Base_RenderObj[]> (); 
 			boatRndrTmpl = new Boat_RenderObj[numUniqueTeams];
 			for(int i=0; i<numUniqueTeams; ++i){	
 				//build boat render object for each individual boat type
-				boatRndrTmpl[i] = new Boat_RenderObj(ri, i, numAnimFramesPerType, palettes[boatClrIDX]);		
+				boatRndrTmpl[i] = new Boat_RenderObj(ri, i, numUniqueTeams, numAnimFramesPerType, palettes[boatClrIDX], null);		
 			}		
 			cmplxRndrTmpls.put(UAVTypeNames[0], boatRndrTmpl);
 			rndrTmpl = cmplxRndrTmpls.get(UAVTypeNames[0]);//start by rendering boats
