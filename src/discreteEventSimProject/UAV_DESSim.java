@@ -120,7 +120,8 @@ public class UAV_DESSim extends GUI_AppManager {
 		setBaseFlagToShow_debugMode(true);
 		setBaseFlagToShow_runSim(true);
 		setBaseFlagToShow_singleStep(true);
-		setBaseFlagToShow_showRtSideMenu(true);	
+		setBaseFlagToShow_showRtSideMenu(true);		
+		setBaseFlagToShow_showStatusBar(true);
 		setBaseFlagToShow_showDrawableCanvas(false);
 	}
 
@@ -179,6 +180,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	protected void initOnce_Indiv() {
 		//which objects to initially show
 		setWinVisFlag(dispDES_SimWin_1, true);
+		setShowStatusBar(true);
 	}
 	@Override
 	//called multiple times, whenever re-initing

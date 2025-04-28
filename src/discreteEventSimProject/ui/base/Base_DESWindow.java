@@ -288,9 +288,6 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	 * @return
 	 */
 	protected abstract boolean setUI_FloatDESValsCustom(int UIidx, float val, float oldVal);
-	
-	@Override
-	public void drawTraj3D(float animTimeMod,myPoint trans){}//drawTraj3D	
 
 	@Override
 	protected void setCamera_Indiv(float[] camVals) {
