@@ -168,7 +168,7 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 		int zLast = locIdxs[0][0].length-1;
 		// binomial theorem to calculate total # of lanes
 		// connected to up to 7 forward nodes.
-		int numIdxs = 8 + xLast *(3 + xLast *((3* 3) + (xLast * 7)));
+		int numIdxs = 8 + xLast *(3 + xLast * (9 + (xLast * 7)));
 		
 		int[][] tLaneIdxs = new int[numIdxs][];
 		int idx_TL = 0;
@@ -234,7 +234,8 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 	 */
 	@Override
 	protected final void useUIDataUpdateVals() {
-		//update local values from dataUpdate adapter		
+		//update local values from dataUpdate adapter
+		//dataUpdate.get
 	}
 
 	/**
