@@ -164,13 +164,13 @@ public class UAV_DESSim extends GUI_AppManager {
 					new int[]{180,180,180,255},new int[]{100,100,100,255},
 					new int[]{0,0,0,200},new int[]{255,255,255,255}});
 
-		dispWinFrames[wIdx] = new StaticDESWindow(ri, this, wIdx);		
+		setDispWindow(wIdx, new StaticDESWindow(ri, this, wIdx));		
 		wIdx = dispDES_SimWin_2;
 		setInitDispWinVals(wIdx, _winTitles[wIdx], _winDescr[wIdx], getDfltBoolAra(true), _floatDims,		
 				new int[][] {new int[]{240,210,250,255},new int[]{255,255,255,255},
 					new int[]{180,180,180,255},new int[]{100,100,100,255},
 					new int[]{0,0,0,200},new int[]{255,255,255,255}});
-		dispWinFrames[wIdx] = new DynamicDESWindow(ri, this, wIdx);		
+		setDispWindow(wIdx, new DynamicDESWindow(ri, this, wIdx));		
 		//specify windows that cannot be shown simultaneously here
 		initXORWins(new int[]{dispDES_SimWin_1, dispDES_SimWin_2},new int[]{dispDES_SimWin_1, dispDES_SimWin_2});
 		
@@ -218,7 +218,7 @@ public class UAV_DESSim extends GUI_AppManager {
 	protected void handleKeyPress(char key, int keyCode) {
 		switch (key){
 		case ' ' : {toggleSimIsRunning(); break;}							//run sim
-		case 'f' : {dispWinFrames[curFocusWin].setInitCamView();break;}					//reset camera
+		case 'f' : {getCurFocusDispWindow().setInitCamView();break;}					//reset camera
 		case 'a' :
 		case 'A' : {toggleSaveAnim();break;}						//start/stop saving every frame for making into animation
 		case 's' :

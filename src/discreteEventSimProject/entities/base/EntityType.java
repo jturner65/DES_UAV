@@ -21,7 +21,7 @@ public enum EntityType {
 	public static String[] getListOfTypes() {return _typeName;}	
 	private static Map<Integer, EntityType> map = new HashMap<Integer, EntityType>(); 
 	static { for (EntityType enumV : EntityType.values()) { map.put(enumV.ordinal(), enumV);}}
-	public int getVal(){return ordinal();} 	
+	public int getOrdinal() {return ordinal();} 	
 	public static EntityType getEnumByIndex(int idx){return map.get(idx);}
 	public static EntityType getEnumFromValue(int idx){return map.get(idx);}
 	public static int numVals(){return map.size();}						//get # of values in enum	
