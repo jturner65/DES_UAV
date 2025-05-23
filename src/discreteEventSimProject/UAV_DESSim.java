@@ -3,7 +3,6 @@ package discreteEventSimProject;
 import java.util.HashMap;
 
 import base_UI_Objects.GUI_AppManager;
-import base_UI_Objects.windowUI.sidebar.SidebarMenu;
 import base_Utils_Objects.io.messaging.MsgCodes;
 import discreteEventSimProject.ui.DynamicDESWindow;
 import discreteEventSimProject.ui.StaticDESWindow;
@@ -254,23 +253,6 @@ public class UAV_DESSim extends GUI_AppManager {
 	public String[] getMouseOverSelBtnLabels() {
 		return new String[0]; 
 	}
-
-	@Override
-	//these tie using the UI buttons to modify the window in with using the boolean tags - PITA but currently necessary
-	public void handleShowWin(int btn, int val, boolean callFlags){//display specific windows - multi-select/ always on if sel
-		if(!callFlags){//called from setflags - only sets button state in UI to avoid infinite loop
-			//setMenuBtnState(mySideBarMenu.btnShowWinIdx,btn, val);
-			setMenuBtnState(SidebarMenu.btnShowWinIdx,btn, val);
-		} else {//called from clicking on buttons in UI
-		
-			//val is btn state before transition 
-			boolean bVal = (val == 1?  false : true);
-			//each entry in this array should correspond to a clickable window, not counting menu
-			setWinVisFlag(winFlagsXOR[btn], bVal);
-			//setWinVisFlag(btn+1, bVal);
-		}
-	}//handleShowWin
-	
 	
 	@Override
 	public int[] getClr_Custom(int colorVal, int alpha) {	return new int[] {255,255,255,alpha};}
