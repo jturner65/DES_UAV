@@ -81,10 +81,10 @@ public class UAV_Obj {
 	}//constructor
 	
 	//align the UAV along the current orientation matrix
-	private void alignUAV(IRenderInterface pa, double delT){
+	private void alignUAV(IRenderInterface ri, double delT){
 		rotVec.set(O_axisAngle[1],O_axisAngle[2],O_axisAngle[3]);
 		float rotAngle = (float) (oldRotAngle + ((O_axisAngle[0]-oldRotAngle) * delT));
-		pa.rotate(rotAngle,rotVec.x, rotVec.y, rotVec.z);
+		ri.rotate(rotAngle,rotVec.x, rotVec.y, rotVec.z);
 		oldRotAngle = rotAngle;
 	}//alignUAV	
 	
