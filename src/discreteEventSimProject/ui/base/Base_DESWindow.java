@@ -72,13 +72,13 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	public final int initSimPrivBtns(ArrayList<Object[]> tmpBtnNamesArray) {
 		// add an entry for each button, in the order they are wished to be displayed
 		// true tag, false tag, btn IDX  
-		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Drawing UAV Teams", "Draw UAV Teams"},  drawUAVTeamsIDX));  
-		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Drawing Task Locs", "Draw Task Locs"},  drawTaskLocsIDX));  
-		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Drawing Lanes", "Draw Transit Lanes"}, drawTLanesIDX));  
-		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Showing Task Lbls", "Show Task Lbls"},  dispTaskLblsIDX));  
-		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Showing TLane Lbls", "Show TLane Lbls"}, dispTLnsLblsIDX));  
-		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Showing Team Lbls", "Show Team Lbls"},  dispUAVLblsIDX));  
-		tmpBtnNamesArray.add(uiObjInitAra_Btn(new String[] {"Drawing UAV Boats", "Drawing UAV Spheres"},   drawBoatsIDX));  
+		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Teams", "Draw UAV Teams"},  drawUAVTeamsIDX));  
+		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Task Locs", "Draw Task Locs"},  drawTaskLocsIDX));  
+		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Lanes", "Draw Transit Lanes"}, drawTLanesIDX));  
+		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Showing Task Lbls", "Show Task Lbls"},  dispTaskLblsIDX));  
+		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Showing TLane Lbls", "Show TLane Lbls"}, dispTLnsLblsIDX));  
+		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Showing Team Lbls", "Show Team Lbls"},  dispUAVLblsIDX));  
+		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Boats", "Drawing UAV Spheres"},   drawBoatsIDX));  
 		return initSimPrivBtns_Indiv(tmpBtnNamesArray);
 	}//initAllPrivBtns	
 	
@@ -98,14 +98,14 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 
 		boolean _isSimpleSim = isSimpleSim();
 		boolean showVis = (ri != null);
-		privFlags.setFlag(drawVisIDX, showVis);		
-		privFlags.setFlag(drawUAVTeamsIDX, showVis);	
-		privFlags.setFlag(drawBoatsIDX, showVis);	
-		privFlags.setFlag(drawTaskLocsIDX, showVis);		
-		privFlags.setFlag(drawTLanesIDX, showVis && _isSimpleSim);			
-		privFlags.setFlag(dispTaskLblsIDX, showVis && _isSimpleSim);	
-		privFlags.setFlag(dispTLnsLblsIDX, showVis && _isSimpleSim);	
-		privFlags.setFlag(dispUAVLblsIDX, showVis && _isSimpleSim);	
+		uiMgr.setPrivFlag(drawVisIDX, showVis);		
+		uiMgr.setPrivFlag(drawUAVTeamsIDX, showVis);	
+		uiMgr.setPrivFlag(drawBoatsIDX, showVis);	
+		uiMgr.setPrivFlag(drawTaskLocsIDX, showVis);		
+		uiMgr.setPrivFlag(drawTLanesIDX, showVis && _isSimpleSim);			
+		uiMgr.setPrivFlag(dispTaskLblsIDX, showVis && _isSimpleSim);	
+		uiMgr.setPrivFlag(dispTLnsLblsIDX, showVis && _isSimpleSim);	
+		uiMgr.setPrivFlag(dispUAVLblsIDX, showVis && _isSimpleSim);	
 		resetDesFlags_Indiv();
 		AppMgr.setSimIsRunning(false);
 	}
@@ -221,7 +221,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 		
 		double initTeamSizeIDX = 1.0*uavTeamSize - Integer.parseInt(uavTeamSizeList[0]);
 		
-		tmpUIObjArray.put(gIDX_UAVTeamSize, uiObjInitAra_List(new double[]{0,uavTeamSizeList.length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size"));          
+		tmpUIObjArray.put(gIDX_UAVTeamSize, uiMgr.uiObjInitAra_List(new double[]{0,uavTeamSizeList.length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size"));          
 		
 		setupGUIObjsAras_Indiv(tmpUIObjArray, tmpListObjVals);
 	}//setupGUIObjsAras
