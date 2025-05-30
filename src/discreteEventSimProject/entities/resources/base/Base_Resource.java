@@ -2,7 +2,6 @@ package discreteEventSimProject.entities.resources.base;
 
 import java.util.concurrent.*;
 
-import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import discreteEventSimProject.entities.base.Base_Entity;
 import discreteEventSimProject.entities.base.EntityType;
@@ -127,13 +126,13 @@ public abstract class Base_Resource extends Base_Entity {
 	public abstract DES_Event leaveRes(DES_Event ev);
 	
 	@Override
-	public void drawEntity(IRenderInterface ri, float delT, boolean drawMe) {
+	public void drawEntity(float delT, boolean drawMe) {
 		ri.pushMatState();
 		//draw resource-based instance-specific stuff
-		drawEntityPriv(ri, drawMe);		
+		drawEntityPriv(drawMe);		
 		ri.popMatState();		
 	}
-	protected abstract void drawEntityPriv(IRenderInterface ri, boolean drawMe);
+	protected abstract void drawEntityPriv(boolean drawMe);
 	
 	/**
 	 * Draw the description data to label this resource
@@ -143,19 +142,19 @@ public abstract class Base_Resource extends Base_Entity {
 	 * @param yVal
 	 * @param yOff
 	 */
-	public final float drawResourceDescr(IRenderInterface ri, int hLiteIDX, int idx, float xVal, float yVal, float yOff) {
+	public final float drawResourceDescr(int hLiteIDX, int idx, float xVal, float yVal, float yOff) {
 		ri.setFill(0,255,255,255);
 		ri.showText(""+(idx+1) +" : "+name,0, yVal);
 		ri.setFill(255,255,255,255);
 		ri.pushMatState();
 		ri.translate((name.length()+3)*7, 0);
-		_drawRsrcsDescrStr_Indiv(ri, yVal);
+		_drawRsrcsDescrStr_Indiv(yVal);
 		ri.popMatState();
 		yVal += yOff; 
 		ri.showText("#Teams Proc: " + String.format("%3d", getTTLNumTeamsProc()), 0, yVal);
 		if(hLiteIDX==idx) {ri.setFill(255,44,80,255);}
 		ri.showText("TTL Task Time: " + String.format("%07d", getTTLRunTime()/1000) + " s",xVal,yVal);
-		return _drawRsrcsDescrPost_Indiv(ri, xVal, yVal + yOff);
+		return _drawRsrcsDescrPost_Indiv(xVal, yVal + yOff);
 	}//drawResourceDescr
 	
 	/**
@@ -163,7 +162,7 @@ public abstract class Base_Resource extends Base_Entity {
 	 * @param ri
 	 * @param yVal
 	 */
-	protected abstract void _drawRsrcsDescrStr_Indiv(IRenderInterface ri, float yVal);
+	protected abstract void _drawRsrcsDescrStr_Indiv(float yVal);
 	
 	/**
 	 * Draw the instance-class specific description for this resource
@@ -171,7 +170,7 @@ public abstract class Base_Resource extends Base_Entity {
 	 * @param yValyOff
 	 * @return
 	 */
-	protected abstract float _drawRsrcsDescrPost_Indiv(IRenderInterface ri, float xVal, float yValyOff);
+	protected abstract float _drawRsrcsDescrPost_Indiv(float xVal, float yValyOff);
 	
 	public String toString(){
 		String res = "Resource : "  + super.toString();

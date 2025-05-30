@@ -251,7 +251,7 @@ public class UAV_Task extends Base_Resource{
 	}//showStatus
 	
 	@Override 
-	protected void drawEntityPriv(IRenderInterface ri, boolean drawMe) {
+	protected void drawEntityPriv(boolean drawMe) {
 		if((!drawMe)&&(!getEntityFlags(taskInUseIDX))){return;}
 		ri.setSphereDetail(10);
 		ri.noFill();
@@ -273,7 +273,7 @@ public class UAV_Task extends Base_Resource{
 	 * @param hLiteIDX
 	 */
 	@Override
-	protected final void _drawRsrcsDescrStr_Indiv(IRenderInterface ri, float yVal) {
+	protected final void _drawRsrcsDescrStr_Indiv(float yVal) {
 		ri.showText(getDispTaskDescStr(),0, yVal);		
 	}
 	
@@ -285,7 +285,7 @@ public class UAV_Task extends Base_Resource{
 	 * @return
 	 */
 	@Override
-	protected final float _drawRsrcsDescrPost_Indiv(IRenderInterface ri, float xVal, float yValyOff) {return yValyOff;}
+	protected final float _drawRsrcsDescrPost_Indiv(float xVal, float yValyOff) {return yValyOff;}
 		
 	public String toString(){
 		String res = (td.isGroupTask ? "Group Task "  : "Task ")  + super.toString();

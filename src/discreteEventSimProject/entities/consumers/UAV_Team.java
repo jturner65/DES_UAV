@@ -149,7 +149,7 @@ public class UAV_Team extends Base_Entity {
 	/**
 	 *
 	 */
-	public void drawEntity(IRenderInterface ri, float delT, boolean drawMe){
+	public void drawEntity(float delT, boolean drawMe){
 		ri.pushMatState();
 			ri.translate(loc);
 			boolean debugAnim = sim.getSimDebug();

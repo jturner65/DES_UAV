@@ -51,17 +51,17 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	 */
 	public static final int 
 			drawBoatsIDX		= numBaseSimPrivFlags,						//whether to draw animated boats or simple spheres for consumer UAVs
-			drawUAVTeamsIDX		= numBaseSimPrivFlags +2,						//yes/no draw UAV teams
-			drawTaskLocsIDX		= numBaseSimPrivFlags +3,						//yes/no draw task spheres
-			drawTLanesIDX		= numBaseSimPrivFlags +4,						//yes/no draw transit lanes and queues
-			dispTaskLblsIDX		= numBaseSimPrivFlags +5,						//show labels over tasks...
-			dispTLnsLblsIDX		= numBaseSimPrivFlags +6,						//over transit lanes...
-			dispUAVLblsIDX		= numBaseSimPrivFlags +7;						//and/or over teams			
+			drawUAVTeamsIDX		= numBaseSimPrivFlags +1,						//yes/no draw UAV teams
+			drawTaskLocsIDX		= numBaseSimPrivFlags +2,						//yes/no draw task spheres
+			drawTLanesIDX		= numBaseSimPrivFlags +3,						//yes/no draw transit lanes and queues
+			dispTaskLblsIDX		= numBaseSimPrivFlags +4,						//show labels over tasks...
+			dispTLnsLblsIDX		= numBaseSimPrivFlags +5,						//over transit lanes...
+			dispUAVLblsIDX		= numBaseSimPrivFlags +6;						//and/or over teams			
 
 	/**
 	 * Number of boolean flags defined in base window. Subsequent IDXs of boolean flags in child class should start here
 	 */
-	public static final int numBaseDesPrivFlags = numBaseSimPrivFlags +8;
+	public static final int numBaseDesPrivFlags = numBaseSimPrivFlags +7;
 	
 	public Base_DESWindow(IRenderInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
 		super(_p, _AppMgr, _winIdx);
@@ -191,7 +191,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 				simExec.setSimFlag(Base_DESSimExec.dispUAVLblsIDX, val);		return true;}			
 			default: {return handleDesPrivFlags_Indiv(idx, val, oldVal);}
 		}		
-	}//handlePrivFlags_Indiv
+	}//handleSimPrivFlags_Indiv
 	
 	/**
 	 * Instance-specific boolean flags to handle
@@ -247,7 +247,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 		switch(UIidx){		
 			case gIDX_UAVTeamSize : {
 				uavTeamSize = ival + Integer.parseInt(uavTeamSizeList[0]);//add idx 0 as min size
-				msgObj.dispDebugMessage("DESSimWindow", "setUIWinVals", "UAV team size desired is : " + uavTeamSize);
+				_dispInfoMsg("setUIWinVals", "UAV team size desired is : " + uavTeamSize);
 				((Base_DESSimExec) simExec).setSimUAVTeamSize(uavTeamSize);
 				//rebuild sim exec and sim environment whenever team size changes
 				simExec.resetSimExec(true);				

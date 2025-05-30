@@ -250,7 +250,7 @@ public class UAV_TransitLane extends Base_Resource{
 	 * transitlane-specifics
 	 */
 	@Override
-	protected void drawEntityPriv(IRenderInterface ri, boolean drawMe) {
+	protected void drawEntityPriv(boolean drawMe) {
 		boolean it = getEntityFlags(taskInUseIDX);
 		if((drawMe)||(it)){
 			ri.pushMatState();	
@@ -289,7 +289,8 @@ public class UAV_TransitLane extends Base_Resource{
 	 * @param win
 	 * @param hLiteIDX
 	 */
-	protected final void _drawRsrcsDescrStr_Indiv(IRenderInterface ri, float yVal) {}
+	@Override
+	protected final void _drawRsrcsDescrStr_Indiv(float yVal) {}
 	
 	/**
 	 * Draw the instance-class specific description for this resource
@@ -297,7 +298,8 @@ public class UAV_TransitLane extends Base_Resource{
 	 * @param yValyOff
 	 * @return
 	 */
-	protected final float _drawRsrcsDescrPost_Indiv(IRenderInterface ri, float xVal, float yValyOff) {
+	@Override
+	protected final float _drawRsrcsDescrPost_Indiv(float xVal, float yValyOff) {
 		float yVal = yValyOff;
 		ri.setFill(255,255,255,255);			
 		ri.showText("Travel Time : "+String.format("%07d", getTTLTravelTime()/1000) + " s",0, yVal);//yVal += yOff; 

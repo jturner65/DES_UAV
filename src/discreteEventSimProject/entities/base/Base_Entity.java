@@ -16,6 +16,9 @@ public abstract class Base_Entity {
 	
 	public Base_DESSimulator sim;
 	
+	public final IRenderInterface ri;
+	
+	public final Base_DispWindow win;
 	public String name;
 	public myPointf loc;			//initial location of this entity (may change if it moves)
 	
@@ -45,8 +48,13 @@ public abstract class Base_Entity {
 	public EntityType[] types;		
 	
 	public Base_Entity(Base_DESSimulator _sim, String _name, myPointf _loc, EntityType[] _types) {
-		sim=_sim;	name = _name; loc = new myPointf(_loc);types=_types;
 		ID = IDcount++;	
+		sim=_sim;
+		ri=sim.ri;
+		win=sim.win;
+		name = _name; 
+		loc = new myPointf(_loc);
+		types=_types; 
 		timeVals = new long[numTimeVals];
 		initEntity();
 	}
@@ -66,9 +74,9 @@ public abstract class Base_Entity {
 	 * @param ri
 	 * @param win
 	 */
-	public final void dispEntityLabel(IRenderInterface ri, Base_DispWindow win) {
+	public final void dispEntityLabel() {
 		ri.pushMatState();
-			ri.translate(loc);
+		ri.translate(loc);
 			win.unSetCamOrient();
 			ri.translate(labelVals[0],labelVals[1],labelVals[2]);
 			ri.setFill(lblColors,255);
@@ -96,7 +104,7 @@ public abstract class Base_Entity {
 	 * @param delT
 	 * @param drawMe
 	 */
-	public abstract void drawEntity(IRenderInterface pa, float delT, boolean drawMe);
+	public abstract void drawEntity(float delT, boolean drawMe);
 
 	public String toString() {
 		String res = "Entity ID : " + ID + " | Name : " + name + "\n";

@@ -202,10 +202,12 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		
 	}//updateOwnerWithSimVals
 	
-	
-	
+	/**
+	 * Set the team size the sim should use
+	 * @param _uavTeamSize
+	 */
 	public final void setSimUAVTeamSize(int _uavTeamSize) {
-		dfltTeamSizeTrl = _uavTeamSize;		
+		dfltTeamSizeTrl = _uavTeamSize;	
 	}
 	
 	/**
@@ -228,7 +230,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 		FEL = new myMinQueue<DES_Event>(50);
 		//rebuild simulation environment
 		((Base_DESSimulator) currSim).createSimAndLayout(showMsg);
-	
+		((Base_DESSimulator) currSim).setUavTeamSize(dfltTeamSizeTrl);	
 	}//initSim
 	
 	
@@ -342,7 +344,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	public final void drawMe(float animTimeMod) {
 		if(!getDoDrawViz()) {return;}//not drawing, return
 		//call simulator to render sim world
-		((Base_UISimulator) currSim).drawMe(ri,animTimeMod, win);
+		((Base_UISimulator) currSim).drawMe(animTimeMod);
 	}//drawMe	
 	
 	/**
