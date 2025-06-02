@@ -7,9 +7,7 @@ import java.util.concurrent.*;
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
-import base_Render_Interface.IRenderInterface;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
-import base_UI_Objects.windowUI.base.Base_DispWindow;
 import base_UI_Objects.windowUI.simulation.sim.Base_UISimulator;
 import discreteEventSimProject.entities.base.Base_Entity;
 import discreteEventSimProject.entities.consumers.UAV_Team;
@@ -541,7 +539,7 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 	/**
 	 * draw sim-specific result information on right sidebar, if gui-based sim
 	 * @param ri
-	 * @param yVals float array holding : 
+	 * @param rtSideYVals float array holding : 
 	 * 		idx 0 : start y value for text
 	 * 		idx 1 : per-line y offset for grouped text
 	 * 		idx 2 : per-line y offset for title-to-group text (small space)
@@ -553,9 +551,22 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 		ri.pushMatState();
 			//TEAM RES - summary
 			int tmSize = teams.size();
-			Base_DispWindow.AppMgr.showOffsetText(0, new int[] {255,155,20,255}, "Teams Summary : (for "+ String.format("%2d", tmSize) + " teams = "+String.format("%3d", (tmSize * uavTeamSize)) + " UAVs out of " + maxNumUAVs + " ttl)");
-			rtSideYVals[0] +=rtSideYVals[1]; ri.translate(0.0f,rtSideYVals[1], 0.0f);
-			Base_DispWindow.AppMgr.showOffsetText(0, ri.getClr(IRenderInterface.gui_White, 255), "Team size : "+uavTeamSize);
+			ri.pushMatState();
+				AppMgr.showMenuTxt_Orange("Teams Summary :");
+				AppMgr.showMenuTxt_LightSeafoam("(for");
+				AppMgr.showMenuTxt_White(String.format("%2d", tmSize));
+				AppMgr.showMenuTxt_LightSeafoam("teams =");
+				AppMgr.showMenuTxt_White(String.format("%3d", (tmSize * uavTeamSize)));
+				AppMgr.showMenuTxt_LightSeafoam("UAVs out of");
+				AppMgr.showMenuTxt_White(String.format("%3d",maxNumUAVs));
+				AppMgr.showMenuTxt_LightSeafoam("ttl)");
+			ri.popMatState();
+			rtSideYVals[0] += rtSideYVals[1];		ri.translate(0.0f,rtSideYVals[1], 0.0f);
+			ri.pushMatState();
+			AppMgr.showMenuTxt_White("Team size :");
+			AppMgr.showMenuTxt_Seafoam(""+uavTeamSize);
+			ri.popMatState();
+			rtSideYVals[0] += rtSideYVals[1];		ri.translate(0.0f,rtSideYVals[1], 0.0f);
 			//
 			long ttlTask=0, ttlTravel=0, ttlQueue=0, ttlRun=0,ttlProcsDone=0;
 			for(int i=0;i<tmSize;++i) {
@@ -566,36 +577,51 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 				ttlRun += tm.getTTLRunTime()+tm.getCurTimeInProc();
 				ttlProcsDone += tm.getTTLNumTeamsProc();
 			}//	
-			ri.showText("Procs Done : ", 0, rtSideYVals[0]);
-			ri.showText(""+String.format("%07d", ttlProcsDone), 90, rtSideYVals[0]);rtSideYVals[0] += rtSideYVals[1];
-			ri.showText("TTL Work time : ", 0, rtSideYVals[0]);
-			ri.showText(""+String.format("%07d", ttlTask/1000) + " sec", 90, rtSideYVals[0]);rtSideYVals[0] += rtSideYVals[1];
-			ri.showText("TTL Travel time : ", 0, rtSideYVals[0]);
-			ri.showText(""+String.format("%07d",ttlTravel/1000) + " sec",90, rtSideYVals[0]);rtSideYVals[0] += rtSideYVals[1];
-			ri.showText("TTL Queue time : ", 0, rtSideYVals[0]);
-			ri.showText(""+String.format("%07d", ttlQueue/1000) + " sec", 90, rtSideYVals[0]);rtSideYVals[0] += rtSideYVals[1];
-			ri.showText("TTL Uptime : ", 0, rtSideYVals[0]);
-			ri.showText(""+String.format("%07d", ttlRun/1000) + " sec", 90, rtSideYVals[0]);rtSideYVals[0] += rtSideYVals[3];
-			
-			//task res
-			ri.setFill(255,88,255,255);
-			ri.showText("Task Totals : (" + tasks.length+ " tasks) (red is max time so far)", 0, rtSideYVals[0]);rtSideYVals[0] +=  rtSideYVals[2];
-			ri.setFill(255,255,255,255);
-
+			ri.pushMatState();
+				AppMgr.showMenuTxt_White("Procs Done :");
+				AppMgr.showMenuTxt_LightCyan( String.format("%07d", ttlProcsDone));				
+			ri.popMatState();
+			rtSideYVals[0] += rtSideYVals[1];		ri.translate(0.0f,rtSideYVals[1], 0.0f);
+			ri.pushMatState();
+				AppMgr.showMenuTxt_White("Total Times across all teams :");
+			ri.popMatState();
+			rtSideYVals[0] += rtSideYVals[1];		ri.translate(0.0f,rtSideYVals[1], 0.0f);
+			ri.pushMatState();
+				AppMgr.showMenuTxt_White("Work :");
+				AppMgr.showMenuTxt_LightCyan(""+String.format("%07d", ttlTask/1000));
+				AppMgr.showMenuTxt_White("s | Travel :");
+				AppMgr.showMenuTxt_LightCyan(""+String.format("%07d",ttlTravel/1000));
+				AppMgr.showMenuTxt_White("s | In Queue :");
+				AppMgr.showMenuTxt_LightCyan(""+String.format("%07d", ttlQueue/1000));
+				AppMgr.showMenuTxt_White("s | Uptime :");
+				AppMgr.showMenuTxt_LightCyan(""+String.format("%07d", ttlRun/1000));
+				AppMgr.showMenuTxt_White("s");
+			ri.popMatState();
+			rtSideYVals[0] += rtSideYVals[3];		ri.translate(0.0f,rtSideYVals[3], 0.0f);
+			ri.pushMatState();
+				AppMgr.showMenuTxt_LightPink("Task Totals :");
+				AppMgr.showMenuTxt_White(String.format("%3d",tasks.length));
+				AppMgr.showMenuTxt_Red(" (red is max time so far)");
+				AppMgr.showMenuTxt_White(" (TTC : Time to complete)");
+			ri.popMatState();
+			rtSideYVals[0] += rtSideYVals[2];		ri.translate(0.0f,rtSideYVals[2], 0.0f);
 			int hLiteIDX = findMaxIDX(tasks,tasks.length-2);
+			
 			for(int i=0;i<tasks.length;++i) {
-				rtSideYVals[0] = tasks[i].drawResourceDescr(hLiteIDX, i, 102, rtSideYVals[0], rtSideYVals[1])+3;
+				tasks[i].drawResourceDescr(hLiteIDX, i, rtSideYVals);
 			}//for every task
-			rtSideYVals[0] += (rtSideYVals[3] - rtSideYVals[2]);//offset by same amount as other groupings
-			
 			//transit lane res
-			ri.setFill(255,150,99,255);
-			ri.showText("Lane Totals : (" + transitLanes.length+ " Lanes) (red is max Q time (bottleneck))", 0, rtSideYVals[0]);rtSideYVals[0] += rtSideYVals[2];
-			ri.setFill(255,255,255,255);
-			
+			rtSideYVals[0] += rtSideYVals[2];		ri.translate(0.0f,rtSideYVals[2], 0.0f);
+			ri.pushMatState();
+				AppMgr.showMenuTxt_LightPink("Lane Totals : (");
+				AppMgr.showMenuTxt_White(String.format("%3d",transitLanes.length));
+				AppMgr.showMenuTxt_LightPink("Lanes)");
+				AppMgr.showMenuTxt_Red(" (red is max Q time (bottleneck))");
+			ri.popMatState();
+			rtSideYVals[0] += rtSideYVals[2];		ri.translate(0.0f,rtSideYVals[2], 0.0f);
 			hLiteIDX = findMaxIDX(transitLanes, transitLanes.length);		
 			for(int i=0;i<transitLanes.length;++i) {				
-				rtSideYVals[0] = transitLanes[i].drawResourceDescr(hLiteIDX, i, 152, rtSideYVals[0], rtSideYVals[1]) + rtSideYVals[2];
+				transitLanes[i].drawResourceDescr(hLiteIDX, i, rtSideYVals);
 			}//for every tl		
 		ri.popMatState();
 		return rtSideYVals[0];

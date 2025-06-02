@@ -136,41 +136,59 @@ public abstract class Base_Resource extends Base_Entity {
 	
 	/**
 	 * Draw the description data to label this resource
-	 * @param ri
 	 * @param hLiteIDX
 	 * @param idx
-	 * @param yVal
-	 * @param yOff
+	 * @param rtSideYVals float array holding : 
+	 * 		idx 0 : start y value for text
+	 * 		idx 1 : per-line y offset for grouped text
+	 * 		idx 2 : per-line y offset for title-to-group text (small space)
+	 * 		idx 3 : per-line y offset for text that is not grouped (slightly larger)
 	 */
-	public final float drawResourceDescr(int hLiteIDX, int idx, float xVal, float yVal, float yOff) {
-		ri.setFill(0,255,255,255);
-		ri.showText(""+(idx+1) +" : "+name,0, yVal);
-		ri.setFill(255,255,255,255);
+	public final void drawResourceDescr(int hLiteIDX, int idx, float[] rtSideYVals) {
 		ri.pushMatState();
-		ri.translate((name.length()+3)*7, 0);
-		_drawRsrcsDescrStr_Indiv(yVal);
+			AppMgr.showMenuTxt_LightCyan(""+(idx+1) +" : ");
+			AppMgr.showMenuTxt_White(name);				
+			_drawRsrcsDescrStr_Indiv(rtSideYVals);
+			AppMgr.showMenuTxt_White("| #Teams Proc: ");
+			AppMgr.showMenuTxt_LightCyan(String.format("%3d", getTTLNumTeamsProc()));				
 		ri.popMatState();
-		yVal += yOff; 
-		ri.showText("#Teams Proc: " + String.format("%3d", getTTLNumTeamsProc()), 0, yVal);
-		if(hLiteIDX==idx) {ri.setFill(255,44,80,255);}
-		ri.showText("TTL Task Time: " + String.format("%07d", getTTLRunTime()/1000) + " s",xVal,yVal);
-		return _drawRsrcsDescrPost_Indiv(xVal, yVal + yOff);
+		rtSideYVals[0] += rtSideYVals[1];		ri.translate(0.0f,rtSideYVals[1], 0.0f);
+		ri.pushMatState();
+		if(hLiteIDX==idx) {
+			AppMgr.showOffsetText_RightSideMenu(255,44,80,255,"TTL Task Time: ");
+			AppMgr.showMenuTxt_LightRed(String.format("%07d", getTTLRunTime()/1000));
+			AppMgr.showOffsetText_RightSideMenu(255,44,80,255,"s");
+		} else {
+			AppMgr.showMenuTxt_White("TTL Task Time: ");
+			AppMgr.showMenuTxt_LightRed(String.format("%07d", getTTLRunTime()/1000));
+			AppMgr.showMenuTxt_White("s");			
+		}
+		ri.popMatState();
+		rtSideYVals[0] += rtSideYVals[1];		ri.translate(0.0f,rtSideYVals[1], 0.0f);
+		
+		_drawRsrcsDescrPost_Indiv(rtSideYVals);
 	}//drawResourceDescr
 	
 	/**
 	 * Draw the instance-class specific description for this resource
-	 * @param ri
-	 * @param yVal
+	 * @param rtSideYVals float array holding : 
+	 * 		idx 0 : start y value for text
+	 * 		idx 1 : per-line y offset for grouped text
+	 * 		idx 2 : per-line y offset for title-to-group text (small space)
+	 * 		idx 3 : per-line y offset for text that is not grouped (slightly larger)
 	 */
-	protected abstract void _drawRsrcsDescrStr_Indiv(float yVal);
+	protected abstract void _drawRsrcsDescrStr_Indiv(float[] rtSideYVals);
 	
 	/**
 	 * Draw the instance-class specific description for this resource
-	 * @param ri
-	 * @param yValyOff
+	 * @param rtSideYVals float array holding : 
+	 * 		idx 0 : start y value for text
+	 * 		idx 1 : per-line y offset for grouped text
+	 * 		idx 2 : per-line y offset for title-to-group text (small space)
+	 * 		idx 3 : per-line y offset for text that is not grouped (slightly larger)
 	 * @return
 	 */
-	protected abstract float _drawRsrcsDescrPost_Indiv(float xVal, float yValyOff);
+	protected abstract void _drawRsrcsDescrPost_Indiv(float[] rtSideYVals);
 	
 	public String toString(){
 		String res = "Resource : "  + super.toString();

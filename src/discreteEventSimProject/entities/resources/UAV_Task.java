@@ -39,17 +39,6 @@ public class UAV_Task extends Base_Resource{
 	}//ctor
 
 	/**
-	 * Build a display string for this task description
-	 * @return
-	 */
-	public final String getDispTaskDescStr() {
-		return "Opt Size : " + td.optUAVTeamSize + " | Opt TTC : " 
-				+ String.format("%4d",((int)(td.timeForOptToCmp/1000.0f)))
-				+ " s | StdDev : "+ String.format("%3.2f",td.stdDev);
-	}
-	
-	
-	/**
 	 * finalize initialization of this resource, after all connections are set
 	 */
 	@Override
@@ -268,24 +257,33 @@ public class UAV_Task extends Base_Resource{
 	
 	/**
 	 * Draw the instance-class specific descirption for this entity
-	 * @param ri
-	 * @param win
-	 * @param hLiteIDX
+	 * @param rtSideYVals float array holding : 
+	 * 		idx 0 : start y value for text
+	 * 		idx 1 : per-line y offset for grouped text
+	 * 		idx 2 : per-line y offset for title-to-group text (small space)
+	 * 		idx 3 : per-line y offset for text that is not grouped (slightly larger)
 	 */
 	@Override
-	protected final void _drawRsrcsDescrStr_Indiv(float yVal) {
-		ri.showText(getDispTaskDescStr(),0, yVal);		
-	}
+	protected final void _drawRsrcsDescrStr_Indiv(float[] rtSideYVals) {
+		AppMgr.showMenuTxt_White("Opt Sz :");
+		AppMgr.showMenuTxt_LightCyan(""+td.optUAVTeamSize);		
+		AppMgr.showMenuTxt_White("| Opt TTC :");
+		AppMgr.showMenuTxt_LightCyan(String.format("%4d",((int)(td.timeForOptToCmp/1000.0f))));		
+		AppMgr.showMenuTxt_White("s| StdDev :");
+		AppMgr.showMenuTxt_LightCyan(String.format("%3.2f",td.stdDev));					
+	}//_drawRsrcsDescrStr_Indiv
 	
 	
 	/**
 	 * Draw the instance-class specific description for this resource
-	 * @param ri
-	 * @param yValyOff
-	 * @return
+	 * @param rtSideYVals float array holding : 
+	 * 		idx 0 : start y value for text
+	 * 		idx 1 : per-line y offset for grouped text
+	 * 		idx 2 : per-line y offset for title-to-group text (small space)
+	 * 		idx 3 : per-line y offset for text that is not grouped (slightly larger)
 	 */
 	@Override
-	protected final float _drawRsrcsDescrPost_Indiv(float xVal, float yValyOff) {return yValyOff;}
+	protected final void _drawRsrcsDescrPost_Indiv(float[] rtSideYVals) {}
 		
 	public String toString(){
 		String res = (td.isGroupTask ? "Group Task "  : "Task ")  + super.toString();

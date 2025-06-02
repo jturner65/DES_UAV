@@ -1,6 +1,7 @@
 package discreteEventSimProject.entities.base;
 
 import base_Render_Interface.IRenderInterface;
+import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import discreteEventSimProject.sim.base.Base_DESSimulator;
@@ -19,6 +20,8 @@ public abstract class Base_Entity {
 	public final IRenderInterface ri;
 	
 	public final Base_DispWindow win;
+	
+	public final GUI_AppManager AppMgr; 
 	public String name;
 	public myPointf loc;			//initial location of this entity (may change if it moves)
 	
@@ -52,6 +55,7 @@ public abstract class Base_Entity {
 		sim=_sim;
 		ri=sim.ri;
 		win=sim.win;
+		AppMgr = Base_DispWindow.AppMgr;
 		name = _name; 
 		loc = new myPointf(_loc);
 		types=_types; 

@@ -285,26 +285,33 @@ public class UAV_TransitLane extends Base_Resource{
 //	}//drawEntityPriv
 	/**
 	 * Draw the instance-class specific descirption for this entity - nothing for lanes
-	 * @param ri
-	 * @param win
-	 * @param hLiteIDX
+	 * @param rtSideYVals float array holding : 
+	 * 		idx 0 : start y value for text
+	 * 		idx 1 : per-line y offset for grouped text
+	 * 		idx 2 : per-line y offset for title-to-group text (small space)
+	 * 		idx 3 : per-line y offset for text that is not grouped (slightly larger)
 	 */
 	@Override
-	protected final void _drawRsrcsDescrStr_Indiv(float yVal) {}
+	protected final void _drawRsrcsDescrStr_Indiv(float[] rtSideYVals) {}
 	
 	/**
 	 * Draw the instance-class specific description for this resource
-	 * @param ri
-	 * @param yValyOff
-	 * @return
+	 * @param rtSideYVals float array holding : 
+	 * 		idx 0 : start y value for text
+	 * 		idx 1 : per-line y offset for grouped text
+	 * 		idx 2 : per-line y offset for title-to-group text (small space)
+	 * 		idx 3 : per-line y offset for text that is not grouped (slightly larger)
 	 */
 	@Override
-	protected final float _drawRsrcsDescrPost_Indiv(float xVal, float yValyOff) {
-		float yVal = yValyOff;
-		ri.setFill(255,255,255,255);			
-		ri.showText("Travel Time : "+String.format("%07d", getTTLTravelTime()/1000) + " s",0, yVal);//yVal += yOff; 
-		ri.showText("Q Time : " + String.format("%07d",  getTTLQueueTime()/1000) + " s",xVal, yVal);		
-		return yVal;
+	protected final void _drawRsrcsDescrPost_Indiv(float[] rtSideYVals) {
+		ri.pushMatState();
+			AppMgr.showMenuTxt_White("Travel Time : ");
+			AppMgr.showMenuTxt_LightViolet(String.format("%07d", getTTLTravelTime()/1000));		
+			AppMgr.showMenuTxt_White("s | Q Time : ");
+			AppMgr.showMenuTxt_LightViolet(String.format("%07d",  getTTLQueueTime()/1000));		
+			AppMgr.showMenuTxt_White("s");
+		ri.popMatState();
+		rtSideYVals[0] += rtSideYVals[1];		ri.translate(0.0f,rtSideYVals[1], 0.0f);		
 	}
 
 	public static String getTLResCSV_Hdr() {return "Transit Lane Name, Teams Processed, TTL Lane Time (ms), TTL Travel Time (ms), TTL Queue Time (ms)";}
