@@ -1,8 +1,8 @@
 package discreteEventSimProject.simExec.base;
 
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ThreadLocalRandom;
 
+import base_Math_Objects.MyMathUtils;
 import base_UI_Objects.renderedObjs.Boat_RenderObj;
 import base_UI_Objects.renderedObjs.Sphere_RenderObj;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
@@ -434,7 +434,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
 	private DES_Event[] TEST_buildTestAra(int numTestElems){
 		DES_Event[] tmpAra = new DES_Event[numTestElems];
 		for (int i =0;i<numTestElems;++i) {
-			tmpAra[i] = new DES_Event(ThreadLocalRandom.current().nextInt(), DES_EventType.EnterQueue, null, null, null);//no entity attached to these events
+			tmpAra[i] = new DES_Event(MyMathUtils.randomInt(), DES_EventType.EnterQueue, null, null, null);//no entity attached to these events
 		}
 		return tmpAra;
 	}

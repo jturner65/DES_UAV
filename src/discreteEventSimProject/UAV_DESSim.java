@@ -255,9 +255,6 @@ public class UAV_DESSim extends GUI_AppManager {
 	}
 	
 	@Override
-	public int[] getClr_Custom(int colorVal, int alpha) {	return new int[] {255,255,255,alpha};}
-
-	@Override
 	public void setSmoothing() {ri.setSmoothing(0);		}
 
 	@Override

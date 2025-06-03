@@ -2,9 +2,9 @@ package discreteEventSimProject.entities.resources;
 
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ThreadLocalRandom;
 
 import base_Render_Interface.IRenderInterface;
+import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import discreteEventSimProject.entities.base.EntityType;
 import discreteEventSimProject.entities.consumers.UAV_Team;
@@ -159,7 +159,7 @@ public class UAV_Task extends Base_Resource{
 	 * @return
 	 */
 	private DES_Event _leaveResEnd(long timeAhead, UAV_Team team, DES_Event ev) {		
-		float _draw = ThreadLocalRandom.current().nextFloat();
+		float _draw = MyMathUtils.randomFloat();
 		//get biggest key less than or equal to _draw - with only 1 entry, will always return same entry
 		Entry<Float, Base_Resource> nextResource = childResources.floorEntry(_draw);
 		if(null == nextResource) {sim.dispOutput("UAV_Task","_leaveResEnd","ERROR : _leaveResEnd : null entry as next resource (transit lane) "+ name); return null;}	
@@ -220,7 +220,7 @@ public class UAV_Task extends Base_Resource{
 	public myPointf getTargetLoc() {
 		if(!td.isGroupTask) {return loc;}
 		else {	
-			myPointf offset = sim.getRandPosInSphere(.75f*rad);
+			myPointf offset = MyMathUtils.getRandPosInSphere(.75f*rad);
 			return myPointf._add(offset, loc);}
 	}//getTargetLoc	
 	

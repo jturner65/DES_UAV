@@ -2,6 +2,7 @@ package discreteEventSimProject.entities.consumers;
 
 
 import base_Render_Interface.IRenderInterface;
+import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
@@ -78,7 +79,7 @@ public class UAV_Team extends Base_Entity {
 		uavTeam = new UAV_Obj[teamSize];
 		//sim.dispOutput("\tUAV_Team : make UAV team of size : "+ _teamSize+ " name : " + name);
 		//2nd idx : 0 is normal, 1 is location
-		myPointf[][] teamLocs = sim.getRegularSphereList(rad, teamSize, 1.0f);
+		myPointf[][] teamLocs = MyMathUtils.getRegularSphereList(rad, teamSize, 1.0f);
 		for(int c = 0; c < uavTeam.length; ++c){uavTeam[c] =  new UAV_Obj(this,teamLocs[c][1]);}
 		motionTraj = new myVectorf();
 		uavVelVec = new myVectorf();

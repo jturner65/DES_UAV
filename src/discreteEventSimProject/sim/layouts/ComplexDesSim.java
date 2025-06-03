@@ -1,7 +1,6 @@
 package discreteEventSimProject.sim.layouts;
 
-import java.util.concurrent.ThreadLocalRandom;
-
+import base_Math_Objects.MyMathUtils;
 import discreteEventSimProject.sim.base.Base_DESSimulator;
 import discreteEventSimProject.simExec.base.Base_DESSimExec;
 
@@ -50,8 +49,8 @@ public class ComplexDesSim extends Base_DESSimulator{
 		optTeamTTCMins[0] = 3;
 		stdDevTTCMult[0] = 0.0f;		
 		for(int i=1;i<taskLocs.length;++i) {
-			taskOptSize[i] = (int)Math.round((ThreadLocalRandom.current().nextDouble(0,1) * 5)+1);
-			optTeamTTCMins[i] = (float)(ThreadLocalRandom.current().nextDouble(0,1) * 30) + 5.0f;
+			taskOptSize[i] = MyMathUtils.randomInt(1, 6); //(int)Math.round((ThreadLocalRandom.current().nextDouble(0,1) * 5)+1);
+			optTeamTTCMins[i] = MyMathUtils.randomFloat(5.0f, 35.0f); //(float)(ThreadLocalRandom.current().nextDouble(0,1) * 30) + 5.0f;
 			stdDevTTCMult[i] = 0.0f;		
 		}
 	}//initSimPriv
@@ -77,7 +76,7 @@ public class ComplexDesSim extends Base_DESSimulator{
 	protected boolean[] getIsGroupAra() {
 		boolean [] isGrp = new boolean[taskLocs.length];
 		for(int i=1;i<taskLocs.length-1;++i) {
-			isGrp[i]= (ThreadLocalRandom.current().nextDouble(0,1) > .8);
+			isGrp[i]=(MyMathUtils.randomDouble(0, 1) > .8);
 			
 		}
 		//entry is not group

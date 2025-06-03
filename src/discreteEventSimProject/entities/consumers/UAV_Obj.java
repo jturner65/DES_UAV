@@ -1,7 +1,5 @@
 package discreteEventSimProject.entities.consumers;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
@@ -61,9 +59,8 @@ public class UAV_Obj {
 	public UAV_Obj(UAV_Team _team, myPointf _coords){
 		ID = IDcount++;	
 		team = _team; 		
-		//preCalcAnimSpd = (float) ThreadLocalRandom.current().nextDouble(.5f,2.0);		
-		animPhase = ThreadLocalRandom.current().nextDouble(.25f, .75f ) ;//keep initial phase between .25 and .75 so that cyclic-force UAVs start moving right away
-		maxAnimCntr = team.getMaxAnimCounter();
+		//keep initial phase between .25 and .75 so that cyclic-force boids start moving right away
+		animPhase = MyMathUtils.randomFloat(.25f, .75f);		maxAnimCntr = team.getMaxAnimCounter();
 		animCntr = animPhase * maxAnimCntr;
 
 		rotVec = myVectorf.RIGHT.cloneMe(); 			//initial setup

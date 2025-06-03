@@ -2,11 +2,8 @@ package discreteEventSimProject.sim.base;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.*;
-
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import base_Math_Objects.vectorObjs.floats.myVectorf;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
 import base_UI_Objects.windowUI.simulation.sim.Base_UISimulator;
 import discreteEventSimProject.entities.base.Base_Entity;
@@ -910,58 +907,6 @@ public abstract class Base_DESSimulator extends Base_UISimulator {
 		for(int i=0;i<tasks.length;++i) {res.add(tasks[i].td.getTaskCompTimeDataCSV(minSize, maxSize, sclFact,eqPwr)+", "+tasks[i].getTTLNumTeamsProc()+", "+tasks[i].getTTLRunTime());}		
 		return res.toArray(new String[0]);
 	}//buildCSVTaskData
-
-		
-	/** 
-	 * convert from spherical coords to cartesian
-	 * @param rad
-	 * @param thet
-	 * @param phi
-	 * @return ara : norm, surface point == x,y,z of coords passed
-	 */
-	public myVectorf[] getXYZFromRThetPhi(double rad, double thet, double phi, double scaleZ) {
-		double sinThet = Math.sin(thet);	
-		myVectorf[] res = new myVectorf[2];
-		res[1] = new myVectorf(sinThet * Math.cos(phi) * rad, sinThet * Math.sin(phi) * rad,Math.cos(thet)*rad*scaleZ);
-		res[0] = myVectorf._normalize(res[1]);
-		return res;
-	}//
-	
-	/**
-	 * builds a list of N regularly placed vertices and normals for a sphere of radius rad centered at ctr
-	 */	
-	public myVectorf[][] getRegularSphereList(float rad, int N, float scaleZ) {
-		ArrayList<myVectorf[]> res = new ArrayList<myVectorf[]>();
-		//choose 1 point per dArea, where dArea is area of sphere parsed into N equal portions
-		double lclA = 4*Math.PI/N, lclD = Math.sqrt(lclA);
-		int Mthet = (int) Math.round(Math.PI/lclD), Mphi;
-		double dThet = MyMathUtils.PI/Mthet, dPhi = lclA/dThet, thet, phi, twoPiOvDPhi = MyMathUtils.TWO_PI/dPhi;
-		for(int i=0;i<Mthet;++i) {
-			thet = dThet * (i + 0.5f);
-			Mphi = (int) Math.round(twoPiOvDPhi * Math.sin(thet));
-			for (int j=0;j<Mphi; ++j) { 
-				phi = (MyMathUtils.TWO_PI*j)/Mphi;		
-				res.add(getXYZFromRThetPhi(rad, thet, phi, scaleZ));
-			}
-		}
-		return res.toArray(new myVectorf[0][]);
-	}//getRegularSphereList	
-	
-	private static final double lcl_third = 1.0/3.0;
-	//return a random position within a sphere
-	public myVectorf getRandPosInSphere(double rad){ return getRandPosInSphere(rad, new myPointf());}
-	public myVectorf getRandPosInSphere(double rad, myPointf ctr){
-		myVectorf pos = new myVectorf();
-		do{
-			double u = ThreadLocalRandom.current().nextDouble(0,1), r = rad * Math.pow(u, lcl_third),
-					cosTheta = ThreadLocalRandom.current().nextDouble(-1,1), sinTheta =  Math.sin(Math.acos(cosTheta)),
-					phi = ThreadLocalRandom.current().nextDouble(0,MyMathUtils.TWO_PI);
-			pos.set(sinTheta * Math.cos(phi), sinTheta * Math.sin(phi),cosTheta);
-			pos._mult(r);
-			pos._add(ctr);
-		} while (pos.z < ctr.z);
-		return pos;
-	}	
 	
 	/**
 	 * handle passed event - dispatch event to appropriate entity with appropriate values
