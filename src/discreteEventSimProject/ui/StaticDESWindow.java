@@ -1,6 +1,5 @@
 package discreteEventSimProject.ui;
 
-import java.util.ArrayList;
 import java.util.TreeMap;
 
 import base_Render_Interface.IRenderInterface;
@@ -33,7 +32,7 @@ public class StaticDESWindow extends Base_DESWindow {
 	 * Instance-specific button instantiation. Should return total number of buttons/booleans
 	 */
 	@Override
-	protected final int initSimPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray) {
+	protected final int initSimPrivBtns_Indiv(TreeMap<Integer, Object[]> tmpBtnNamesArray) {
 		return numStaticPrivFlags;
 	}
 	/**

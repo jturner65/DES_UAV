@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import base_Render_Interface.IRenderInterface;
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.doubles.myVector;
+import base_Render_Interface.IRenderInterface;
 import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.drawnTrajectories.DrawnSimpleTraj;
 import base_UI_Objects.windowUI.simulation.simExec.Base_UISimExec;
@@ -69,23 +69,24 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	
 
 	@Override
-	public final int initSimPrivBtns(ArrayList<Object[]> tmpBtnNamesArray) {
+	public final int initSimPrivBtns(TreeMap<Integer, Object[]> tmpBtnNamesArray) {
 		// add an entry for each button, in the order they are wished to be displayed
 		// true tag, false tag, btn IDX  
-		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Teams", "Draw UAV Teams"},  drawUAVTeamsIDX));  
-		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Task Locs", "Draw Task Locs"},  drawTaskLocsIDX));  
-		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Lanes", "Draw Transit Lanes"}, drawTLanesIDX));  
-		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Showing Task Lbls", "Show Task Lbls"},  dispTaskLblsIDX));  
-		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Showing TLane Lbls", "Show TLane Lbls"}, dispTLnsLblsIDX));  
-		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Showing Team Lbls", "Show Team Lbls"},  dispUAVLblsIDX));  
-		tmpBtnNamesArray.add(uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Boats", "Drawing UAV Spheres"},   drawBoatsIDX));  
+		int idx=0;
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Teams", "Draw UAV Teams"},  drawUAVTeamsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Task Locs", "Draw Task Locs"},  drawTaskLocsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Lanes", "Draw Transit Lanes"}, drawTLanesIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing Task Lbls", "Show Task Lbls"},  dispTaskLblsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing TLane Lbls", "Show TLane Lbls"}, dispTLnsLblsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing Team Lbls", "Show Team Lbls"},  dispUAVLblsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Boats", "Drawing UAV Spheres"},   drawBoatsIDX));  
 		return initSimPrivBtns_Indiv(tmpBtnNamesArray);
 	}//initAllPrivBtns	
 	
 	@Override 
 	protected final String getSweepFieldName() {return "Team Size";}
 	
-	protected abstract int initSimPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray);
+	protected abstract int initSimPrivBtns_Indiv(TreeMap<Integer, Object[]> tmpBtnNamesArray);
 	
 	/**
 	 * Instance specific reset of flag states

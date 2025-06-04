@@ -13,10 +13,10 @@ import base_UI_Objects.windowUI.simulation.ui.Base_UISimWindow;
 import base_Utils_Objects.priorityQueue.myMinQueue;
 import base_Utils_Objects.priorityQueue.base.myPriorityQueue;
 import base_Utils_Objects.sim.Base_SimDataAdapter;
-import discreteEventSimProject.events.DES_EventType;
 import discreteEventSimProject.events.DES_Event;
-import discreteEventSimProject.sim.base.DES_SimDataUpdater;
+import discreteEventSimProject.events.DES_EventType;
 import discreteEventSimProject.sim.base.Base_DESSimulator;
+import discreteEventSimProject.sim.base.DES_SimDataUpdater;
 
 /**
  * class to manage the functionality of the simulation 

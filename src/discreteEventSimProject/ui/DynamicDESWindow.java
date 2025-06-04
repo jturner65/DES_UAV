@@ -1,6 +1,5 @@
 package discreteEventSimProject.ui;
 
-import java.util.ArrayList;
 import java.util.TreeMap;
 
 import base_Render_Interface.IRenderInterface;
@@ -21,7 +20,7 @@ public class DynamicDESWindow extends Base_DESWindow {
 	}
 
 	@Override
-	protected int initSimPrivBtns_Indiv(ArrayList<Object[]> tmpBtnNamesArray) {
+	protected int initSimPrivBtns_Indiv(TreeMap<Integer, Object[]> tmpBtnNamesArray) {
 		return numDynamicPrivFlags;
 	}
 
