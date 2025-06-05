@@ -65,28 +65,12 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	
 	public Base_DESWindow(IRenderInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
 		super(_p, _AppMgr, _winIdx);
-	}//DancingBallWin
+	}//Base_DESWindow
 	
-
-	@Override
-	public final int initSimPrivBtns(TreeMap<Integer, Object[]> tmpBtnNamesArray) {
-		// add an entry for each button, in the order they are wished to be displayed
-		// true tag, false tag, btn IDX  
-		int idx=0;
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Teams", "Draw UAV Teams"},  drawUAVTeamsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Task Locs", "Draw Task Locs"},  drawTaskLocsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Lanes", "Draw Transit Lanes"}, drawTLanesIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing Task Lbls", "Show Task Lbls"},  dispTaskLblsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing TLane Lbls", "Show TLane Lbls"}, dispTLnsLblsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing Team Lbls", "Show Team Lbls"},  dispUAVLblsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Boats", "Drawing UAV Spheres"},   drawBoatsIDX));  
-		return initSimPrivBtns_Indiv(tmpBtnNamesArray);
-	}//initAllPrivBtns	
 	
 	@Override 
 	protected final String getSweepFieldName() {return "Team Size";}
 	
-	protected abstract int initSimPrivBtns_Indiv(TreeMap<Integer, Object[]> tmpBtnNamesArray);
 	
 	/**
 	 * Instance specific reset of flag states
@@ -161,9 +145,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	/**
 	 * This function is called on ui value update, to pass new ui values on to window-owned consumers
 	 */
-	protected final void updateCalcObjUIVals() {
-		//pass updates to simulator executive
-		
+	protected final void updateCalcObjUIVals() {	
 		
 	}
 	
@@ -202,7 +184,53 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	 * @return
 	 */
 	protected abstract boolean handleDesPrivFlags_Indiv(int idx, boolean val, boolean oldVal);
-	
+		/**
+	 * Build all UI objects to be shown in left side bar menu for this window.  This is the first child class function called by initThisWin
+	 * @param tmpUIObjArray : map of object data, keyed by UI object idx, with array values being :                    
+	 *           the first element double array of min/max/mod values                                                   
+	 *           the 2nd element is starting value                                                                      
+	 *           the 3rd elem is label for object                                                                       
+	 *           the 4th element is object type (GUIObj_Type enum)
+	 *           the 5th element is boolean array of : (unspecified values default to false)
+	 *           	idx 0: value is sent to owning window,  
+	 *           	idx 1: value is sent on any modifications (while being modified, not just on release), 
+	 *           	idx 2: changes to value must be explicitly sent to consumer (are not automatically sent),
+	 *           the 6th element is a boolean array of format values :(unspecified values default to false)
+	 *           	idx 0: whether multi-line(stacked) or not                                                  
+	 *              idx 1: if true, build prefix ornament                                                      
+	 *              idx 2: if true and prefix ornament is built, make it the same color as the text fill color.
+	 * @param tmpListObjVals : map of string arrays, keyed by UI object idx, with array values being each element in the list
+	 * @param tmpBtnNamesArray : map of Object arrays to be built containing all button definitions, keyed by sequential value == objId
+	 * 				the first element is true label
+	 * 				the second element is false label
+	 * 				the third element is integer flag idx 
+	 */
+	@Override
+	protected final void setupGUIObjsAras_Sim(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals, TreeMap<Integer,Object[]> tmpBtnNamesArray) {
+		tmpListObjVals.put(gIDX_UAVTeamSize, uavTeamSizeList);	
+		
+		double initTeamSizeIDX = 1.0*uavTeamSize - Integer.parseInt(uavTeamSizeList[0]);
+		
+		tmpUIObjArray.put(gIDX_UAVTeamSize, uiMgr.uiObjInitAra_List(new double[]{0,uavTeamSizeList.length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size"));          
+		// add an entry for each button, in the order they are wished to be displayed
+		// true tag, false tag, btn IDX  
+		int idx=tmpBtnNamesArray.size();
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Teams", "Draw UAV Teams"},  drawUAVTeamsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Task Locs", "Draw Task Locs"},  drawTaskLocsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Lanes", "Draw Transit Lanes"}, drawTLanesIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing Task Lbls", "Show Task Lbls"},  dispTaskLblsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing TLane Lbls", "Show TLane Lbls"}, dispTLnsLblsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing Team Lbls", "Show Team Lbls"},  dispUAVLblsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Boats", "Drawing UAV Spheres"},   drawBoatsIDX));  
+			
+		setupGUIObjsAras_Indiv(tmpUIObjArray, tmpListObjVals, tmpBtnNamesArray.size(), tmpBtnNamesArray);
+	}//setupGUIObjsAras
+	/**
+	 * Return the list to use for sim layout
+	 * @return
+	 */
+	protected final String[] getSimLayoutToUseList() {return simLayoutToUseList;}
+
 	/**
 	 * Build all UI objects to be shown in left side bar menu for this window.  This is the first child class function called by initThisWin
 	 * @param tmpUIObjArray : map of object data, keyed by UI object idx, with array values being :                    
@@ -211,30 +239,22 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	 *           the 3rd elem is label for object                                                                       
 	 *           the 4th element is object type (GUIObj_Type enum)
 	 *           the 5th element is boolean array of : (unspecified values default to false)
-	 *           	{value is sent to owning window, 
-	 *           	value is sent on any modifications (while being modified, not just on release), 
-	 *           	changes to value must be explicitly sent to consumer (are not automatically sent)}    
-	 * @param tmpListObjVals : map of list object possible selection values
+	 *           	idx 0: value is sent to owning window,  
+	 *           	idx 1: value is sent on any modifications (while being modified, not just on release), 
+	 *           	idx 2: changes to value must be explicitly sent to consumer (are not automatically sent),
+	 *           the 6th element is a boolean array of format values :(unspecified values default to false)
+	 *           	idx 0: whether multi-line(stacked) or not                                                  
+	 *              idx 1: if true, build prefix ornament                                                      
+	 *              idx 2: if true and prefix ornament is built, make it the same color as the text fill color.
+	 * @param tmpListObjVals : map of string arrays, keyed by UI object idx, with array values being each element in the list
+	 * @param firstBtnIDX : first index to place button objects in @tmpBtnNamesArray 
+	 * @param tmpBtnNamesArray : map of Object arrays to be built containing all button definitions, keyed by sequential value == objId
+	 * 				the first element is true label
+	 * 				the second element is false label
+	 * 				the third element is integer flag idx 
 	 */
-	@Override
-	protected final void setupGUIObjsAras_Sim(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals) {
-		tmpListObjVals.put(gIDX_UAVTeamSize, uavTeamSizeList);	
-		
-		double initTeamSizeIDX = 1.0*uavTeamSize - Integer.parseInt(uavTeamSizeList[0]);
-		
-		tmpUIObjArray.put(gIDX_UAVTeamSize, uiMgr.uiObjInitAra_List(new double[]{0,uavTeamSizeList.length-1, 1.0f}, initTeamSizeIDX, "UAV Team Size"));          
-		
-		setupGUIObjsAras_Indiv(tmpUIObjArray, tmpListObjVals);
-	}//setupGUIObjsAras
-	/**
-	 * Return the list to use for sim layout
-	 * @return
-	 */
-	protected final String[] getSimLayoutToUseList() {return simLayoutToUseList;}
-	
-	
-	protected abstract void setupGUIObjsAras_Indiv(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals);
-	
+	protected abstract void setupGUIObjsAras_Indiv(TreeMap<Integer, Object[]> tmpUIObjArray, TreeMap<Integer, String[]> tmpListObjVals, int firstBtnIDX, TreeMap<Integer, Object[]> tmpBtnNamesArray);
+
 	/**
 	 * Called if int-handling guiObjs_Numeric[UIidx] (int or list) has new data which updated UI adapter. 
 	 * Intended to support custom per-object handling by owning window.
