@@ -10,13 +10,13 @@ import java.util.Map;
 public enum DES_EventType {
 	ArriveResource(0), LeaveResource(1), EnterQueue(2), ConsumerWaiting(3);		
 	private int value; 
-	private static final String[] _typeExplanation = new String[] {
+	private static final String[] _typeExplanation = new String[]{
 		"Consumer has arrived at Resource",
 		"Consumer is leaving Resource",
 		"Consumer has entered a Queue",
 		"Consumer is waiting for Resource to be available"		
 	};
-	private static final String[] _typeName = new String[] {"ArriveAtResource","LeaveResource","EnterQueue","ConsumerWaiting"};
+	private static final String[] _typeName = new String[]{"ArriveAtResource","LeaveResource","EnterQueue","ConsumerWaiting"};
 	public static String[] getListOfTypes() {return _typeName;}	
 	private static Map<Integer, DES_EventType> map = new HashMap<Integer, DES_EventType>(); 
 	static { for (DES_EventType enumV : DES_EventType.values()) { map.put(enumV.value, enumV);}}

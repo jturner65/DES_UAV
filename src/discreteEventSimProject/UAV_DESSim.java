@@ -129,7 +129,7 @@ public class UAV_DESSim extends GUI_AppManager {
 		showInfo = true;
 		//titles and descs, need to be set before sidebar menu is defined
 		String[] _winTitles = new String[]{"","UAV DES Sim 1","UAV DES Sim 2"},
-				_winDescr = new String[] {"","Display UAV Discrete Event Simulator 1","Display UAV Discrete Event Simulator 2"};
+				_winDescr = new String[]{"","Display UAV Discrete Event Simulator 1","Display UAV Discrete Event Simulator 2"};
 
 		//instanced window dims when open and closed - only showing 1 open at a time - and init cam vals
 		float[][] _floatDims  = getDefaultWinAndCameraDims();	
@@ -144,7 +144,7 @@ public class UAV_DESSim extends GUI_AppManager {
 			{"Verify PQ", "Verify FEL", "Show Sim", "Test Tasks"}
 		};				
 		
-		String[] menuDbgBtnNames = new String[] {};//must have literals for every button or this is ignored
+		String[] menuDbgBtnNames = new String[]{};//must have literals for every button or this is ignored
 		//build menu
 		buildSideBarMenu(_winTitles, menuBtnTitles, menuBtnNames, menuDbgBtnNames, true, false);
 

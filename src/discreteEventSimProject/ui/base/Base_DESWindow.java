@@ -9,8 +9,8 @@ import base_Math_Objects.vectorObjs.doubles.myVector;
 import base_Render_Interface.IRenderInterface;
 import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.drawnTrajectories.DrawnSimpleTraj;
-import base_UI_Objects.windowUI.simulation.simExec.Base_UISimExec;
-import base_UI_Objects.windowUI.simulation.ui.Base_UISimWindow;
+import base_UI_Objects.simulationUI.simExec.Base_UISimExec;
+import base_UI_Objects.simulationUI.ui.Base_UISimWindow;
 import base_UI_Objects.windowUI.uiData.UIDataUpdater;
 import base_Utils_Objects.io.messaging.MsgCodes;
 import discreteEventSimProject.simExec.base.Base_DESSimExec;
@@ -36,12 +36,12 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	/**
 	 * list of values for dropdown list of team size
 	 */
-	protected final String[] uavTeamSizeList = new String[] {"2","3","4","5","6","7","8","9"};
+	protected final String[] uavTeamSizeList = new String[]{"2","3","4","5","6","7","8","9"};
 	
 	/**
 	 * List of layout idxs available
 	 */
-	protected final String[] simLayoutToUseList = new String[] {"0","1","2","3","4"};
+	protected final String[] simLayoutToUseList = new String[]{"0","1","2","3","4"};
 	
 	/////////
 	//custom debug/function ui button names -empty will do nothing
@@ -215,13 +215,13 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 		// add an entry for each button, in the order they are wished to be displayed
 		// true tag, false tag, btn IDX  
 		int idx=tmpBtnNamesArray.size();
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Teams", "Draw UAV Teams"},  drawUAVTeamsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Task Locs", "Draw Task Locs"},  drawTaskLocsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing Lanes", "Draw Transit Lanes"}, drawTLanesIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing Task Lbls", "Show Task Lbls"},  dispTaskLblsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing TLane Lbls", "Show TLane Lbls"}, dispTLnsLblsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Showing Team Lbls", "Show Team Lbls"},  dispUAVLblsIDX));  
-		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[] {"Drawing UAV Boats", "Drawing UAV Spheres"},   drawBoatsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[]{"Drawing UAV Teams", "Draw UAV Teams"},  drawUAVTeamsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[]{"Drawing Task Locs", "Draw Task Locs"},  drawTaskLocsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[]{"Drawing Lanes", "Draw Transit Lanes"}, drawTLanesIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[]{"Showing Task Lbls", "Show Task Lbls"},  dispTaskLblsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[]{"Showing TLane Lbls", "Show TLane Lbls"}, dispTLnsLblsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[]{"Showing Team Lbls", "Show Team Lbls"},  dispUAVLblsIDX));  
+		tmpBtnNamesArray.put(idx++, uiMgr.uiObjInitAra_Btn(new String[]{"Drawing UAV Boats", "Drawing UAV Spheres"},   drawBoatsIDX));  
 			
 		setupGUIObjsAras_Indiv(tmpUIObjArray, tmpListObjVals, tmpBtnNamesArray.size(), tmpBtnNamesArray);
 	}//setupGUIObjsAras

@@ -11,13 +11,13 @@ import java.util.Map;
  */
 public enum EntityType {
 	Consumer, Resource, Queue, Group;	
-	private static final String[] _typeExplanation = new String[] {
+	private static final String[] _typeExplanation = new String[]{
 		"Consumes resource",
 		"Some resource to be consumed",
 		"FIFO Ordered Collection",
 		"Unordered Collection"
 	};
-	private static final String[] _typeName = new String[] {"Consumer","Resource","Queue","Group"};
+	private static final String[] _typeName = new String[]{"Consumer","Resource","Queue","Group"};
 	public static String[] getListOfTypes() {return _typeName;}	
 	private static Map<Integer, EntityType> map = new HashMap<Integer, EntityType>(); 
 	static { for (EntityType enumV : EntityType.values()) { map.put(enumV.ordinal(), enumV);}}

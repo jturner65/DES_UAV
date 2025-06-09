@@ -2,7 +2,7 @@ package discreteEventSimProject.sim.base;
 
 import java.util.Map;
 
-import base_UI_Objects.windowUI.simulation.uiData.Base_UISimDataAdapter;
+import base_UI_Objects.simulationUI.uiData.Base_UISimDataAdapter;
 import discreteEventSimProject.simExec.base.Base_DESSimExec;
 /**
  * DES Simulation data adapter, to communicate simulation values and parameters between sim exec and sim instances
