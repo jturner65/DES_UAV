@@ -68,15 +68,15 @@ public class DynamicDESWindow extends Base_DESWindow {
 	
 	/**
 	 * Build all UI buttons to be shown in left side bar menu for this window. This is for instancing DES Sim windows to add to button region
-	 * USE tmpUIBtnObjMap.size() for start idx
-	 * @param tmpUIBtnObjMap : map of GUIObj_Params to be built containing all button definitions, keyed by sequential value == objId
+	 * USE tmpUIBoolSwitchObjMap.size() for start idx
+	 * @param tmpUIBoolSwitchObjMap : map of GUIObj_Params to be built containing all flag-backed boolean switch definitions, keyed by sequential value == objId
 	 * 				the first element is the object index
 	 * 				the second element is true label
 	 * 				the third element is false label
 	 * 				the final element is integer flag idx 
 	 */
 	@Override
-	protected final void setupGUIBtnAras_SimIndiv(TreeMap<String, GUIObj_Params> tmpUIBtnObjMap) {}
+	protected final void setupGUIBtnAras_SimIndiv(TreeMap<String, GUIObj_Params> tmpUIBoolSwitchObjMap) {}
 
 	@Override
 	protected boolean setUI_IntDESValsCustom(int UIidx, int ival, int oldVal) {

@@ -211,24 +211,24 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	}
 	/**
 	 * Build all UI buttons to be shown in left side bar menu for this window. This is for instancing sim windows to add to button region
-	 * @param tmpUIBtnObjMap : map of GUIObj_Params to be built containing all button definitions, keyed by sequential value == objId
+	 * @param tmpUIBoolSwitchObjMap : map of GUIObj_Params to be built containing all flag-backed boolean switch definitions, keyed by sequential value == objId
 	 * 				the first element is true label
 	 * 				the second element is false label
 	 * 				the third element is integer flag idx 
 	 */	@Override
-	protected final void setupGUIBtnAras_Sim(TreeMap<String, GUIObj_Params> tmpUIBtnObjMap) {
+	protected final void setupGUIBtnAras_Sim(TreeMap<String, GUIObj_Params> tmpUIBoolSwitchObjMap) {
 		// add an entry for each button, in the order they are wished to be displayed
 		// true tag, false tag, btn IDX  
-		int idx=tmpUIBtnObjMap.size()+1;
-		tmpUIBtnObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Btn(idx++, "button_"+idx, "Drawing UAV Teams", "Draw UAV Teams",  drawUAVTeamsIDX));  
-		tmpUIBtnObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Btn(idx++, "button_"+idx, "Drawing Task Locs", "Draw Task Locs",  drawTaskLocsIDX));  
-		tmpUIBtnObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Btn(idx++, "button_"+idx, "Drawing Lanes", "Draw Transit Lanes", drawTLanesIDX));  
-		tmpUIBtnObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Btn(idx++, "button_"+idx, "Showing Task Lbls", "Show Task Lbls",  dispTaskLblsIDX));  
-		tmpUIBtnObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Btn(idx++, "button_"+idx, "Showing TLane Lbls", "Show TLane Lbls", dispTLnsLblsIDX));  
-		tmpUIBtnObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Btn(idx++, "button_"+idx, "Showing Team Lbls", "Show Team Lbls",  dispUAVLblsIDX));  
-		tmpUIBtnObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Btn(idx++, "button_"+idx, "Drawing UAV Boats", "Drawing UAV Spheres",   drawBoatsIDX));  
+		int idx=tmpUIBoolSwitchObjMap.size()+1;
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Drawing UAV Teams", "Draw UAV Teams",  drawUAVTeamsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Drawing Task Locs", "Draw Task Locs",  drawTaskLocsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Drawing Lanes", "Draw Transit Lanes", drawTLanesIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Showing Task Lbls", "Show Task Lbls",  dispTaskLblsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Showing TLane Lbls", "Show TLane Lbls", dispTLnsLblsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Showing Team Lbls", "Show Team Lbls",  dispUAVLblsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Drawing UAV Boats", "Drawing UAV Spheres",   drawBoatsIDX));  
 			
-		setupGUIBtnAras_SimIndiv(tmpUIBtnObjMap);
+		setupGUIBtnAras_SimIndiv(tmpUIBoolSwitchObjMap);
 	}//setupGUIObjsAras
 	/**
 	 * Return the list to use for sim layout
@@ -257,14 +257,14 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	
 	/**
 	 * Build all UI buttons to be shown in left side bar menu for this window. This is for instancing windows to add to button region
-	 * USE tmpUIBtnObjMap.size() for start idx
-	 * @param tmpUIBtnObjMap : map of GUIObj_Params to be built containing all button definitions, keyed by sequential value == objId
+	 * USE tmpUIBoolSwitchObjMap.size() for start idx
+	 * @param tmpUIBoolSwitchObjMap : map of GUIObj_Params to be built containing all flag-backed boolean switch definitions, keyed by sequential value == objId
 	 * 				the first element is the object index
 	 * 				the second element is true label
 	 * 				the third element is false label
 	 * 				the final element is integer flag idx 
 	 */
-	protected abstract void setupGUIBtnAras_SimIndiv(TreeMap<String, GUIObj_Params> tmpUIBtnObjMap);
+	protected abstract void setupGUIBtnAras_SimIndiv(TreeMap<String, GUIObj_Params> tmpUIBoolSwitchObjMap);
 	/**
 	 * Called if int-handling guiObjs_Numeric[UIidx] (int or list) has new data which updated UI adapter. 
 	 * Intended to support custom per-object handling by owning window.
