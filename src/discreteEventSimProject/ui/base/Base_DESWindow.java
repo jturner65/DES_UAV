@@ -186,7 +186,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	 */
 	protected abstract boolean handleDesPrivFlags_Indiv(int idx, boolean val, boolean oldVal);
 		/**
-	 * Build all custom UI objects to be shown in left side bar menu for this window. This is for instancing sim windows
+	 * Build all UI objects to be shown in left side bar menu for this window. This is the first child class function called by initThisWin
 	 * @param tmpUIObjMap : map of GUIObj_Params, keyed by unique string, with values describing the UI object
 	 * 			- The object IDX                   
 	 *          - A double array of min/max/mod values                                                   
@@ -197,10 +197,13 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	 *           	idx 0: value is sent to owning window,  
 	 *           	idx 1: value is sent on any modifications (while being modified, not just on release), 
 	 *           	idx 2: changes to value must be explicitly sent to consumer (are not automatically sent),
-	 *          - A boolean array of renderer format values :(unspecified values default to false)
-	 *           	idx 0: whether multi-line(stacked) or not                                                  
-	 *              idx 1: if true, build prefix ornament                                                      
-	 *              idx 2: if true and prefix ornament is built, make it the same color as the text fill color.
+	 *          - A boolean array of renderer format values :(unspecified values default to false) - Behavior Boolean array must also be provided!
+	 * 				idx 0 : Should be multiline
+	 * 				idx 1 : One object per row in UI space (i.e. default for multi-line and btn objects is false, single line non-buttons is true)
+	 * 				idx 2 : Text should be centered (default is false)
+	 * 				idx 3 : Object should be rendered with outline (default for btns is true, for non-buttons is false)
+	 * 				idx 4 : Should have ornament
+	 * 				idx 5 : Ornament color should match label color 
 	 */
 	@Override
 	protected final void setupGUIObjsAras_Sim(TreeMap<String, GUIObj_Params> tmpUIObjMap){	
@@ -210,25 +213,27 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 		setupGUIObjsAras_SimIndiv(tmpUIObjMap);
 	}
 	/**
-	 * Build all UI buttons to be shown in left side bar menu for this window. This is for instancing sim windows to add to button region
+	 * Build all UI buttons to be shown in left side bar menu for this window. This is for instancing windows to add to button region
+	 * @param firstIdx : the first index to use in the map/as the objIdx
 	 * @param tmpUIBoolSwitchObjMap : map of GUIObj_Params to be built containing all flag-backed boolean switch definitions, keyed by sequential value == objId
-	 * 				the first element is true label
-	 * 				the second element is false label
-	 * 				the third element is integer flag idx 
+	 * 				the first element is the object index
+	 * 				the second element is true label
+	 * 				the third element is false label
+	 * 				the final element is integer flag idx 
 	 */	@Override
-	protected final void setupGUIBtnAras_Sim(TreeMap<String, GUIObj_Params> tmpUIBoolSwitchObjMap) {
+	protected final void setupGUIBoolSwitchAras_Sim(int firstIdx,TreeMap<String, GUIObj_Params> tmpUIBoolSwitchObjMap) {
 		// add an entry for each button, in the order they are wished to be displayed
 		// true tag, false tag, btn IDX  
-		int idx=tmpUIBoolSwitchObjMap.size()+1;
-		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Drawing UAV Teams", "Draw UAV Teams",  drawUAVTeamsIDX));  
-		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Drawing Task Locs", "Draw Task Locs",  drawTaskLocsIDX));  
-		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Drawing Lanes", "Draw Transit Lanes", drawTLanesIDX));  
-		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Showing Task Lbls", "Show Task Lbls",  dispTaskLblsIDX));  
-		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Showing TLane Lbls", "Show TLane Lbls", dispTLnsLblsIDX));  
-		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Showing Team Lbls", "Show Team Lbls",  dispUAVLblsIDX));  
-		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx++, "button_"+idx, "Drawing UAV Boats", "Drawing UAV Spheres",   drawBoatsIDX));  
+		int idx=firstIdx;
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx, "button_"+idx++, "Drawing UAV Teams", "Draw UAV Teams",  drawUAVTeamsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx, "button_"+idx++, "Drawing Task Locs", "Draw Task Locs",  drawTaskLocsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx, "button_"+idx++, "Drawing Lanes", "Draw Transit Lanes", drawTLanesIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx, "button_"+idx++, "Showing Task Lbls", "Show Task Lbls",  dispTaskLblsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx, "button_"+idx++, "Showing TLane Lbls", "Show TLane Lbls", dispTLnsLblsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx, "button_"+idx++, "Showing Team Lbls", "Show Team Lbls",  dispUAVLblsIDX));  
+		tmpUIBoolSwitchObjMap.put("Button_"+idx, uiMgr.uiObjInitAra_Switch(idx, "button_"+idx++, "Drawing UAV Boats", "Drawing UAV Spheres",   drawBoatsIDX));  
 			
-		setupGUIBtnAras_SimIndiv(tmpUIBoolSwitchObjMap);
+		setupGUIBoolSwitchAras_SimIndiv(idx, tmpUIBoolSwitchObjMap);
 	}//setupGUIObjsAras
 	/**
 	 * Return the list to use for sim layout
@@ -237,7 +242,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	protected final String[] getSimLayoutToUseList() {return simLayoutToUseList;}
 
 	/**
-	 * Build all custom UI objects to be shown in left side bar menu for this window. This is for instancing sim windows
+	 * Build all UI objects to be shown in left side bar menu for this window. This is the first child class function called by initThisWin
 	 * @param tmpUIObjMap : map of GUIObj_Params, keyed by unique string, with values describing the UI object
 	 * 			- The object IDX                   
 	 *          - A double array of min/max/mod values                                                   
@@ -248,23 +253,26 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
 	 *           	idx 0: value is sent to owning window,  
 	 *           	idx 1: value is sent on any modifications (while being modified, not just on release), 
 	 *           	idx 2: changes to value must be explicitly sent to consumer (are not automatically sent),
-	 *          - A boolean array of renderer format values :(unspecified values default to false)
-	 *           	idx 0: whether multi-line(stacked) or not                                                  
-	 *              idx 1: if true, build prefix ornament                                                      
-	 *              idx 2: if true and prefix ornament is built, make it the same color as the text fill color.
+	 *          - A boolean array of renderer format values :(unspecified values default to false) - Behavior Boolean array must also be provided!
+	 * 				idx 0 : Should be multiline
+	 * 				idx 1 : One object per row in UI space (i.e. default for multi-line and btn objects is false, single line non-buttons is true)
+	 * 				idx 2 : Text should be centered (default is false)
+	 * 				idx 3 : Object should be rendered with outline (default for btns is true, for non-buttons is false)
+	 * 				idx 4 : Should have ornament
+	 * 				idx 5 : Ornament color should match label color 
 	 */
 	protected abstract void setupGUIObjsAras_SimIndiv(TreeMap<String, GUIObj_Params> tmpUIObjMap);
 	
 	/**
 	 * Build all UI buttons to be shown in left side bar menu for this window. This is for instancing windows to add to button region
-	 * USE tmpUIBoolSwitchObjMap.size() for start idx
+	 * @param firstIdx : the first index to use in the map/as the objIdx
 	 * @param tmpUIBoolSwitchObjMap : map of GUIObj_Params to be built containing all flag-backed boolean switch definitions, keyed by sequential value == objId
 	 * 				the first element is the object index
 	 * 				the second element is true label
 	 * 				the third element is false label
 	 * 				the final element is integer flag idx 
 	 */
-	protected abstract void setupGUIBtnAras_SimIndiv(TreeMap<String, GUIObj_Params> tmpUIBoolSwitchObjMap);
+	protected abstract void setupGUIBoolSwitchAras_SimIndiv(int firstIdx, TreeMap<String, GUIObj_Params> tmpUIBoolSwitchObjMap);
 	/**
 	 * Called if int-handling guiObjs_Numeric[UIidx] (int or list) has new data which updated UI adapter. 
 	 * Intended to support custom per-object handling by owning window.

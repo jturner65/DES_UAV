@@ -47,7 +47,7 @@ public class DynamicDESWindow extends Base_DESWindow {
 	public int getTotalNumOfPrivBools(){		return numDynamicPrivFlags;	}
 	
 	/**
-	 * Build all custom UI objects to be shown in left side bar menu for this window. This is for instancing sim windows
+	 * Build all UI objects to be shown in left side bar menu for this window. This is the first child class function called by initThisWin
 	 * @param tmpUIObjMap : map of GUIObj_Params, keyed by unique string, with values describing the UI object
 	 * 			- The object IDX                   
 	 *          - A double array of min/max/mod values                                                   
@@ -58,17 +58,20 @@ public class DynamicDESWindow extends Base_DESWindow {
 	 *           	idx 0: value is sent to owning window,  
 	 *           	idx 1: value is sent on any modifications (while being modified, not just on release), 
 	 *           	idx 2: changes to value must be explicitly sent to consumer (are not automatically sent),
-	 *          - A boolean array of renderer format values :(unspecified values default to false)
-	 *           	idx 0: whether multi-line(stacked) or not                                                  
-	 *              idx 1: if true, build prefix ornament                                                      
-	 *              idx 2: if true and prefix ornament is built, make it the same color as the text fill color.
+	 *          - A boolean array of renderer format values :(unspecified values default to false) - Behavior Boolean array must also be provided!
+	 * 				idx 0 : Should be multiline
+	 * 				idx 1 : One object per row in UI space (i.e. default for multi-line and btn objects is false, single line non-buttons is true)
+	 * 				idx 2 : Text should be centered (default is false)
+	 * 				idx 3 : Object should be rendered with outline (default for btns is true, for non-buttons is false)
+	 * 				idx 4 : Should have ornament
+	 * 				idx 5 : Ornament color should match label color 
 	 */
 	@Override
 	protected final void setupGUIObjsAras_SimIndiv(TreeMap<String, GUIObj_Params> tmpUIObjMap) {}
 	
 	/**
-	 * Build all UI buttons to be shown in left side bar menu for this window. This is for instancing DES Sim windows to add to button region
-	 * USE tmpUIBoolSwitchObjMap.size() for start idx
+	 * Build all UI buttons to be shown in left side bar menu for this window. This is for instancing windows to add to button region
+	 * @param firstIdx : the first index to use in the map/as the objIdx
 	 * @param tmpUIBoolSwitchObjMap : map of GUIObj_Params to be built containing all flag-backed boolean switch definitions, keyed by sequential value == objId
 	 * 				the first element is the object index
 	 * 				the second element is true label
@@ -76,7 +79,7 @@ public class DynamicDESWindow extends Base_DESWindow {
 	 * 				the final element is integer flag idx 
 	 */
 	@Override
-	protected final void setupGUIBtnAras_SimIndiv(TreeMap<String, GUIObj_Params> tmpUIBoolSwitchObjMap) {}
+	protected final void setupGUIBoolSwitchAras_SimIndiv(int firstIdx, TreeMap<String, GUIObj_Params> tmpUIBoolSwitchObjMap) {}
 
 	@Override
 	protected boolean setUI_IntDESValsCustom(int UIidx, int ival, int oldVal) {
