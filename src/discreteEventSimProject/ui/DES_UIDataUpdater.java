@@ -11,13 +11,13 @@ import base_UI_Objects.windowUI.uiData.UIDataUpdater;
  */
 public class DES_UIDataUpdater extends UIDataUpdater {
 
-	public DES_UIDataUpdater(Base_DispWindow _win) {super(_win);}
+    public DES_UIDataUpdater(Base_DispWindow _win) {super(_win);}
 
-	public DES_UIDataUpdater(UIDataUpdater _otr) {super(_otr);}
+    public DES_UIDataUpdater(UIDataUpdater _otr) {super(_otr);}
 
-	public DES_UIDataUpdater(Base_DispWindow _win, Map<Integer, Integer> _iVals, Map<Integer, Float> _fVals,
-			Map<Integer, Boolean> _bVals) {
-		super(_win, _iVals, _fVals, _bVals);
-	}
+    public DES_UIDataUpdater(Base_DispWindow _win, Map<Integer, Integer> _iVals, Map<Integer, Float> _fVals,
+            Map<Integer, Boolean> _bVals) {
+        super(_win, _iVals, _fVals, _bVals);
+    }
 
 }//class DES_UIDataUpdater

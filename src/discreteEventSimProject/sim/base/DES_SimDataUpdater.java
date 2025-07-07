@@ -11,24 +11,24 @@ import discreteEventSimProject.simExec.base.Base_DESSimExec;
  */
 public class DES_SimDataUpdater extends Base_UISimDataAdapter {
 
-	public DES_SimDataUpdater(Base_DESSimExec _simExec) {
-		super(_simExec);
-	}
+    public DES_SimDataUpdater(Base_DESSimExec _simExec) {
+        super(_simExec);
+    }
 
-	public DES_SimDataUpdater(Base_DESSimExec _simExec, Map<Integer, Integer> _iVals, Map<Integer, Float> _fVals,
-			Map<Integer, Boolean> _bVals) {
-		super(_simExec, _iVals, _fVals, _bVals);
-	}
+    public DES_SimDataUpdater(Base_DESSimExec _simExec, Map<Integer, Integer> _iVals, Map<Integer, Float> _fVals,
+            Map<Integer, Boolean> _bVals) {
+        super(_simExec, _iVals, _fVals, _bVals);
+    }
 
-	public DES_SimDataUpdater(DES_SimDataUpdater _otr) {super(_otr);}
+    public DES_SimDataUpdater(DES_SimDataUpdater _otr) {super(_otr);}
 
-	@Override
-	protected void updateBoolValue_Indiv(int idx, boolean value) {}
+    @Override
+    protected void updateBoolValue_Indiv(int idx, boolean value) {}
 
-	@Override
-	protected void updateIntValue_Indiv(int idx, Integer value) {}
+    @Override
+    protected void updateIntValue_Indiv(int idx, Integer value) {}
 
-	@Override
-	protected void updateFloatValue_Indiv(int idx, Float value) {}
-	
+    @Override
+    protected void updateFloatValue_Indiv(int idx, Float value) {}
+    
 }//class DES_SimDataUpdater
