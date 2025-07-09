@@ -42,13 +42,13 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
      * flags relevant to managed simulator execution - idxs in SimPrivStateFlags
      */
     public static final int
-                    drawBoatsIDX         = numSimFlags,                        //either draw boats or draw spheres for consumer UAV team members
-                    drawUAVTeamsIDX        = numSimFlags + 1,                        //yes/no draw UAV teams
-                    drawTaskLocsIDX        = numSimFlags + 2,                        //yes/no draw task spheres
-                    drawTLanesIDX        = numSimFlags + 3,                        //yes/no draw transit lanes and queues
-                    dispTaskLblsIDX        = numSimFlags + 4,                        //show labels over tasks
-                    dispTLnsLblsIDX        = numSimFlags + 5,
-                    dispUAVLblsIDX        = numSimFlags + 6;
+                    drawBoatsIDX         = numSimFlags,              //either draw boats or draw spheres for consumer UAV team members
+                    drawUAVTeamsIDX      = numSimFlags + 1,          //yes/no draw UAV teams
+                    drawTaskLocsIDX      = numSimFlags + 2,          //yes/no draw task spheres
+                    drawTLanesIDX        = numSimFlags + 3,          //yes/no draw transit lanes and queues
+                    dispTaskLblsIDX      = numSimFlags + 4,          //show labels over tasks
+                    dispTLnsLblsIDX      = numSimFlags + 5,          //show labels over lanes
+                    dispUAVLblsIDX       = numSimFlags + 6;          //show labels over UAV teams
     
     protected static final int numDesSimFlags = numSimFlags + 7;
     
@@ -75,11 +75,11 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
         boatClrIDX = 1;
     private static final int numTeamTypes = 2;
     private static final int[][] specClr = new int[][]{
-        {255,255,255,255},        //sphere
+        {255,255,255,255},     //sphere
         {255,255,255,255}};        //boat
     //Divide fill color for each type by these values for stroke
     private static final float[][] strokeScaleFact = new float[][]{
-        {1.25f,0.42f,1.33f,0.95f,3.3f},                //sphere    
+        {1.25f,0.42f,1.33f,0.95f,3.3f},             //sphere    
         {1.25f,0.42f,1.33f,0.95f,3.3f}};               //boat
         
     //scale all fill colors by this value for emissive value
@@ -91,7 +91,7 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
     
     //per type, per flock fill colors
     private static final int[][][] objFillColors = new int[][][]{
-        {{110, 65, 30,255},    {30, 30, 30,255}, {130, 22, 10,255}, {22, 188, 110,255},    {22, 10, 130,255}},        //sphere
+        {{110, 65, 30,255}, {30, 30, 30,255}, {130, 22, 10,255}, {22, 188, 110,255}, {22, 10, 130,255}},     //sphere
         {{110, 65, 30,255}, {20, 20, 20,255}, {130, 22, 10,255}, {22, 128, 50,255}, {22, 10, 150,255}}                //boats
     };    
         
