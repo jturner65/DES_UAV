@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IGraphicsAppInterface;
 import discreteEventSimProject.entities.base.EntityType;
 import discreteEventSimProject.entities.consumers.UAV_Team;
 import discreteEventSimProject.entities.resources.base.Base_Resource;
@@ -243,14 +243,14 @@ public class UAV_Task extends Base_Resource{
     protected void drawEntityPriv(boolean drawMe) {
         if((!drawMe)&&(!getEntityFlags(taskInUseIDX))){return;}
         ri.setSphereDetail(10);
-        ri.noFill();
+        ri.setNoFill();
         ri.translate(loc);
         //don't draw at all if drawMe is false, unless occupied
         if(drawMe) {//always draw
-            ri.setColorValStroke(getEntityFlags(taskInUseIDX) ? (td.isGroupTask ? IRenderInterface.gui_TransMagenta : IRenderInterface.gui_TransCyan) : IRenderInterface.gui_TransGray, 255);
+            ri.setColorValStroke(getEntityFlags(taskInUseIDX) ? (td.isGroupTask ? IGraphicsAppInterface.gui_TransMagenta : IGraphicsAppInterface.gui_TransCyan) : IGraphicsAppInterface.gui_TransGray, 255);
             ri.drawSphere(rad); 
         } else if(getEntityFlags(taskInUseIDX)) {//only draw if occupied
-            ri.setColorValStroke( (td.isGroupTask ? IRenderInterface.gui_TransMagenta : IRenderInterface.gui_TransCyan), 255 );
+            ri.setColorValStroke( (td.isGroupTask ? IGraphicsAppInterface.gui_TransMagenta : IGraphicsAppInterface.gui_TransCyan), 255 );
             ri.drawSphere(rad); 
         }
     }//drawEntityPriv

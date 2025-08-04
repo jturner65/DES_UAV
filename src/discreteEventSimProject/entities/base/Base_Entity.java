@@ -1,7 +1,7 @@
 package discreteEventSimProject.entities.base;
 
 import base_Math_Objects.vectorObjs.floats.myPointf;
-import base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IGraphicsAppInterface;
 import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
 import discreteEventSimProject.sim.base.Base_DESSimulator;
@@ -17,7 +17,7 @@ public abstract class Base_Entity {
     
     public Base_DESSimulator sim;
     
-    public final IRenderInterface ri;
+    public final IGraphicsAppInterface ri;
     
     public final Base_DispWindow win;
     

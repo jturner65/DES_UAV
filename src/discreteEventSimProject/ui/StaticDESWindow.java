@@ -2,7 +2,7 @@ package discreteEventSimProject.ui;
 
 import java.util.LinkedHashMap;
 
-import base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IGraphicsAppInterface;
 import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.simulationUI.simExec.Base_UISimExec;
 import base_UI_Objects.windowUI.uiObjs.base.GUIObj_Params;
@@ -24,7 +24,7 @@ public class StaticDESWindow extends Base_DESWindow {
      * @param _AppMgr
      * @param _winIdx
      */
-    public StaticDESWindow(IRenderInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
+    public StaticDESWindow(IGraphicsAppInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
         super(_p, _AppMgr, _winIdx);
         super.initThisWin(false);
     }

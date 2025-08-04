@@ -3,7 +3,7 @@ package discreteEventSimProject.entities.consumers;
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
-import base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IGraphicsAppInterface;
 import base_UI_Objects.GUI_AppManager;
 
 /**
@@ -77,7 +77,7 @@ public class UAV_Obj {
     }//constructor
     
     //align the UAV along the current orientation matrix
-    private void alignUAV(IRenderInterface ri, double delT){
+    private void alignUAV(IGraphicsAppInterface ri, double delT){
         rotVec.set(O_axisAngle[1],O_axisAngle[2],O_axisAngle[3]);
         float rotAngle = (float) (oldRotAngle + ((O_axisAngle[0]-oldRotAngle) * delT));
         ri.rotate(rotAngle,rotVec.x, rotVec.y, rotVec.z);
@@ -157,7 +157,7 @@ public class UAV_Obj {
         setOrientation(delT);
     }//moveUAV
     
-    private void drawTmpl(IRenderInterface ri) {
+    private void drawTmpl(IGraphicsAppInterface ri) {
         ri.pushMatState();
         team.getCurrTemplate().drawMe(animPhase, ID);
         ri.popMatState();
@@ -168,7 +168,7 @@ public class UAV_Obj {
      * @param ri
      * @param delT
      */
-    public void drawMe(IRenderInterface ri, float delT){
+    public void drawMe(IGraphicsAppInterface ri, float delT){
         ri.pushMatState();
             ri.translate(coords.x,coords.y,coords.z);        //move to location
             alignUAV(ri, delT);
@@ -184,10 +184,10 @@ public class UAV_Obj {
      * @param ri
      * @param delT
      */
-    public void drawMeDbgFrame(GUI_AppManager AppMgr, IRenderInterface ri, float delT){
+    public void drawMeDbgFrame(GUI_AppManager AppMgr, IGraphicsAppInterface ri, float delT){
         ri.pushMatState();
             ri.translate(coords.x,coords.y,coords.z);        //move to location
-            ri.setColorValStroke(IRenderInterface.gui_Cyan, 255);
+            ri.setColorValStroke(IGraphicsAppInterface.gui_Cyan, 255);
             ri.setStrokeWt(2.0f);
             ri.drawLine(myPointf.ZEROPT,myPointf._mult(rotVec, 100f));
             AppMgr.drawRGBAxes(100, 2.0f, myPointf.ZEROPT, orientation, 255);
@@ -200,8 +200,8 @@ public class UAV_Obj {
      * @param ri
      * @param debugAnim
      */
-    public void drawMeBall(GUI_AppManager AppMgr, IRenderInterface ri, boolean debugAnim){
-        if(debugAnim){drawMyVec(ri,rotVec, IRenderInterface.gui_Black,4.0f);AppMgr.drawRGBAxes(100, 2.0f, myPointf.ZEROPT, orientation, 255);}
+    public void drawMeBall(GUI_AppManager AppMgr, IGraphicsAppInterface ri, boolean debugAnim){
+        if(debugAnim){drawMyVec(ri,rotVec, IGraphicsAppInterface.gui_Black,4.0f);AppMgr.drawRGBAxes(100, 2.0f, myPointf.ZEROPT, orientation, 255);}
         ri.pushMatState();
             ri.translate(coords.x,coords.y,coords.z);        //move to location
             ri.scale(scaleBt.x,scaleBt.y,scaleBt.z);
@@ -211,7 +211,7 @@ public class UAV_Obj {
         ri.popMatState();
     }//drawMeBall 
     
-    public void drawMyVec(IRenderInterface ri, myVectorf v, int clr, float sw){
+    public void drawMyVec(IGraphicsAppInterface ri, myVectorf v, int clr, float sw){
         ri.pushMatState();
             ri.translate(coords.x,coords.y,coords.z);        //move to location        
             ri.setColorValStroke(clr, 255);

@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 
 import base_Math_Objects.vectorObjs.doubles.myPoint;
 import base_Math_Objects.vectorObjs.doubles.myVector;
-import base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IGraphicsAppInterface;
 import base_UI_Objects.GUI_AppManager;
 import base_UI_Objects.windowUI.base.GUI_AppWinVals;
 import base_UI_Objects.windowUI.drawnTrajectories.DrawnSimpleTraj;
@@ -65,7 +65,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
      */
     public static final int numBaseDesPrivFlags = numBaseSimPrivFlags +7;
     
-    public Base_DESWindow(IRenderInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
+    public Base_DESWindow(IGraphicsAppInterface _p, GUI_AppManager _AppMgr, int _winIdx) {
         super(_p, _AppMgr, _winIdx);
     }//Base_DESWindow
     
@@ -140,6 +140,7 @@ public abstract class Base_DESWindow extends Base_UISimWindow {
      * This function implements the instantiation of a child window owned by this window, if such exists.
      * The implementation should be similar to how the main windows are implemented in GUI_AppManager::initAllDispWindows.
      * If no child window exists, this implementation of this function can be empty
+     * If a child window is instantiated, it MUST have its init called (childWin.initThisWin(false))
      * 
      * @param GUI_AppWinVals the window control values for the child window.
      */

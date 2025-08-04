@@ -102,13 +102,13 @@ public abstract class Base_DESSimExec extends Base_UISimExec{
     
     
     /**
-     * pass null for command line version - define empty class called IRenderInterface
+     * pass null for command line version - define empty class called IGraphicsAppInterface
      * @param _ri
      * @param _msgObj
      */
     public Base_DESSimExec(Base_UISimWindow _win, String _name, int _numSims) {
         super(_win,_name, _numSims);
-        if(ri==null) {msgObj.dispInfoMessage(name,"ctor","Null IRenderInterface, assuming console only");}
+        if(ri==null) {msgObj.dispInfoMessage(name,"ctor","Null IGraphicsAppInterface, assuming console only");}
     }//DES_SimExec ctor
     
     /**

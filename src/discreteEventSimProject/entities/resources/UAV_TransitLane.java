@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
-import base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IGraphicsAppInterface;
 import discreteEventSimProject.entities.base.EntityType;
 import discreteEventSimProject.entities.consumers.UAV_Team;
 import discreteEventSimProject.entities.resources.base.Base_Resource;
@@ -255,11 +255,11 @@ public class UAV_TransitLane extends Base_Resource{
         if((drawMe)||(it)){
             ri.pushMatState();    
             if((drawMe) && (!it)) {
-                int clr = (this.laneVel > 1) ? IRenderInterface.gui_TransBlack : IRenderInterface.gui_TransLtGray;
+                int clr = (this.laneVel > 1) ? IGraphicsAppInterface.gui_TransBlack : IGraphicsAppInterface.gui_TransLtGray;
                 ri.drawCylinder_NoFill(stLoc,endLoc, rad, clr, clr);
             } else if (it) {
-                int clr =  (this.laneVel > 1) ? IRenderInterface.gui_Green : IRenderInterface.gui_Yellow;
-                ri.drawCylinder_NoFill(stLoc,endLoc, rad, IRenderInterface.gui_Red , clr);
+                int clr =  (this.laneVel > 1) ? IGraphicsAppInterface.gui_Green : IGraphicsAppInterface.gui_Yellow;
+                ri.drawCylinder_NoFill(stLoc,endLoc, rad, IGraphicsAppInterface.gui_Red , clr);
             }            
             ri.popMatState();    
         }
@@ -268,16 +268,16 @@ public class UAV_TransitLane extends Base_Resource{
 //     * transitlane-specifics
 //     */
 //    @Override
-//    protected void drawEntityPriv(IRenderInterface ri, boolean drawMe) {
+//    protected void drawEntityPriv(IGraphicsAppInterface ri, boolean drawMe) {
 //        boolean it = getEntityFlags(taskInUseIDX);
 //
 //        if (it) {
 //            ri.pushMatState();    
-//            ri.drawCylinder_NoFill(stLoc,endLoc, rad, IRenderInterface.gui_Red, (this.laneVel > 1) ? IRenderInterface.gui_Green : IRenderInterface.gui_Yellow);
+//            ri.drawCylinder_NoFill(stLoc,endLoc, rad, IGraphicsAppInterface.gui_Red, (this.laneVel > 1) ? IGraphicsAppInterface.gui_Green : IGraphicsAppInterface.gui_Yellow);
 //            ri.popMatState();    
 //        } else if (drawMe) {
 //            ri.pushMatState();    
-//            int clr = (this.laneVel > 1) ? IRenderInterface.gui_TransBlack : IRenderInterface.gui_TransLtGray;
+//            int clr = (this.laneVel > 1) ? IGraphicsAppInterface.gui_TransBlack : IGraphicsAppInterface.gui_TransLtGray;
 //            ri.drawCylinder_NoFill(stLoc,endLoc, rad, clr, clr);
 //            ri.popMatState();
 //        }

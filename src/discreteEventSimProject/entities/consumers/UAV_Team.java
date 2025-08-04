@@ -4,7 +4,7 @@ package discreteEventSimProject.entities.consumers;
 import base_Math_Objects.MyMathUtils;
 import base_Math_Objects.vectorObjs.floats.myPointf;
 import base_Math_Objects.vectorObjs.floats.myVectorf;
-import base_Render_Interface.IRenderInterface;
+import base_Render_Interface.IGraphicsAppInterface;
 import base_UI_Objects.renderedObjs.base.Base_RenderObj;
 import base_UI_Objects.windowUI.base.Base_DispWindow;
 import discreteEventSimProject.entities.base.Base_Entity;
@@ -155,7 +155,7 @@ public class UAV_Team extends Base_Entity {
             ri.translate(loc);
             boolean debugAnim = sim.getSimDebug();
             ri.pushMatState();
-            ri.setColorValStroke(IRenderInterface.gui_Black, 255);
+            ri.setColorValStroke(IGraphicsAppInterface.gui_Black, 255);
             ri.setStrokeWt(2.0f);
             if(debugAnim) {ri.drawLine(new myPointf(), motionTraj);}//motion trajectory vector
             ri.popMatState();
